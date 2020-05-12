@@ -53,46 +53,9 @@ public class DatabaseManagement {
 
             stmt = conn.createStatement();
             createTable("user_data", "userID text PRIMARY KEY", "serverNickname text NOT NULL", "address text", "interests text", "competencies text", "gCalendarLink text", "meetings INTEGER", "activities INTEGER", "FOREIGN KEY (meetings) REFERENCES meeting_data (meetingID)", "FOREIGN KEY (activities) REFERENCES user_activity (activityID)");
-            createTable("meeting_data", "meetingID integer PRIMARY KEY", "userID text NOT NULL", "starttime text NOT NULL", "endtime text NOT NULL", "message text");
-            createTable("user_activity", "activityID integer PRIMARY KEY", "starttime text NOT NULL", "endtime text");
-
-            findLastID();
+            createTable("meeting_data", "meetingID integer PRIMARY KEY AUTOINCREMENT", "userID text NOT NULL", "starttime text NOT NULL", "endtime text NOT NULL", "message text");
+            createTable("user_activity", "activityID integer PRIMARY KEY AUTOINCREMENT", "starttime text NOT NULL", "endtime text");
         } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void findLastID() {
-
-        //Findet maximale (letzte) ID's der Tabellen
-        String meetingSQL = "SELECT MAX(meetingID) as lastMeetingID FROM meeting_data";
-        String activitySQL = "SELECT MAX(activityID) as lastActivityID FROM user_activity";
-
-        try {
-            //Speichert letzte ID als Variable
-            ResultSet meetingID = stmt.executeQuery(meetingSQL);
-
-            //Prüft, ob es überhaupt schon einen Eintrag gibt
-            try {
-                //Setzt meetingID-Variable zum Erstellen von Meeting-Instanzen auf die letzte ID in der Datenbank
-                int meeting = meetingID.getInt("lastMeetingID");
-                MeetingManagement.getINSTANCE().setMeetingID(meeting);
-            } catch (SQLException e) {
-                MeetingManagement.getINSTANCE().setMeetingID(0);
-            }
-
-            //Speichert letzte ID als Variable
-            ResultSet activityID = stmt.executeQuery(activitySQL);
-
-            //Prüft, ob es überhaupt schon einen Eintrag gibt
-            try {
-                //Setzt activityID-Variable zum Erstellen von Activity-Instanzen auf die letzte ID in der Datenbank
-                int activity = activityID.getInt("lastActivityID");
-                UserManagement.getINSTANCE().setActivityID(activity);
-            } catch (SQLException e) {
-                UserManagement.getINSTANCE().setActivityID(0);
-            }
-        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -154,15 +117,14 @@ public class DatabaseManagement {
             MeetingData meeting = (MeetingData) obj;
 
             //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO meeting_data (meetingID, userID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO meeting_data (userID, startTime, endTime, message) VALUES (?, ?, ?, ?)";
 
             //Versucht Meeting in Datenbank einzufügen
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setInt(1, meeting.getMeetingID());
-                prepStmt.setString(2, meeting.getUserID());
-                prepStmt.setString(3, meeting.getStartTime());
-                prepStmt.setString(4, meeting.getEndTime());
-                prepStmt.setString(5, meeting.getMessage());
+                prepStmt.setString(1, meeting.getUserID());
+                prepStmt.setString(2, meeting.getStartTime());
+                prepStmt.setString(3, meeting.getEndTime());
+                prepStmt.setString(4, meeting.getMessage());
                 prepStmt.executeUpdate();
                 System.out.println("Successfully added the Meeting to the Database!");
                 return true;
@@ -193,106 +155,73 @@ public class DatabaseManagement {
         return false;
     }
 
-    public boolean delete(Object obj) {
+    public boolean deleteUser(String userID) {
 
-        //Prüft welches Objekt gelöscht werden soll
-        if (obj instanceof UserData) {
+        //SQL-Code zum Löschen aus der Datenbank
+        String sql = "DELETE FROM user_data WHERE userID = ?";
 
-            //Castet Objekt in richtigen Datentypen
-            UserData user = (UserData) obj;
-
-            //SQL-Code zum Löschen aus der Datenbank
-            String sql = "DELETE FROM user_data WHERE userID = ?";
-
-            //Versucht User aus Datenbank zu löschen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setString(1, user.getUserID());
-                prepStmt.executeUpdate();
-                System.out.println("Successfully deleted the User from the Database!");
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.out.println("User does not exist!");
-            }
-        } else if (obj instanceof MeetingData) {
-
-            //Castet Objekt in richtigen Datentypen
-            MeetingData meeting = (MeetingData) obj;
-
-            //SQL-Code zum Löschen aus der Datenbank
-            String sql = "DELETE FROM meeting_data WHERE meetingID = ?";
-
-            //Versucht Meeting aus Datenbank zu löschen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setInt(1, meeting.getMeetingID());
-                prepStmt.executeUpdate();
-                System.out.println("Successfully deleted the Meeting from the Database!");
-                return true;
-            } catch (SQLException e) {
-                System.out.println("Meeting does not exist!");
-            }
+        //Versucht User aus Datenbank zu löschen
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, userID);
+            prepStmt.executeUpdate();
+            System.out.println("Successfully deleted the User from the Database!");
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("User does not exist!");
+            return  false;
         }
-        return false;
     }
 
-    public boolean update(Object obj, String column, String newValue) {
+    public boolean deleteMeeting(int meetingID) {
 
-        //Prüft welches Objekt geupdated werden soll
-        if (obj instanceof UserData) {
+        //SQL-Code zum Löschen aus der Datenbank
+        String sql = "DELETE FROM meeting_data WHERE meetingID = ?";
 
-            //Castet Objekt in richtigen Datentypen
-            UserData user = (UserData) obj;
-
-            //SQL-Code zum Updaten der Werte
-            String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
-
-            //Versucht Datenbank zu updaten
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setString(1, newValue);
-                prepStmt.setString(2, user.getUserID());
-                prepStmt.executeUpdate();
-                return true;
-            } catch (SQLException e) {
-                System.out.println("User could not be updated!");
-            }
-
-        } else if (obj instanceof MeetingData) {
-
-            //Castet Objekt in richtigen Datentypen
-            MeetingData meeting = (MeetingData) obj;
-
-            //SQL-Code zum Updaten der Werte
-            String sql = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
-
-            //Versucht Datenbank zu updaten
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setString(1, newValue);
-                prepStmt.setInt(2, meeting.getMeetingID());
-                prepStmt.executeUpdate();
-                return true;
-            } catch (SQLException e) {
-                System.out.println("Meeting could not be updated!");
-            }
-
-        } else if (obj instanceof UserActivity) {
-
-            //Castet Objekt in richtigen Datentypen
-            UserActivity activity = (UserActivity) obj;
-
-            //SQL-Code zum Updaten der Werte
-            String sql = "UPDATE user_activity SET " + column + " = ? WHERE activityID = ?";
-
-            //Versucht Datenbank zu updaten
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setString(1, newValue);
-                prepStmt.setInt(2, activity.getActivityID());
-                prepStmt.executeUpdate();
-                return true;
-            } catch (SQLException e) {
-                System.out.println("Activity could not be updated!");
-            }
+        //Versucht Meeting aus Datenbank zu löschen
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setInt(1, meetingID);
+            prepStmt.executeUpdate();
+            System.out.println("Successfully deleted the Meeting from the Database!");
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Meeting does not exist!");
+            return false;
         }
-        return false;
+    }
+
+    public boolean updateUser(String userID, String column, String newValue) {
+
+        //SQL-Code zum Updaten der Werte
+        String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
+
+        //Versucht Datenbank zu updaten
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, newValue);
+            prepStmt.setString(2, userID);
+            prepStmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("User could not be updated!");
+            return false;
+        }
+    }
+
+    public boolean updateMeeting(int meetingID, String column, String newValue) {
+
+        //SQL-Code zum Updaten der Werte
+        String sql = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
+
+        //Versucht Datenbank zu updaten
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, newValue);
+            prepStmt.setInt(2, meetingID);
+            prepStmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Meeting could not be updated!");
+            return false;
+        }
     }
 
     public Connection getConn() {

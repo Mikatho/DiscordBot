@@ -1,7 +1,5 @@
 package com.discord.bot.data;
 
-import java.util.ArrayList;
-
 public class UserData {
 
     private String userID;
@@ -14,16 +12,9 @@ public class UserData {
 
     private String[] competencies;
 
-    private ArrayList<MeetingData> meetings;
-
-    private ArrayList<UserActivity> activities;
-
     private String gCalendarLink;
 
     public UserData(String userID, String nickname) {
-
-        meetings = new ArrayList<>();
-        activities = new ArrayList<>();
 
         this.userID = userID;
         this.serverNickname = nickname;
@@ -63,14 +54,6 @@ public class UserData {
 
     public String[] getCompetencies() {
         return competencies;
-    }
-
-    public ArrayList<MeetingData> getMeetings() {
-        return meetings;
-    }
-
-    public ArrayList<UserActivity> getActivities() {
-        return activities;
     }
 
     public void setgCalendarLink(String gCalendarLink) {

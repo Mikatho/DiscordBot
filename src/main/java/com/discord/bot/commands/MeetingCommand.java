@@ -93,12 +93,6 @@ public class MeetingCommand implements CommandInterface {
                     //Versucht MeetingID in Zahl zu konvertieren
                     int meetingID = Integer.parseInt(args[2]);
 
-                    //Prüft, ob MeetingID existiert
-                    if (!meetingMng.getMeetings().containsKey(meetingID)) {
-                        channel.sendMessage("This Meeting does not exist.").queue();
-                        return;
-                    }
-
                     //Versucht Meeting zu löschen
                     if (!meetingMng.delete(meetingID)) {
                         channel.sendMessage("Could not delete the Meeting.").queue();
@@ -131,12 +125,6 @@ public class MeetingCommand implements CommandInterface {
                 try {
                     //Versucht MeetingID in Zahl zu konvertieren
                     int meetingID = Integer.parseInt(updateArgs[0]);
-
-                    //Prüft, ob MeetingID existiert
-                    if (!meetingMng.getMeetings().containsKey(meetingID)) {
-                        channel.sendMessage("This Meeting does not exist.").queue();
-                        return;
-                    }
 
                     //Prüft, ob richtiger Wert zum updaten angegeben wurde
                     if (!updateArgs[1].matches("starttime|endtime|message")) {

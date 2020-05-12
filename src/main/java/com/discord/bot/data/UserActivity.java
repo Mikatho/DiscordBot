@@ -7,9 +7,8 @@ public class UserActivity {
     private String starttime;
     private String endtime;
 
-    public UserActivity(Integer activityID, String starttime) {
+    public UserActivity(String starttime) {
 
-        this.activityID = activityID;
         this.starttime = starttime;
     }
 

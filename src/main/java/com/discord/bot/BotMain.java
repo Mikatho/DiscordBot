@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class BotMain {
+
     private JDA jda;
     private JDABuilder jdaBuilder;
 

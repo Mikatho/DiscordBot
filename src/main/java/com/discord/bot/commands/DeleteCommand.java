@@ -19,12 +19,6 @@ public class DeleteCommand implements CommandInterface {
 
         String[] args = msg.getContentRaw().split(" ");
 
-        //Prüft, ob der User existiert
-        if (!UserManagement.getINSTANCE().getUser().containsKey(args[1])) {
-            channel.sendMessage("This User does not exist.").queue();
-            return;
-        }
-
         //Versucht den User zu löschen
         if (!UserManagement.getINSTANCE().delete(args[1])) {
             channel.sendMessage("Could not delete the User.").queue();

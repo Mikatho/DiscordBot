@@ -9,60 +9,30 @@ public class UserManagement {
 
     private static final UserManagement INSTANCE = new UserManagement();
 
-    private ConcurrentHashMap<String, UserData> user = new ConcurrentHashMap<>();
-
-    private int activityID;
-
     private DatabaseManagement dbManager = DatabaseManagement.getINSTANCE();
 
     public static UserManagement getINSTANCE() {
         return INSTANCE;
     }
 
-    public ConcurrentHashMap<String, UserData> getUser() {
-        return user;
-    }
-
-    public ConcurrentHashMap<Integer, UserActivity> activities = new ConcurrentHashMap<>();
-
-    public ConcurrentHashMap<Integer, UserActivity> getActivities() {
-        return activities;
-    }
-
-    public void setActivityID(int activityID) {
-        this.activityID = activityID;
-    }
-
-    public boolean register(String uID, String uName) {
+    public boolean register(String userID, String uName) {
 
         //Erstellt neue Instanz mit Daten
-        UserData tempUser = new UserData(uID, uName);
-
-        //Fügt Instanz in HashMap hinzu
-        user.put(uID, tempUser);
+        UserData tempUser = new UserData(userID, uName);
 
         //Versucht User in Datenbank einzufügen
         return dbManager.insert(tempUser);
     }
 
-    public boolean delete(String uID) {
-
-        //Speichert sich User
-        UserData tempUser = user.get(uID);
-
-        //Löscht User aus HashMap
-        user.remove(uID);
+    public boolean delete(String userID) {
 
         //Versucht User aus Datenbank zu löschen
-        return dbManager.delete(tempUser);
+        return dbManager.deleteUser(userID);
     }
 
-    public boolean update(String uID, String column, String newValue) {
+    public boolean update(String userID, String column, String newValue) {
 
-        //Speichert sich User
-        UserData tempUser = user.get(uID);
-
-        //Updated User-Instanz
+        /*Updated User-Instanz
         if (column.equals("address")) {
             tempUser.setAddress(newValue);
         } else {
@@ -85,16 +55,13 @@ public class UserManagement {
                 tempUser.setCompetencies(values);
             }
         }
+         */
 
         //Versucht User in Datenbank zu updaten
-        return dbManager.update(tempUser, column, newValue);
+        return dbManager.updateUser(userID, column, newValue);
     }
 
     public boolean startActivity(String time) {
-
-        activityID++;
-
-        activities.put(activityID, new UserActivity(activityID, time));
 
         return true;
     }
