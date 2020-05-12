@@ -224,7 +224,24 @@ public class DatabaseManagement {
         }
     }
 
-    public Connection getConn() {
-        return conn;
+    //Funktion um UserData abzurufen
+    public Object[] returnData(String userID) {
+
+        String sql = "SELECT * FROM user_data WHERE userID = ?";
+
+        Object[] data = new Object[3];
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, userID);
+            ResultSet rsData = prepStmt.executeQuery();
+
+            data[0] = rsData.getString("address");
+            data[1] = rsData.getString("interests");
+            data[2] = rsData.getString("competencies");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return data;
     }
 }

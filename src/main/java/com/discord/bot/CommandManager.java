@@ -31,8 +31,7 @@ public class CommandManager {
 
         //Commands für private Nachrichten an den Bot
         commandsPM.put("activity", new ActivityCommand());
-        commandsPM.put("data", new DataCommand());
-        commandsPM.put("update", new UpdateCommand());
+        commandsPM.put("user", new UserCommand());
     }
 
     public static CommandManager getInstance() {
