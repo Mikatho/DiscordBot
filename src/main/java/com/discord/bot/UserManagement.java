@@ -35,7 +35,6 @@ public class UserManagement {
 
     public boolean register(String uID, String uName) {
 
-<<<<<<< HEAD
         //Erstellt neue Instanz mit Daten
         UserData tempUser = new UserData(uID, uName);
 
@@ -44,21 +43,10 @@ public class UserManagement {
 
         //Versucht User in Datenbank einzufügen
         return dbManager.insert(tempUser);
-=======
-        UserData userData = new UserData(uID, uName);
-
-        if (!dbManager.insert(userData)) {
-            return false;
-        }
-
-        user.put(uID, userData);
-        return true;
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
     }
 
     public boolean delete(String uID) {
 
-<<<<<<< HEAD
         //Speichert sich User
         UserData tempUser = user.get(uID);
 
@@ -67,21 +55,10 @@ public class UserManagement {
 
         //Versucht User aus Datenbank zu löschen
         return dbManager.delete(tempUser);
-=======
-        UserData userData = user.get(uID);
-
-        if (!dbManager.delete(userData)) {
-            return false;
-        }
-
-        user.remove(uID);
-        return true;
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
     }
 
     public boolean update(String uID, String column, String newValue) {
 
-<<<<<<< HEAD
         //Speichert sich User
         UserData tempUser = user.get(uID);
 
@@ -96,23 +73,6 @@ public class UserManagement {
                 values = newValue.split(",");
 
                 for (int i = 0; i < values.length; i++) {
-=======
-        UserData userData = user.get(uID);
-
-        if (!dbManager.update(userData, column, newValue)) {
-            return false;
-        }
-
-        if (column.equals("address")) {
-            userData.setAddress(newValue);
-        } else {
-            String[] values;
-
-            if (newValue.contains(",")) {
-                values = newValue.split(",");
-
-                for (int i=0; i<values.length; i++) {
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
                     values[i] = values[i].trim();
                 }
             } else {
@@ -120,7 +80,6 @@ public class UserManagement {
             }
 
             if (column.equals("interests")) {
-<<<<<<< HEAD
                 tempUser.setInterests(values);
             } else if (column.equals("competencies")) {
                 tempUser.setCompetencies(values);
@@ -129,14 +88,6 @@ public class UserManagement {
 
         //Versucht User in Datenbank zu updaten
         return dbManager.update(tempUser, column, newValue);
-=======
-                userData.setInterests(values);
-            } else if (column.equals("competencies")) {
-                userData.setCompetencies(values);
-            }
-        }
-        return true;
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
     }
 
     public boolean startActivity(String time) {

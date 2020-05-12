@@ -2,10 +2,6 @@ package com.discord.bot;
 
 import com.discord.bot.data.MeetingData;
 
-<<<<<<< HEAD
-=======
-import java.sql.*;
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MeetingManagement {
@@ -16,12 +12,9 @@ public class MeetingManagement {
 
     private int meetingID;
 
-<<<<<<< HEAD
-    private UserManagement userMng = UserManagement.getINSTANCE();
-
-=======
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
     private DatabaseManagement dbManager = DatabaseManagement.getINSTANCE();
+
+    private UserManagement userMng = UserManagement.getINSTANCE();
 
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
@@ -37,7 +30,6 @@ public class MeetingManagement {
 
     public boolean insert(String userID, String startTime, String endTime, String message) {
 
-<<<<<<< HEAD
         //Inkrementiert MeetingID
         meetingID++;
 
@@ -52,24 +44,11 @@ public class MeetingManagement {
 
         //Versucht Meeting in Datenbank einzufügen
         return dbManager.insert(tempMeeting);
-=======
-        meetingID++;
-
-        MeetingData tempData = new MeetingData(meetingID, userID, startTime, endTime, message);
-
-        if (!dbManager.insert(tempData)) {
-            return false;
-        }
-
-        meetings.put(meetingID, tempData);
-        return true;
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
     }
 
 
     public boolean delete(Integer meetingID) {
 
-<<<<<<< HEAD
         //Speichert sich Meeting
         MeetingData tempMeeting = meetings.get(meetingID);
 
@@ -81,21 +60,10 @@ public class MeetingManagement {
 
         //Versucht Meeting aus Datenbank zu löschen
         return dbManager.delete(tempMeeting);
-=======
-        MeetingData meeting = meetings.get(meetingID);
-
-        if (!dbManager.delete(meeting)) {
-            return false;
-        }
-
-        meetings.remove(meetingID);
-        return true;
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
     }
 
     public boolean update(Integer meetingID, String column, String newValue) {
 
-<<<<<<< HEAD
         //speichert sich Meeting
         MeetingData tempMeeting = meetings.get(meetingID);
 
@@ -114,25 +82,5 @@ public class MeetingManagement {
 
         //Versucht Meeting in Datenbank zu updaten
         return dbManager.update(tempMeeting, column, newValue);
-=======
-        MeetingData meetingData = meetings.get(meetingID);
-
-        if (!dbManager.update(meetingData, column, newValue)) {
-            return false;
-        }
-
-        switch (column) {
-            case "starttime":
-                meetingData.setStartTime(newValue);
-                break;
-            case "endtime":
-                meetingData.setEndTime(newValue);
-                break;
-            case "message":
-                meetingData.setMessage(newValue);
-                break;
-        }
-        return true;
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
     }
 }

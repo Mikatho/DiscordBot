@@ -20,13 +20,8 @@ public class DatabaseManagement {
         return INSTANCE;
     }
 
-<<<<<<< HEAD
     //Löscht Daten in Datenbank
     public void clear() {
-
-=======
-    public void clear() {
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
         String meeting = "DELETE FROM meeting_data;";
         String activity = "DELETE FROM user_activity;";
         String user = "DELETE FROM user_data;";
@@ -41,17 +36,11 @@ public class DatabaseManagement {
     }
 
     public void connect() {
-<<<<<<< HEAD
 
         conn = null;
 
         try {
             //Erstellt neue Datenbank-Datei, falls nicht vorhanden
-=======
-        conn = null;
-
-        try {
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             File file = new File("database.db");
             if (!file.exists()) {
                 file.createNewFile();
@@ -74,46 +63,30 @@ public class DatabaseManagement {
     }
 
     public void findLastID() {
-<<<<<<< HEAD
 
         //Findet maximale (letzte) ID's der Tabellen
-=======
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
         String meetingSQL = "SELECT MAX(meetingID) as lastMeetingID FROM meeting_data";
         String activitySQL = "SELECT MAX(activityID) as lastActivityID FROM user_activity";
 
         try {
-
-<<<<<<< HEAD
             //Speichert letzte ID als Variable
             ResultSet meetingID = stmt.executeQuery(meetingSQL);
 
             //Prüft, ob es überhaupt schon einen Eintrag gibt
             try {
                 //Setzt meetingID-Variable zum Erstellen von Meeting-Instanzen auf die letzte ID in der Datenbank
-=======
-            ResultSet meetingID = stmt.executeQuery(meetingSQL);
-
-            try {
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
                 int meeting = meetingID.getInt("lastMeetingID");
                 MeetingManagement.getINSTANCE().setMeetingID(meeting);
             } catch (SQLException e) {
                 MeetingManagement.getINSTANCE().setMeetingID(0);
             }
 
-<<<<<<< HEAD
             //Speichert letzte ID als Variable
             ResultSet activityID = stmt.executeQuery(activitySQL);
 
             //Prüft, ob es überhaupt schon einen Eintrag gibt
             try {
                 //Setzt activityID-Variable zum Erstellen von Activity-Instanzen auf die letzte ID in der Datenbank
-=======
-            ResultSet activityID = stmt.executeQuery(activitySQL);
-
-            try {
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
                 int activity = activityID.getInt("lastActivityID");
                 UserManagement.getINSTANCE().setActivityID(activity);
             } catch (SQLException e) {
@@ -125,14 +98,8 @@ public class DatabaseManagement {
     }
 
     public void disconnect() {
-<<<<<<< HEAD
-
         try {
             if (conn != null) {
-=======
-        try {
-            if(conn != null) {
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
                 stmt.close();
                 conn.close();
                 System.out.println("Connection to Database cut.");
@@ -142,18 +109,11 @@ public class DatabaseManagement {
         }
     }
 
-<<<<<<< HEAD
     //Erstellt Tabellen, indem man SQL-Text zum Erstellen der Spalten als String übergibt
     public void createTable(String... strings) {
 
         StringJoiner joiner = new StringJoiner(",");
         for (int i = 1; i < strings.length; i++) {
-=======
-    public void createTable(String... strings) {
-
-        StringJoiner joiner = new StringJoiner(",");
-        for(int i=1; i<strings.length; i++) {
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             joiner.add(strings[i]);
         }
 
@@ -168,7 +128,6 @@ public class DatabaseManagement {
 
     public boolean insert(Object obj) {
 
-<<<<<<< HEAD
         //Prüft welches Objekt eingefügt werden soll
         if (obj instanceof UserData) {
 
@@ -179,14 +138,6 @@ public class DatabaseManagement {
             String sql = "INSERT INTO user_data (userID, serverNickname) VALUES (?, ?)";
 
             //Versucht User in Datenbank einzufügen
-=======
-        if (obj instanceof UserData) {
-
-            UserData user = (UserData) obj;
-
-            String sql = "INSERT INTO user_data (userID, serverNickname) VALUES (?, ?)";
-
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setString(1, user.getUserID());
                 prepStmt.setString(2, user.getServerNickname());
@@ -199,7 +150,6 @@ public class DatabaseManagement {
             }
         } else if (obj instanceof MeetingData) {
 
-<<<<<<< HEAD
             //Castet Objekt in richtigen Datentypen
             MeetingData meeting = (MeetingData) obj;
 
@@ -207,12 +157,6 @@ public class DatabaseManagement {
             String sql = "INSERT INTO meeting_data (meetingID, userID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
 
             //Versucht Meeting in Datenbank einzufügen
-=======
-            MeetingData meeting = (MeetingData) obj;
-
-            String sql = "INSERT INTO meeting_data (meetingID, userID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
-
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setInt(1, meeting.getMeetingID());
                 prepStmt.setString(2, meeting.getUserID());
@@ -228,7 +172,6 @@ public class DatabaseManagement {
             }
         } else if (obj instanceof UserActivity) {
 
-<<<<<<< HEAD
             //Castet Objekt in richtigen Datentypen
             UserActivity activity = (UserActivity) obj;
 
@@ -236,12 +179,6 @@ public class DatabaseManagement {
             String sql = "INSERT INTO user_activity (activityID, starttime) VALUES (?, ?)";
 
             //Versucht Activity in Datenbank einzufügen
-=======
-            UserActivity activity = (UserActivity) obj;
-
-            String sql = "INSERT INTO user_activity (activityID, starttime) VALUES (?, ?)";
-
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setInt(1, activity.getActivityID());
                 prepStmt.setString(2, activity.getStarttime());
@@ -258,7 +195,6 @@ public class DatabaseManagement {
 
     public boolean delete(Object obj) {
 
-<<<<<<< HEAD
         //Prüft welches Objekt gelöscht werden soll
         if (obj instanceof UserData) {
 
@@ -269,13 +205,6 @@ public class DatabaseManagement {
             String sql = "DELETE FROM user_data WHERE userID = ?";
 
             //Versucht User aus Datenbank zu löschen
-=======
-        if (obj instanceof UserData) {
-            UserData user = (UserData) obj;
-
-            String sql = "DELETE FROM user_data WHERE userID = ?";
-
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setString(1, user.getUserID());
                 prepStmt.executeUpdate();
@@ -286,7 +215,6 @@ public class DatabaseManagement {
                 System.out.println("User does not exist!");
             }
         } else if (obj instanceof MeetingData) {
-<<<<<<< HEAD
 
             //Castet Objekt in richtigen Datentypen
             MeetingData meeting = (MeetingData) obj;
@@ -295,12 +223,6 @@ public class DatabaseManagement {
             String sql = "DELETE FROM meeting_data WHERE meetingID = ?";
 
             //Versucht Meeting aus Datenbank zu löschen
-=======
-            MeetingData meeting = (MeetingData) obj;
-
-            String sql = "DELETE FROM meeting_data WHERE meetingID = ?";
-
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setInt(1, meeting.getMeetingID());
                 prepStmt.executeUpdate();
@@ -315,7 +237,6 @@ public class DatabaseManagement {
 
     public boolean update(Object obj, String column, String newValue) {
 
-<<<<<<< HEAD
         //Prüft welches Objekt geupdated werden soll
         if (obj instanceof UserData) {
 
@@ -326,13 +247,6 @@ public class DatabaseManagement {
             String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
 
             //Versucht Datenbank zu updaten
-=======
-        if (obj instanceof UserData) {
-            UserData user = (UserData) obj;
-
-            String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
-
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setString(1, newValue);
                 prepStmt.setString(2, user.getUserID());
@@ -343,7 +257,6 @@ public class DatabaseManagement {
             }
 
         } else if (obj instanceof MeetingData) {
-<<<<<<< HEAD
 
             //Castet Objekt in richtigen Datentypen
             MeetingData meeting = (MeetingData) obj;
@@ -352,12 +265,6 @@ public class DatabaseManagement {
             String sql = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
 
             //Versucht Datenbank zu updaten
-=======
-            MeetingData meeting = (MeetingData) obj;
-
-            String sql = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
-
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setString(1, newValue);
                 prepStmt.setInt(2, meeting.getMeetingID());
@@ -367,7 +274,6 @@ public class DatabaseManagement {
                 System.out.println("Meeting could not be updated!");
             }
 
-<<<<<<< HEAD
         } else if (obj instanceof UserActivity) {
 
             //Castet Objekt in richtigen Datentypen
@@ -377,13 +283,6 @@ public class DatabaseManagement {
             String sql = "UPDATE user_activity SET " + column + " = ? WHERE activityID = ?";
 
             //Versucht Datenbank zu updaten
-=======
-        } else if (obj instanceof  UserActivity) {
-            UserActivity activity = (UserActivity) obj;
-
-            String sql = "UPDATE user_activity SET " + column + " = ? WHERE activityID = ?";
-
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setString(1, newValue);
                 prepStmt.setInt(2, activity.getActivityID());

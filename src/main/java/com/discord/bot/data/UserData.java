@@ -1,10 +1,7 @@
 package com.discord.bot.data;
 
-<<<<<<< HEAD
 import java.util.ArrayList;
 
-=======
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
 public class UserData {
 
     private String userID;
@@ -17,26 +14,17 @@ public class UserData {
 
     private String[] competencies;
 
-<<<<<<< HEAD
     private ArrayList<MeetingData> meetings;
 
     private ArrayList<UserActivity> activities;
-=======
-    private MeetingData[] meetings;
-
-    private UserActivity[] activities;
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
 
     private String gCalendarLink;
 
     public UserData(String userID, String nickname) {
 
-<<<<<<< HEAD
         meetings = new ArrayList<>();
         activities = new ArrayList<>();
 
-=======
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
         this.userID = userID;
         this.serverNickname = nickname;
     }
@@ -77,27 +65,11 @@ public class UserData {
         return competencies;
     }
 
-<<<<<<< HEAD
     public ArrayList<MeetingData> getMeetings() {
         return meetings;
     }
 
     public ArrayList<UserActivity> getActivities() {
-=======
-    public void setMeetings(MeetingData[] meetings) {
-        this.meetings = meetings;
-    }
-
-    public MeetingData[] getMeetings() {
-        return meetings;
-    }
-
-    public void setActivities(UserActivity[] activities) {
-        this.activities = activities;
-    }
-
-    public UserActivity[] getActivities() {
->>>>>>> fa80302b304130282fe7f33c3855d11f3576c846
         return activities;
     }
 
