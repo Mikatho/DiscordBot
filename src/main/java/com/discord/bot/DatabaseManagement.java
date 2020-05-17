@@ -15,6 +15,7 @@ public class DatabaseManagement {
 
     private Connection conn;
     private Statement stmt;
+    private ResultSet rs;
 
     public static DatabaseManagement getINSTANCE() {
         return INSTANCE;
@@ -52,7 +53,7 @@ public class DatabaseManagement {
             System.out.println("Connection to Database created.");
 
             stmt = conn.createStatement();
-            createTable("user_data", "userID text PRIMARY KEY", "serverNickname text NOT NULL", "address text", "interests text", "competencies text", "gCalendarLink text", "meetings INTEGER", "activities INTEGER", "FOREIGN KEY (meetings) REFERENCES meeting_data (meetingID)", "FOREIGN KEY (activities) REFERENCES user_activity (activityID)");
+            createTable("user_data", "userID text PRIMARY KEY", "address text", "interests text", "competencies text", "gCalendarLink text", "meetings INTEGER", "activities INTEGER", "FOREIGN KEY (meetings) REFERENCES meeting_data (meetingID)", "FOREIGN KEY (activities) REFERENCES user_activity (activityID)");
             createTable("meeting_data", "meetingID integer PRIMARY KEY AUTOINCREMENT", "userID text NOT NULL", "starttime text NOT NULL", "endtime text NOT NULL", "message text");
             createTable("user_activity", "activityID integer PRIMARY KEY AUTOINCREMENT", "starttime text NOT NULL", "endtime text");
         } catch (SQLException | IOException e) {
@@ -62,11 +63,16 @@ public class DatabaseManagement {
 
     public void disconnect() {
         try {
-            if (conn != null) {
-                stmt.close();
-                conn.close();
-                System.out.println("Connection to Database cut.");
+            if (rs != null) {
+                rs.close();
             }
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+            System.out.println("Connection to Database cut.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -98,12 +104,11 @@ public class DatabaseManagement {
             UserData user = (UserData) obj;
 
             //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO user_data (userID, serverNickname) VALUES (?, ?)";
+            String sql = "INSERT INTO user_data (userID) VALUES (?)";
 
             //Versucht User in Datenbank einzufügen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 prepStmt.setString(1, user.getUserID());
-                prepStmt.setString(2, user.getServerNickname());
                 prepStmt.executeUpdate();
                 System.out.println("Successfully added the User to the Database!");
                 return true;
@@ -126,6 +131,20 @@ public class DatabaseManagement {
                 prepStmt.setString(3, meeting.getEndTime());
                 prepStmt.setString(4, meeting.getMessage());
                 prepStmt.executeUpdate();
+
+                //Holt sich automatisch generierte ID
+                rs = stmt.getGeneratedKeys();
+
+                //Speichert sich ID aus ResultSet als Integer
+                if (rs.next()) {
+                    int meetingID = rs.getInt(1);
+
+                    //Versucht ForeignKey in User_Data zu aktualisieren
+                    if (!insertForeignKey("meetings", meetingID, meeting.getUserID())) {
+                        return false;
+                    }
+                }
+
                 System.out.println("Successfully added the Meeting to the Database!");
                 return true;
             } catch (SQLException e) {
@@ -153,6 +172,22 @@ public class DatabaseManagement {
             }
         }
         return false;
+    }
+
+    //Funktion um ForeignKeys von User_Data zu aktualisieren
+    public boolean insertForeignKey(String column, Integer columnID, String userID) {
+
+        String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setInt(1, columnID);
+            prepStmt.setString(2, userID);
+            prepStmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Data could not be added to User!");
+            return false;
+        }
     }
 
     public boolean deleteUser(String userID) {
@@ -238,10 +273,31 @@ public class DatabaseManagement {
             data[0] = rsData.getString("address");
             data[1] = rsData.getString("interests");
             data[2] = rsData.getString("competencies");
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Could not get User data properly!");
         }
         return data;
+    }
+
+    //Checkt, ob User in Datenbank registriert ist
+    public boolean registeredCheck(String userID) {
+
+        //Sql-Code um zu gucken, ob User in Datenbank registriert ist
+        String sql = "SELECT COUNT (*) FROM user_data WHERE userID = ?";
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, userID);
+
+            rs = prepStmt.executeQuery();
+
+            if (rs.next()) {
+                //Return True, wenn User registriert ist, False, wenn nicht
+                return rs.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to check for User!");
+            return false;
+        }
+        return true;
     }
 }

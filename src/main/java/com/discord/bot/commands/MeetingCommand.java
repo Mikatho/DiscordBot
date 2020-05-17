@@ -1,5 +1,6 @@
 package com.discord.bot.commands;
 
+import com.discord.bot.DatabaseManagement;
 import com.discord.bot.MeetingManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -19,13 +20,18 @@ public class MeetingCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
+        if (!DatabaseManagement.getINSTANCE().registeredCheck(msg.getAuthor().getId())) {
+            channel.sendMessage("Please use `!register` first to execute this command.").queue();
+            return;
+        }
+
         //Speichert sich User der Nachricht
         User user = msg.getAuthor();
 
         MeetingManagement meetingMng = MeetingManagement.getINSTANCE();
 
         //Setzt Datumsformat vorraus und stellt sicher, dass das Datum existiert
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         format.setLenient(false);
 
         //Patterns des Commands
@@ -70,7 +76,8 @@ public class MeetingCommand implements CommandInterface {
                     format.parse(starttime);
                     format.parse(endtime);
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
+                    return;
                 }
 
                 //Versucht Meeting hinzuzufügen
@@ -137,7 +144,7 @@ public class MeetingCommand implements CommandInterface {
                         try {
                             format.parse(updateArgs[2]);
                         } catch (ParseException e) {
-                            channel.sendMessage("Date is not valid according to " + format.toPattern() + " pattern.").queue();
+                            channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                             return;
                         }
                     }
