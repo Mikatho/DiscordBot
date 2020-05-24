@@ -61,6 +61,13 @@ public class UserManagement {
         return dbManager.updateUser(userID, column, newValue);
     }
 
+    public Object[] search(String userID) {
+
+        //Versucht UserData aus Datenbank zu holen
+        Object[] data = dbManager.returnData(userID);
+        return data;
+    }
+
     public boolean startActivity(String time) {
 
         return true;
