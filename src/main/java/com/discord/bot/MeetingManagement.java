@@ -10,16 +10,14 @@ public class MeetingManagement {
 
     private DatabaseManagement dbManager = DatabaseManagement.getINSTANCE();
 
-    private UserManagement userMng = UserManagement.getINSTANCE();
-
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
     }
 
-    public boolean insert(String userID, String startTime, String endTime, String message) {
+    public boolean insert(String hostID, String participantID, long startTime, long endTime, String message) {
 
         //Erstellt neue Instanz mit Daten
-        MeetingData tempMeeting = new MeetingData(userID, startTime, endTime, message);
+        MeetingData tempMeeting = new MeetingData(hostID, participantID, startTime, endTime, message);
 
         //Versucht Meeting in Datenbank einzufügen
         return dbManager.insert(tempMeeting);
@@ -32,7 +30,7 @@ public class MeetingManagement {
         return dbManager.deleteMeeting(meetingID);
     }
 
-    public boolean update(Integer meetingID, String column, String newValue) {
+    public boolean update(Integer meetingID, String column, Object newValue) {
 
         //Versucht Meeting in Datenbank zu updaten
         return dbManager.updateMeeting(meetingID, column, newValue);

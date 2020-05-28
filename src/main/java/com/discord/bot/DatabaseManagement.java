@@ -54,7 +54,7 @@ public class DatabaseManagement {
 
             stmt = conn.createStatement();
             createTable("user_data", "userID text PRIMARY KEY", "address text", "interests text", "competencies text", "gCalendarLink text", "meetings INTEGER", "activities INTEGER", "FOREIGN KEY (meetings) REFERENCES meeting_data (meetingID)", "FOREIGN KEY (activities) REFERENCES user_activity (activityID)");
-            createTable("meeting_data", "meetingID integer PRIMARY KEY AUTOINCREMENT", "userID text NOT NULL", "starttime text NOT NULL", "endtime text NOT NULL", "message text");
+            createTable("meeting_data", "meetingID integer PRIMARY KEY AUTOINCREMENT", "hostID text NOT NULL", "participantID text NOT NULL", "starttime INTEGER NOT NULL", "endtime INTEGER NOT NULL", "message text");
             createTable("user_activity", "activityID integer PRIMARY KEY AUTOINCREMENT", "starttime text NOT NULL", "endtime text");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
@@ -122,14 +122,15 @@ public class DatabaseManagement {
             MeetingData meeting = (MeetingData) obj;
 
             //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO meeting_data (userID, startTime, endTime, message) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO meeting_data (hostID, participantID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
 
             //Versucht Meeting in Datenbank einzufügen
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setString(1, meeting.getUserID());
-                prepStmt.setString(2, meeting.getStartTime());
-                prepStmt.setString(3, meeting.getEndTime());
-                prepStmt.setString(4, meeting.getMessage());
+                prepStmt.setString(2, meeting.getParticipantID());
+                prepStmt.setLong(3, meeting.getStartTime());
+                prepStmt.setLong(4, meeting.getEndTime());
+                prepStmt.setString(5, meeting.getMessage());
                 prepStmt.executeUpdate();
 
                 //Holt sich automatisch generierte ID
@@ -140,7 +141,7 @@ public class DatabaseManagement {
                     int meetingID = rs.getInt(1);
 
                     //Versucht ForeignKey in User_Data zu aktualisieren
-                    if (!insertForeignKey("meetings", meetingID, meeting.getUserID())) {
+                    if (!insertForeignKey("meetings", meetingID, meeting.getUserID(), meeting.getParticipantID())) {
                         return false;
                     }
                 }
@@ -175,13 +176,14 @@ public class DatabaseManagement {
     }
 
     //Funktion um ForeignKeys von User_Data zu aktualisieren
-    public boolean insertForeignKey(String column, Integer columnID, String userID) {
+    public boolean insertForeignKey(String column, Integer columnID, String hostID, String participantID) {
 
-        String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
+        String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ? OR userID = ?";
 
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
             prepStmt.setInt(1, columnID);
-            prepStmt.setString(2, userID);
+            prepStmt.setString(2, hostID);
+            prepStmt.setString(3, participantID);
             prepStmt.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -242,14 +244,14 @@ public class DatabaseManagement {
         }
     }
 
-    public boolean updateMeeting(int meetingID, String column, String newValue) {
+    public boolean updateMeeting(int meetingID, String column, Object newValue) {
 
         //SQL-Code zum Updaten der Werte
         String sql = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
 
         //Versucht Datenbank zu updaten
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-            prepStmt.setString(1, newValue);
+            prepStmt.setObject(1, newValue);
             prepStmt.setInt(2, meetingID);
             prepStmt.executeUpdate();
             return true;

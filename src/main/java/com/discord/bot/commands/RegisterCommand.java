@@ -15,7 +15,7 @@ public class RegisterCommand implements CommandInterface {
         User user = msg.getAuthor();
 
         //Versucht den User zu registrieren
-        if (!UserManagement.getINSTANCE().register(user.getId(), user.getName())) {
+        if (!UserManagement.getINSTANCE().register(user.getId())) {
             channel.sendMessage(user.getAsMention() + " could not be added to the Database!").queue();
             return;
         }
