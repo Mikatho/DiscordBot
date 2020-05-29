@@ -4,8 +4,6 @@ public class UserData {
 
     private String userID;
 
-    private String serverNickname;
-
     private String address;
 
     private String[] interests;
@@ -14,22 +12,13 @@ public class UserData {
 
     private String gCalendarLink;
 
-    public UserData(String userID, String nickname) {
+    public UserData(String userID) {
 
         this.userID = userID;
-        this.serverNickname = nickname;
     }
 
     public String getUserID() {
         return userID;
-    }
-
-    public void setServerNickname(String serverNickname) {
-        this.serverNickname = serverNickname;
-    }
-
-    public String getServerNickname() {
-        return serverNickname;
     }
 
     public void setAddress(String address) {

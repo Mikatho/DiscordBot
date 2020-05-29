@@ -2,50 +2,62 @@ package com.discord.bot.data;
 
 public class MeetingData {
 
-    private String userID;
+    private String hostID;
 
-    private String startTime;
+    private String participantID;
 
-    private String endTime;
+    private long startTime;
+
+    private long endTime;
 
     private String message;
 
-    public MeetingData(String userID, String startTime, String endTime) {
+    public MeetingData(String hostID, String participantID, long startTime, long endTime) {
 
-        this.userID = userID;
+        this.hostID = hostID;
+        this.participantID = participantID;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
-    public MeetingData(String userID, String startTime, String endTime, String message) {
+    public MeetingData(String hostID, String participantID, long startTime, long endTime, String message) {
 
-        this.userID = userID;
+        this.hostID = hostID;
+        this.participantID = participantID;
         this.startTime = startTime;
         this.endTime = endTime;
         this.message = message;
     }
 
     public void setUserID(String userID) {
-        this.userID = userID;
+        this.hostID = userID;
     }
 
     public String getUserID() {
-        return userID;
+        return hostID;
     }
 
-    public void setStartTime(String startTime) {
+    public void setParticipantID(String participantID) {
+        this.participantID = participantID;
+    }
+
+    public String getParticipantID() {
+        return participantID;
+    }
+
+    public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
 
-    public String getStartTime() {
+    public long getStartTime() {
         return startTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
 
-    public String getEndTime() {
+    public long getEndTime() {
         return endTime;
     }
 

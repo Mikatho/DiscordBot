@@ -8,11 +8,12 @@ import net.dv8tion.jda.api.entities.User;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MeetingCommand implements CommandInterface {
 
     /*
-    !meeting create [starttime] [endtime] [message]
+    !meeting create [@Participant] [starttime] [endtime] [message]
     !meeting delete [meetingID]
     !meeting update [meetingID] [value to change] [new value]
      */
@@ -35,7 +36,7 @@ public class MeetingCommand implements CommandInterface {
         format.setLenient(false);
 
         //Patterns des Commands
-        String[] patterns = {"!meeting create [starttime] [endtime] [message]",
+        String[] patterns = {"!meeting create [@Participant] [starttime] [endtime] [message]",
                 "!meeting delete [meetingID]",
                 "!meeting update [meetingID] [value to change] [new value]"};
 
@@ -59,30 +60,41 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                String[] createArgs = args[2].split(" ", 5);
+                String[] createArgs = args[2].split(" ", 6);
 
                 //Wenn nicht alle Zusatz-Parameter eingegeben wurden
-                if (createArgs.length != 5) {
+                if (createArgs.length != 6) {
                     channel.sendMessage(String.format("Please add the values like this:\n`%s`", patterns[0])).queue();
                     return;
                 }
 
+                if (!createArgs[0].matches("<@!\\d{18}>")) {
+                    channel.sendMessage("User is not valid. Please use ´@UserName´!").queue();
+                    return;
+                }
+                String participantID = createArgs[0].substring(3, 21);
+
                 //Stellt Zeiten aus den Zusatz-Parametern her
-                String starttime = createArgs[0] + " " + createArgs[1];
-                String endtime = createArgs[2] + " " + createArgs[3];
+                String starttime = createArgs[1] + " " + createArgs[2];
+                String endtime = createArgs[3] + " " + createArgs[4];
 
                 //Versucht Zeiten richtig zu formatieren und überprüft, ob Datum & Uhrzeit existieren
                 try {
-                    format.parse(starttime);
-                    format.parse(endtime);
+                    //Parsed String in Datum
+                    Date dateStart = format.parse(starttime);
+                    //Speichert sich Epoch vom Datum (ohne Millisekunden)
+                    long epochStart = dateStart.getTime() / 1000;
+
+                    Date dateEnd = format.parse(endtime);
+                    long epochEnd = dateEnd.getTime() / 1000;
+
+                    //Versucht Meeting hinzuzufügen
+                    if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, createArgs[5])) {
+                        channel.sendMessage("Could not create the Meeting.").queue();
+                        return;
+                    }
                 } catch (ParseException e) {
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
-                    return;
-                }
-
-                //Versucht Meeting hinzuzufügen
-                if (!meetingMng.insert(user.getId(), starttime, endtime, createArgs[4])) {
-                    channel.sendMessage("Could not create the Meeting.").queue();
                     return;
                 }
 
@@ -127,6 +139,9 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
+                //Variable zum Speichern des neuen Wertes
+                Object newValue;
+
                 updateArgs[1] = updateArgs[1].toLowerCase();
 
                 try {
@@ -142,15 +157,20 @@ public class MeetingCommand implements CommandInterface {
                     //Wenn der Wert ein Datum ist wird geprüft, ob das richtige Format eingegeben wurde und das Datum existiert
                     if (updateArgs[1].contains("time")) {
                         try {
-                            format.parse(updateArgs[2]);
+                            Date time = format.parse(updateArgs[2]);
+                            //Epoch (ohne Millisekunden) wird in Variable zum Übergeben gespeichert
+                            newValue = time.getTime() / 1000;
                         } catch (ParseException e) {
                             channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                             return;
                         }
+                    //Wenn nicht die Zeit geändert werden soll
+                    } else {
+                        newValue = updateArgs[2];
                     }
 
                     //Versucht Meeting zu updaten
-                    if (!meetingMng.update(meetingID, updateArgs[1], updateArgs[2])) {
+                    if (!meetingMng.update(meetingID, updateArgs[1], newValue)) {
                         channel.sendMessage("Could not update the Meeting.").queue();
                         return;
                     }
