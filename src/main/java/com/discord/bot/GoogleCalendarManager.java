@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class GoogleCalendarManager {
@@ -52,6 +53,11 @@ public class GoogleCalendarManager {
     static Calendar service;
 
     /**
+     * List with users and their calendar ids
+     */
+    private static HashMap<String, String> userList;
+
+    /**
      * Singleton implementation
      */
     private static GoogleCalendarManager INSTANCE;
@@ -63,10 +69,9 @@ public class GoogleCalendarManager {
             System.out.println(TAG + "didn't connect to Server");
         }
     }
-    /**
-     * @return a GoogleKalenderManager
-     */
+
     public static GoogleCalendarManager getInstance() { return INSTANCE; };
+    public static HashMap<String, String> getUserList() { return userList; };
 
     /**
      * private method for creating n new GoogleKalendar, only used by this class
@@ -159,5 +164,4 @@ public class GoogleCalendarManager {
 
         return newcalendar;
     }
-
 }
