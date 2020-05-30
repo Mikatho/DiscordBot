@@ -113,6 +113,7 @@ public class GoogleCalendarManager {
 
     /**
      * This functions creates a new Calendar for a specific user.
+     *
      * @param calendarID the ID of the Calendar that the event is added to
      * @param eventName name of the event
      * @param eventLocation name of the event location
@@ -148,6 +149,8 @@ public class GoogleCalendarManager {
     }
 
     /**
+     * Creates a Calendar for a User.
+     *
      * @param userName the name of the user that belongs to tne calendar
      * @return String with calendar id
      * @throws IOException if the insertion fails
@@ -177,20 +180,31 @@ public class GoogleCalendarManager {
         AclRule rule = new AclRule();
         AclRule.Scope scope = new AclRule.Scope();
 
-        //TODO Versuchen den Kalender als öffentlich zu markieren und link teilen
-        //https://stackoverflow.com/questions/11377963/google-calendar-api-set-calendar-to-public
-
+        //Make the Calendar public so it can be shared
         scope.setType("default").setValue("");
         rule.setScope(scope).setRole("reader");
 
-        // Insert new access rule
+        // Insert new access rule (Can delete Var if not needed any further)
         AclRule createdRule = service.acl().insert(tempCalendar.getId(), rule).execute();
-        System.out.println(createdRule.getId());
 
         return tempCalendar.getId();
     }
 
     /**
+     * Returns the Calendar ID of a particular user.
+     *
+     * @param userName the name of the user
+     * @return the Calendar ID or an Error String
+     */
+    public String getUserCalLink(String userName) {
+        if (!(userList.containsKey(userName))) {
+            return TAG + "User is not registered in gCalendarDatabase";
+        }
+        return userList.get(userName);
+    }
+
+    /**
+     * Returns a public link to a Calendar so the User can add it to their browser.
      *
      * @param userName The name of the user the link is needed for
      * @return the link to the public google Calendar of that person.
@@ -205,6 +219,7 @@ public class GoogleCalendarManager {
     /**
      * This method is for loading in the users and their links from the database. This is needed to access most of
      * the functions in this class
+     *
      * @param userName the name of the user
      * @param gCalendarLink the link of the calendar of that user
      */
