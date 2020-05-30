@@ -9,6 +9,22 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.StringJoiner;
 
+
+/**
+ * Contains all methods which access the database.
+ * [clear], [connect], [disconnect], [createTable], [insert], [insertForeignKey], [delete user],
+ * [delete meeting], [update user], [update meeting], [returnData], [registeredCheck]
+ * Execute all function calls from <code>UserManagement</code> and <code>MeetingManagement</code>
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.UserManagement
+ * @see         com.discord.bot.MeetingManagement
+ * @see         UserManagement#getINSTANCE()
+ * @see         MeetingManagement#getINSTANCE()
+ * @see         com.discord.bot
+ * @since       1.0
+ */
 public class DatabaseManagement {
 
     private static final DatabaseManagement INSTANCE = new DatabaseManagement();
@@ -17,6 +33,11 @@ public class DatabaseManagement {
     private Statement stmt;
     private ResultSet rs;
 
+    /**
+     * This method return an instance of the DatabaseManagement object.
+     *
+     * @return  INSTANCE    instance of the DatabaseManagement object
+     */
     public static DatabaseManagement getINSTANCE() {
         return INSTANCE;
     }

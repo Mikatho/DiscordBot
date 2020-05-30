@@ -8,21 +8,47 @@ import net.dv8tion.jda.api.entities.User;
 
 import java.util.Arrays;
 
+
+/**
+ * The <code>UserCommand</code> Class implements the <code>CommandInterface</code>
+ * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
+ * method. It controls syntax and interprets the command to call the right method in the
+ * <code>UserManagement</code> class.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.commands.CommandInterface
+ * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @see         com.discord.bot.UserManagement
+ * @since       1.0
+ */
 public class UserCommand implements CommandInterface {
 
     /*
     !user data
     !user update [value to change] [new value]
+    !user search [userID]
      */
-
+    /**
+     * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
+     * method is executed, because a Discord input have been made.
+     *
+     * @param channel   Discord channel
+     * @param msg       the Discord inputs.
+     */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
         //Speichert sich User der Nachricht
         User user = msg.getAuthor();
+        Object[] receivedData;  // contains all user User data
+        String data;    // Ausgabe aller UserData
+        String searchID;    // UserID der gesuchten Person //user search [searchID]
 
         //Patters des Commands
-        String[] patterns = {"!user data", "!user update address [new value]", "!user update interests [new value1, new value2, etc.]", "!user update competencies [new value1, new value2, etc.]"};
+        String[] patterns = {"!user data", "!user update address [new value]",
+                "!user update interests [new value1, new value2, etc.]",
+                "!user update competencies [new value1, new value2, etc.]"};
 
         //Prüft, ob nur der Command an sich geschrieben wurde
         if (!msg.getContentRaw().contains(" ")) {
@@ -36,13 +62,12 @@ public class UserCommand implements CommandInterface {
         switch (args[1].toLowerCase()) {
             case "data":
                 //Speichert sich Return-Array ab
-                Object[] receivedData = DatabaseManagement.getINSTANCE().returnData(msg.getAuthor().getId());
-
+                receivedData = UserManagement.getINSTANCE().search(msg.getAuthor().getId());
                 //Ruft Daten des Users aus seiner Instanz auf
-                String data = "Nickname: " + msg.getAuthor().getName()
+                data = "Nickname: " + msg.getAuthor().getName()
                         + "\nAddress: " + receivedData[0]
-                        + "\nInterests: " + receivedData[1].toString()
-                        + "\nCompetencies: " + receivedData[2].toString();
+                        + "\nInterests: " + receivedData[1]
+                        + "\nCompetencies: " + receivedData[2];
                 channel.sendMessage(data).queue();
                 break;
             case "update":
@@ -67,6 +92,38 @@ public class UserCommand implements CommandInterface {
                 }
 
                 channel.sendMessage("Successfully updated your: " + args[2]).queue();
+                break;
+            case "search":
+
+                /**
+                 * abfrage ob ein dritter Parameter, die UserID mitgegeben wurde.
+                 */
+                if (args.length == 2) {
+                    channel.sendMessage("Please add the userID [@userName]!").queue();
+                    return;
+                }
+
+                /**
+                 * speichert aus der eingabe @user den kompletten String und filtert
+                 * die UserID heraus
+                 */
+                searchID = msg.getContentRaw().substring( 16, 34 );
+
+                /**
+                 * prüft ob die userID überhaupt in der Datenbank vorhanden ist
+                 */
+                if(!DatabaseManagement.getINSTANCE().registeredCheck( searchID )) {
+                    channel.sendMessage("User doesn´t exist").queue();
+                    return;
+                }
+
+                receivedData = UserManagement.getINSTANCE().search( searchID );
+                //receivedData = DatabaseManagement.getINSTANCE().returnData( searchID );
+                data =    "\nAddress: " + receivedData[0]
+                        + "\nInterests: " + receivedData[1]
+                        + "\nCompetencies: " + receivedData[2];
+
+                channel.sendMessage(data).queue();
                 break;
             default:
                 channel.sendMessage(String.format("Unknown command: `%s` does not exist.", args[1])).queue();

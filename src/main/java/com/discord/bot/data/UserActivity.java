@@ -1,5 +1,15 @@
 package com.discord.bot.data;
 
+
+/**
+ * The <code>UserActivity</code> class is saved as an object in the database.
+ * It contains the working start- and end-time.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.commands.ActivityCommand
+ * @since       1.0
+ */
 public class UserActivity {
 
     private int activityID;
@@ -16,7 +26,7 @@ public class UserActivity {
         return activityID;
     }
 
-    public String getStarttime() {
+    public final String getStarttime() {
         return starttime;
     }
 
@@ -24,7 +34,7 @@ public class UserActivity {
         this.endtime = endtime;
     }
 
-    public String getEndtime() {
+    public final String getEndtime() {
         return endtime;
     }
 }
