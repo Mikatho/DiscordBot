@@ -2,7 +2,7 @@ package com.discord.bot;
 
 import com.discord.bot.data.MeetingData;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
 
 public class MeetingManagement {
 
@@ -14,10 +14,18 @@ public class MeetingManagement {
         return INSTANCE;
     }
 
-    public boolean insert(String hostID, String participantID, long startTime, long endTime, String message) {
+    public boolean insert(String hostID, String participantID, long starttime, long endtime, int duration, String message) {
+
+        //Returnt starttime & endtime als long[starttime, endtime]
+        long[] meetingtimes = dbManager.findEarliestPossibleMeetingtimes(participantID, starttime, endtime, duration);
+
+        //Falls das Suchen nach Start- und Endtime nicht erfolgreich ausgeführt werden konnte
+        if (meetingtimes[0] == 0 || meetingtimes[1] == 0) {
+            return false;
+        }
 
         //Erstellt neue Instanz mit Daten
-        MeetingData tempMeeting = new MeetingData(hostID, participantID, startTime, endTime, message);
+        MeetingData tempMeeting = new MeetingData(hostID, participantID, meetingtimes[0], meetingtimes[1], message);
 
         //Versucht Meeting in Datenbank einzufügen
         return dbManager.insert(tempMeeting);

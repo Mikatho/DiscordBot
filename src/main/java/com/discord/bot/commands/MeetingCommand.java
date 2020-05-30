@@ -13,7 +13,7 @@ import java.util.Date;
 public class MeetingCommand implements CommandInterface {
 
     /*
-    !meeting create [@Participant] [starttime] [endtime] [message]
+    !meeting create [@Participant] [starttime] [endtime] [duration in minutes] [message]
     !meeting delete [meetingID]
     !meeting update [meetingID] [value to change] [new value]
      */
@@ -36,7 +36,7 @@ public class MeetingCommand implements CommandInterface {
         format.setLenient(false);
 
         //Patterns des Commands
-        String[] patterns = {"!meeting create [@Participant] [starttime] [endtime] [message]",
+        String[] patterns = {"!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [message]",
                 "!meeting delete [meetingID]",
                 "!meeting update [meetingID] [value to change] [new value]"};
 
@@ -60,14 +60,15 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                String[] createArgs = args[2].split(" ", 6);
+                String[] createArgs = args[2].split(" ", 7);
 
                 //Wenn nicht alle Zusatz-Parameter eingegeben wurden
-                if (createArgs.length != 6) {
+                if (createArgs.length != 7) {
                     channel.sendMessage(String.format("Please add the values like this:\n`%s`", patterns[0])).queue();
                     return;
                 }
 
+                //Prüft, ob User im richtigen Format übergeben wurde
                 if (!createArgs[0].matches("<@!\\d{18}>")) {
                     channel.sendMessage("User is not valid. Please use ´@UserName´!").queue();
                     return;
@@ -88,13 +89,19 @@ public class MeetingCommand implements CommandInterface {
                     Date dateEnd = format.parse(endtime);
                     long epochEnd = dateEnd.getTime() / 1000;
 
+                    //Dauer des Meetings in Sekunden
+                    int duration = Integer.parseInt(createArgs[5]) * 60;
+
                     //Versucht Meeting hinzuzufügen
-                    if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, createArgs[5])) {
+                    if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, createArgs[6])) {
                         channel.sendMessage("Could not create the Meeting.").queue();
                         return;
                     }
                 } catch (ParseException e) {
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
+                    return;
+                } catch (NumberFormatException e) {
+                    channel.sendMessage("Please add a duration of the meeting!\n Note: Duration has to be in minutes (only the number).").queue();
                     return;
                 }
 

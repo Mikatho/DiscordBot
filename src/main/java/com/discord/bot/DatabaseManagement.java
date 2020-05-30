@@ -7,6 +7,7 @@ import com.discord.bot.data.UserData;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.StringJoiner;
 
 public class DatabaseManagement {
@@ -128,8 +129,8 @@ public class DatabaseManagement {
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setString(1, meeting.getUserID());
                 prepStmt.setString(2, meeting.getParticipantID());
-                prepStmt.setLong(3, meeting.getStartTime());
-                prepStmt.setLong(4, meeting.getEndTime());
+                prepStmt.setLong(3, meeting.getStarttime());
+                prepStmt.setLong(4, meeting.getEndtime());
                 prepStmt.setString(5, meeting.getMessage());
                 prepStmt.executeUpdate();
 
@@ -190,6 +191,139 @@ public class DatabaseManagement {
             System.out.println("Data could not be added to User!");
             return false;
         }
+    }
+
+    public long[] findEarliestPossibleMeetingtimes(String userID, long starttime, long endtime, int duration) {
+
+        //Sucht alle zeitlichen Daten in dem angefragten Zeitraum heraus und sortiert diese
+        String sql = "SELECT starttime, endtime FROM meeting_data WHERE (hostID = ? OR participantID = ?) AND (starttime BETWEEN ? AND ?) ORDER BY starttime ASC";
+
+        ArrayList<Long> starttimeList = new ArrayList<>();
+        ArrayList<Long> endtimeList = new ArrayList<>();
+
+        //Variable die zurückgegeben wird
+        long[] meetingtimes = new long[2];
+
+        //Länge der Pause zwischen Meetings in Sekunden
+        final int BREAKTIME_IN_SECONDS = 300;
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, userID);
+            prepStmt.setString(2, userID);
+            prepStmt.setLong(3, starttime);
+            prepStmt.setLong(4, endtime);
+            ResultSet rsData = prepStmt.executeQuery();
+
+            //Fügt herausgesuchte Daten in jeweilige Liste
+            while (rsData.next()) {
+                starttimeList.add(rsData.getLong("starttime"));
+                endtimeList.add(rsData.getLong("endtime"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Could not get User data properly!");
+            return meetingtimes;
+        }
+
+        //Wenn es keine anderen Termine in dem Zeitraum gibt
+        if (starttimeList.isEmpty() && endtimeList.isEmpty()) {
+
+            meetingtimes[0] = starttime;
+            meetingtimes[1] = meetingtimes[0] + duration;
+            return meetingtimes;
+        }
+
+        //Wenn nur eine Endzeit in dem Zeitraum ist
+        if (starttimeList.isEmpty()) {
+
+            //Prüft, ob eine Pause eingelegt werden kann
+            if ((endtimeList.get(0) + duration) <= (endtime - BREAKTIME_IN_SECONDS)) {
+
+                meetingtimes[0] = endtimeList.get(0) + BREAKTIME_IN_SECONDS;
+                meetingtimes[1] = meetingtimes[0] + duration;
+            } else if ((endtimeList.get(0) + duration) <= endtime) {
+
+                meetingtimes[0] = endtimeList.get(0);
+                meetingtimes[1] = meetingtimes[0] + duration;
+            }
+            return meetingtimes;
+        }
+
+        //Wenn nur eine Startzeit in dem Zeitraum ist
+        if (endtimeList.isEmpty()) {
+
+            //Prüft, ob eine Pause eingelegt werden kann
+            if ((starttimeList.get(0) - duration) >= (starttime +  BREAKTIME_IN_SECONDS)) {
+
+                meetingtimes[0] = starttime + BREAKTIME_IN_SECONDS;
+                meetingtimes[1] = meetingtimes[0] + duration;
+            } else if ((starttimeList.get(0) - duration) >= starttime) {
+
+                meetingtimes[0] = starttime;
+                meetingtimes[1] = meetingtimes[0] + duration;
+            }
+            return meetingtimes;
+        }
+
+        //Wenn der Zeitraum mit einer Startzeit eines Termines anfängt
+        if (starttimeList.get(0) < endtimeList.get(0)) {
+
+            //Wenn es nur 1 anderen Termin in dem Zeitraum gibt
+            if (starttimeList.size() == 1) {
+
+                //Prüft, ob der Termin vor oder nach dem Termin eingefügt werden muss
+                //Prüft, ob eine Pause eingelegt werden kann
+                if ((starttimeList.get(0) - duration) >= (starttime + BREAKTIME_IN_SECONDS)) {
+
+                    meetingtimes[0] = starttime + BREAKTIME_IN_SECONDS;
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                } else if ((starttimeList.get(0) - duration) >= starttime) {
+
+                    meetingtimes[0] = starttime;
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                //Prüft, ob eine Pause eingelegt werden kann
+                } else if ((endtimeList.get(0) + duration) <= (endtime - BREAKTIME_IN_SECONDS)) {
+
+                    meetingtimes[0] = endtimeList.get(0) + BREAKTIME_IN_SECONDS;
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                } else if ((endtimeList.get(0) + duration) <= endtime) {
+
+                    meetingtimes[0] = endtimeList.get(0);
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                }
+                return meetingtimes;
+            }
+
+            //Prüft, zwischen welche Termine genug Zeit liegt, um den Termin einzufügen
+            for (int i=1; i<starttimeList.size(); i++) {
+
+                if ((starttimeList.get(i) - endtimeList.get(i-1)) >= (duration + 2*BREAKTIME_IN_SECONDS)) {
+
+                    meetingtimes[0] = endtimeList.get(i-1) + BREAKTIME_IN_SECONDS;
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                } else if ((starttimeList.get(i) - endtimeList.get(i-1)) >= duration) {
+
+                    meetingtimes[0] = endtimeList.get(i-1);
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                }
+            }
+        //Wenn der Zeitraum mit einer Startzeit eines Termines anfängt
+        } else {
+
+            //Prüft, zwischen welche Termine genug Zeit liegt, um den Termin einzufügen
+            for (int i=0; i<starttimeList.size(); i++) {
+
+                if ((starttimeList.get(i) - endtimeList.get(i)) >= (duration + 2* BREAKTIME_IN_SECONDS)) {
+
+                    meetingtimes[0] = endtimeList.get(i) + BREAKTIME_IN_SECONDS;
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                } else if ((starttimeList.get(i) - endtimeList.get(i)) >= duration) {
+
+                    meetingtimes[0] = endtimeList.get(i);
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                }
+            }
+        }
+        return meetingtimes;
     }
 
     public boolean deleteUser(String userID) {

@@ -6,26 +6,26 @@ public class MeetingData {
 
     private String participantID;
 
-    private long startTime;
+    private long starttime;
 
-    private long endTime;
+    private long endtime;
 
     private String message;
 
-    public MeetingData(String hostID, String participantID, long startTime, long endTime) {
+    public MeetingData(String hostID, String participantID, long starttime, long endtime) {
 
         this.hostID = hostID;
         this.participantID = participantID;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.starttime = starttime;
+        this.endtime = endtime;
     }
 
-    public MeetingData(String hostID, String participantID, long startTime, long endTime, String message) {
+    public MeetingData(String hostID, String participantID, long starttime, long endtime, String message) {
 
         this.hostID = hostID;
         this.participantID = participantID;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.starttime = starttime;
+        this.endtime = endtime;
         this.message = message;
     }
 
@@ -45,20 +45,20 @@ public class MeetingData {
         return participantID;
     }
 
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
+    public void setStarttime(long starttime) {
+        this.starttime = starttime;
     }
 
-    public long getStartTime() {
-        return startTime;
+    public long getStarttime() {
+        return starttime;
     }
 
-    public void setEndTime(long endTime) {
-        this.endTime = endTime;
+    public void setEndtime(long endtime) {
+        this.endtime = endtime;
     }
 
-    public long getEndTime() {
-        return endTime;
+    public long getEndtime() {
+        return endtime;
     }
 
     public void setMessage(String message) {
