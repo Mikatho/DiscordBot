@@ -25,13 +25,26 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This class is for creating and Managing public Google Calendars of all Users that work with our
+ * Discord Bot.
+ *
+ * If you change the system this class will be called on, delete the storedCredentials in the token folder.
+ *
+ * This class will print out a error warning that can be ignored.
+ * More information on this bug:
+ * https://stackoverflow.com/questions/30634827/warning-unable-to-change-permissions-for-everybody
+ *
+ * @Author Christian Paulsen
+ */
 public class GoogleCalendarManager {
+
     /**
      * Tag for debugging and logging
      */
     public static final String TAG = "GoogleCalendarManager: ";
 
-    private static final String APPLICATION_NAME = "Google Calendar API Java Quickstart";
+    private static final String APPLICATION_NAME = "DisAppointment Terminkalender";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
@@ -58,6 +71,13 @@ public class GoogleCalendarManager {
      * Value: calendar ID
      */
     private static HashMap<String, String> userList = new HashMap<>();
+
+    /**
+     * This Method is for extracting all Users and their Calendar ids
+     *
+     * @return Hashmap with Usernames and gCalendar Ids.
+     */
+    public static HashMap<String, String> getUserList() { return userList; };
 
     /**
      * Singleton implementation with try catch block, to catch errors while connecting
@@ -118,8 +138,8 @@ public class GoogleCalendarManager {
      * @param eventName name of the event
      * @param eventLocation name of the event location
      * @param eventDescription name of the eventDescription
-     * @param startTime with following format: "2020-05-28T09:00:00"
-     * @param endTime with following format: "2020-05-28T17:00:00"
+     * @param startTime with following format: "YYYY-MM-DD'T'HH:MM:SS" -> "2020-05-28T17:00:00"
+     * @param endTime with following format: "YYYY-MM-DD'T'HH:MM:SS" -> "2020-05-28T17:00:00"
      * @throws IOException when the event can't be added to a users calendar
      * @return a link to the newly created Event
      */
@@ -225,6 +245,30 @@ public class GoogleCalendarManager {
      */
     public void addUserToUserlist(String userName, String gCalendarLink) {
         userList.put(userName, gCalendarLink);
+    }
+
+    private List<Event> getEvent(String userCalendarID, String eventName, String startTime) throws IOException {
+
+        DateTime now = new DateTime(System.currentTimeMillis());
+        Events events = service.events().list(userCalendarID)
+                .setTimeMin(now)
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .execute();
+
+        List<Event> items = events.getItems();
+
+        //TODO richtiges event rausfiltern
+        /*for (int i = 0; items.size() > i ; i++) {
+            if (items.get(i).get() )
+
+
+        }*/
+
+
+
+        return null;
+
     }
 
 
