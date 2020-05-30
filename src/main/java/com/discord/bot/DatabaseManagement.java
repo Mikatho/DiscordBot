@@ -271,7 +271,6 @@ public class DatabaseManagement {
             if (starttimeList.size() == 1) {
 
                 //Prüft, ob der Termin vor oder nach dem Termin eingefügt werden muss
-                //Prüft, ob eine Pause eingelegt werden kann
                 if ((starttimeList.get(0) - duration) >= (starttime + BREAKTIME_IN_SECONDS)) {
 
                     meetingtimes[0] = starttime + BREAKTIME_IN_SECONDS;
@@ -280,7 +279,6 @@ public class DatabaseManagement {
 
                     meetingtimes[0] = starttime;
                     meetingtimes[1] = meetingtimes[0] + duration;
-                //Prüft, ob eine Pause eingelegt werden kann
                 } else if ((endtimeList.get(0) + duration) <= (endtime - BREAKTIME_IN_SECONDS)) {
 
                     meetingtimes[0] = endtimeList.get(0) + BREAKTIME_IN_SECONDS;
