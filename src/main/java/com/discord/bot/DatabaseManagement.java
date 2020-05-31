@@ -22,6 +22,18 @@ public class DatabaseManagement {
         return INSTANCE;
     }
 
+    public void fill() {
+        String sql = "INSERT INTO meeting_data (hostID, participantID, starttime, endtime, message) VALUES ('247096225659092992', '247096225659092992', 1585813920, 1585814220, 'Example1.')";
+        String sql2 = "INSERT INTO meeting_data (hostID, participantID, starttime, endtime, message) VALUES ('247096225659092992', '247096225659092992', 1585815000, 1585815120, 'Example2.')";
+
+        try {
+            stmt.execute(sql);
+            stmt.execute(sql2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     //Löscht Daten in Datenbank
     public void clear() {
         String meeting = "DELETE FROM meeting_data;";
@@ -35,6 +47,8 @@ public class DatabaseManagement {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        UserManagement.getINSTANCE().register("247096225659092992");
+        fill();
     }
 
     public void connect() {
@@ -195,23 +209,25 @@ public class DatabaseManagement {
 
     public long[] findEarliestPossibleMeetingtimes(String userID, long starttime, long endtime, int duration) {
 
-        //Sucht alle zeitlichen Daten in dem angefragten Zeitraum heraus und sortiert diese
-        String sql = "SELECT starttime, endtime FROM meeting_data WHERE (hostID = ? OR participantID = ?) AND (starttime BETWEEN ? AND ?) ORDER BY starttime ASC";
-
-        ArrayList<Long> starttimeList = new ArrayList<>();
-        ArrayList<Long> endtimeList = new ArrayList<>();
+        //Länge der Pause zwischen Meetings in Sekunden
+        final int BREAKTIME_IN_SECONDS = 300;
 
         //Variable die zurückgegeben wird
         long[] meetingtimes = new long[2];
 
-        //Länge der Pause zwischen Meetings in Sekunden
-        final int BREAKTIME_IN_SECONDS = 300;
+        ArrayList<Long> starttimeList = new ArrayList<>();
+        ArrayList<Long> endtimeList = new ArrayList<>();
+
+        //Sucht alle zeitlichen Daten in dem angefragten Zeitraum heraus und sortiert diese
+        String sql = "SELECT starttime, endtime FROM meeting_data WHERE (hostID = ? OR participantID = ?) AND ((starttime BETWEEN ? AND ?) OR (endtime BETWEEN ? AND ?)) ORDER BY starttime ASC";
 
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
             prepStmt.setString(1, userID);
             prepStmt.setString(2, userID);
-            prepStmt.setLong(3, starttime);
-            prepStmt.setLong(4, endtime);
+            prepStmt.setLong(3, starttime - BREAKTIME_IN_SECONDS);
+            prepStmt.setLong(4, endtime + BREAKTIME_IN_SECONDS);
+            prepStmt.setLong(5, starttime - BREAKTIME_IN_SECONDS);
+            prepStmt.setLong(6, endtime + BREAKTIME_IN_SECONDS);
             ResultSet rsData = prepStmt.executeQuery();
 
             //Fügt herausgesuchte Daten in jeweilige Liste
@@ -232,31 +248,10 @@ public class DatabaseManagement {
             return meetingtimes;
         }
 
-        //Wenn nur eine Endzeit in dem Zeitraum ist
-        if (starttimeList.isEmpty()) {
-
-            //Prüft, ob eine Pause eingelegt werden kann
-            if ((endtimeList.get(0) + duration) <= (endtime - BREAKTIME_IN_SECONDS)) {
-
-                meetingtimes[0] = endtimeList.get(0) + BREAKTIME_IN_SECONDS;
-                meetingtimes[1] = meetingtimes[0] + duration;
-            } else if ((endtimeList.get(0) + duration) <= endtime) {
-
-                meetingtimes[0] = endtimeList.get(0);
-                meetingtimes[1] = meetingtimes[0] + duration;
-            }
-            return meetingtimes;
-        }
-
         //Wenn nur eine Startzeit in dem Zeitraum ist
         if (endtimeList.isEmpty()) {
 
-            //Prüft, ob eine Pause eingelegt werden kann
-            if ((starttimeList.get(0) - duration) >= (starttime +  BREAKTIME_IN_SECONDS)) {
-
-                meetingtimes[0] = starttime + BREAKTIME_IN_SECONDS;
-                meetingtimes[1] = meetingtimes[0] + duration;
-            } else if ((starttimeList.get(0) - duration) >= starttime) {
+            if ((starttimeList.get(0) - duration) >= starttime) {
 
                 meetingtimes[0] = starttime;
                 meetingtimes[1] = meetingtimes[0] + duration;
@@ -264,6 +259,97 @@ public class DatabaseManagement {
             return meetingtimes;
         }
 
+        //Wenn nur eine Endzeit in dem Zeitraum ist
+        if (starttimeList.isEmpty() || (starttimeList.size() == 1 && starttimeList.get(0) < endtimeList.get(0))) {
+
+            //Prüft, ob eine Pause eingelegt werden kann
+            if ((endtimeList.get(0) + duration) <= (endtime - BREAKTIME_IN_SECONDS)) {
+
+                meetingtimes[0] = endtimeList.get(0) + BREAKTIME_IN_SECONDS;
+                meetingtimes[1] = meetingtimes[0] + duration;
+                return meetingtimes;
+            }
+
+            if (endtimeList.get(0) < starttime) {
+
+                meetingtimes[0] = starttime;
+                meetingtimes[1] = meetingtimes[0] + duration;
+                return meetingtimes;
+            }
+
+            //Prüft, ob ein Meeting überhaupt zeitlich stattfinden kann
+            if ((endtimeList.get(0) + duration) <= endtime) {
+
+                meetingtimes[0] = endtimeList.get(0);
+                meetingtimes[1] = meetingtimes[0] + duration;
+                return meetingtimes;
+            }
+        }
+
+        for (int i = 0; i < starttimeList.size(); i++) {
+
+            int index = i;
+
+            if (starttimeList.get(0) < endtimeList.get(0)) {
+
+                if (i == 0) {
+                    i++;
+                }
+                index = i - 1;
+            }
+
+            System.out.println(starttimeList.toString());
+            System.out.println(endtimeList.toString());
+
+            System.out.println(i);
+            System.out.println(index);
+
+            System.out.println(starttimeList.get(i));
+            System.out.println(endtimeList.get(index));
+
+            if (starttimeList.get(starttimeList.size()-1) < endtimeList.get(endtimeList.size()-1)) {
+
+                if ((endtime - endtimeList.get(index)) >= (duration + BREAKTIME_IN_SECONDS)) {
+
+                }
+            }
+
+            if ((starttimeList.get(i) - endtimeList.get(index)) >= (duration + 2 * BREAKTIME_IN_SECONDS)) {
+
+                meetingtimes[0] = endtimeList.get(index) + BREAKTIME_IN_SECONDS;
+                meetingtimes[1] = meetingtimes[0] + duration;
+                return meetingtimes;
+            }
+
+            if (endtimeList.get(index) < starttime) {
+
+                if ((starttimeList.get(i) - starttime) >= duration) {
+
+                    meetingtimes[0] = starttime;
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                    return meetingtimes;
+                }
+            }
+
+            if (starttimeList.get(i) > endtime) {
+
+                if ((endtime - endtimeList.get(index)) >= duration) {
+
+                    meetingtimes[0] = endtimeList.get(index);
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                    return meetingtimes;
+                }
+
+                if ((starttimeList.get(i) - endtimeList.get(index)) >= duration) {
+
+                    meetingtimes[0] = endtimeList.get(index);
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                    return meetingtimes;
+                }
+            }
+        }
+
+        /*
         //Wenn der Zeitraum mit einer Startzeit eines Termines anfängt
         if (starttimeList.get(0) < endtimeList.get(0)) {
 
@@ -271,19 +357,13 @@ public class DatabaseManagement {
             if (starttimeList.size() == 1) {
 
                 //Prüft, ob der Termin vor oder nach dem Termin eingefügt werden muss
-                //Prüft, ob eine Pause eingelegt werden kann
-                if ((starttimeList.get(0) - duration) >= (starttime + BREAKTIME_IN_SECONDS)) {
-
-                    meetingtimes[0] = starttime + BREAKTIME_IN_SECONDS;
-                    meetingtimes[1] = meetingtimes[0] + duration;
-                } else if ((starttimeList.get(0) - duration) >= starttime) {
+                if ((starttimeList.get(0) - duration) >= starttime) {
 
                     meetingtimes[0] = starttime;
                     meetingtimes[1] = meetingtimes[0] + duration;
-                //Prüft, ob eine Pause eingelegt werden kann
                 } else if ((endtimeList.get(0) + duration) <= (endtime - BREAKTIME_IN_SECONDS)) {
 
-                    meetingtimes[0] = endtimeList.get(0) + BREAKTIME_IN_SECONDS;
+                    meetingtimes[0] = endtimeList.get(0) + 2 * BREAKTIME_IN_SECONDS;
                     meetingtimes[1] = meetingtimes[0] + duration;
                 } else if ((endtimeList.get(0) + duration) <= endtime) {
 
@@ -294,35 +374,84 @@ public class DatabaseManagement {
             }
 
             //Prüft, zwischen welche Termine genug Zeit liegt, um den Termin einzufügen
-            for (int i=1; i<starttimeList.size(); i++) {
+            for (int i = 1; i < starttimeList.size(); i++) {
 
-                if ((starttimeList.get(i) - endtimeList.get(i-1)) >= (duration + 2*BREAKTIME_IN_SECONDS)) {
+                if ((starttimeList.get(i) - endtimeList.get(i - 1)) >= (duration + 2 * BREAKTIME_IN_SECONDS)) {
 
-                    meetingtimes[0] = endtimeList.get(i-1) + BREAKTIME_IN_SECONDS;
+                    meetingtimes[0] = endtimeList.get(i - 1) + BREAKTIME_IN_SECONDS;
                     meetingtimes[1] = meetingtimes[0] + duration;
-                } else if ((starttimeList.get(i) - endtimeList.get(i-1)) >= duration) {
+                    return meetingtimes;
+                }
 
-                    meetingtimes[0] = endtimeList.get(i-1);
-                    meetingtimes[1] = meetingtimes[0] + duration;
+                if (endtimeList.get(i - 1) < starttime) {
+
+                    if ((starttimeList.get(i) - starttime) >= duration) {
+
+                        meetingtimes[0] = starttime;
+                        meetingtimes[1] = meetingtimes[0] + duration;
+                        return meetingtimes;
+                    }
+                }
+
+                if (starttimeList.get(i) > endtime) {
+
+                    if ((endtime - endtimeList.get(i - 1)) >= duration) {
+
+                        meetingtimes[0] = endtimeList.get(i - 1);
+                        meetingtimes[1] = meetingtimes[0] + duration;
+                        return meetingtimes;
+                    }
+
+                    if ((starttimeList.get(i) - endtimeList.get(i - 1)) >= duration) {
+
+                        meetingtimes[0] = endtimeList.get(i - 1);
+                        meetingtimes[1] = meetingtimes[0] + duration;
+                        return meetingtimes;
+                    }
                 }
             }
-        //Wenn der Zeitraum mit einer Startzeit eines Termines anfängt
+            //Wenn der Zeitraum mit einer Startzeit eines Termines anfängt
         } else {
 
             //Prüft, zwischen welche Termine genug Zeit liegt, um den Termin einzufügen
-            for (int i=0; i<starttimeList.size(); i++) {
+            for (int i = 0; i < starttimeList.size(); i++) {
 
-                if ((starttimeList.get(i) - endtimeList.get(i)) >= (duration + 2* BREAKTIME_IN_SECONDS)) {
+                if ((starttimeList.get(i) - endtimeList.get(i)) >= (duration + 2 * BREAKTIME_IN_SECONDS)) {
 
                     meetingtimes[0] = endtimeList.get(i) + BREAKTIME_IN_SECONDS;
                     meetingtimes[1] = meetingtimes[0] + duration;
-                } else if ((starttimeList.get(i) - endtimeList.get(i)) >= duration) {
+                    return meetingtimes;
+                }
+
+                if (endtimeList.get(i) < starttime) {
+
+                    if ((starttimeList.get(i) - starttime) >= duration) {
+
+                        meetingtimes[0] = starttime;
+                        meetingtimes[1] = meetingtimes[0] + duration;
+                        return meetingtimes;
+                    }
+                }
+
+                if (starttimeList.get(i) > endtime) {
+
+                    if ((endtime - endtimeList.get(i)) >= duration) {
+
+                        meetingtimes[0] = endtimeList.get(i);
+                        meetingtimes[1] = meetingtimes[0] + duration;
+                        return meetingtimes;
+                    }
+                }
+
+                if ((starttimeList.get(i) - endtimeList.get(i)) >= duration) {
 
                     meetingtimes[0] = endtimeList.get(i);
                     meetingtimes[1] = meetingtimes[0] + duration;
+                    return meetingtimes;
                 }
             }
         }
+         */
         return meetingtimes;
     }
 
@@ -340,7 +469,7 @@ public class DatabaseManagement {
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("User does not exist!");
-            return  false;
+            return false;
         }
     }
 

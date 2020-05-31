@@ -92,6 +92,12 @@ public class MeetingCommand implements CommandInterface {
                     //Dauer des Meetings in Sekunden
                     int duration = Integer.parseInt(createArgs[5]) * 60;
 
+                    //Wenn die Länge des Meeting größer ist, als der angefragte Zeitraum
+                    if (duration > (epochEnd - epochStart)) {
+                        channel.sendMessage("The duration of the meeting can't be longer than the requested period.").queue();
+                        return;
+                    }
+
                     //Versucht Meeting hinzuzufügen
                     if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, createArgs[6])) {
                         channel.sendMessage("Could not create the Meeting.").queue();
