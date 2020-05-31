@@ -32,13 +32,23 @@ public class MeetingManagement {
     }
 
 
-    public boolean delete(Integer meetingID) {
+    public boolean delete(Integer meetingID, String userID) {
+
+        //Wenn User nicht die nötige Berechtigung hat
+        if (!dbManager.authorizationCheck(meetingID, userID)) {
+            return false;
+        }
 
         //Versucht Meeting aus Datenbank zu löschen
         return dbManager.deleteMeeting(meetingID);
     }
 
-    public boolean update(Integer meetingID, String column, Object newValue) {
+    public boolean update(Integer meetingID, String userID, String column, Object newValue) {
+
+        //Wenn User nicht die nötige Berechtigung hat
+        if (!dbManager.authorizationCheck(meetingID, userID)) {
+            return false;
+        }
 
         //Versucht Meeting in Datenbank zu updaten
         return dbManager.updateMeeting(meetingID, column, newValue);

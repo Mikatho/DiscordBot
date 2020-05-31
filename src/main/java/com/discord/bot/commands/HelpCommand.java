@@ -1,6 +1,5 @@
 package com.discord.bot.commands;
 
-import com.discord.bot.DatabaseManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 

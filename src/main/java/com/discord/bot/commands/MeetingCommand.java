@@ -89,12 +89,20 @@ public class MeetingCommand implements CommandInterface {
                     Date dateEnd = format.parse(endtime);
                     long epochEnd = dateEnd.getTime() / 1000;
 
+                    //Prüft, ob Endzeit des Zeitraums nach Startzeit liegt
+                    if (!(epochStart < epochEnd)) {
+
+                        channel.sendMessage("The endtime has to be later than the starttime. ").queue();
+                        return;
+                    }
+
                     //Dauer des Meetings in Sekunden
                     int duration = Integer.parseInt(createArgs[5]) * 60;
 
                     //Wenn die Länge des Meeting größer ist, als der angefragte Zeitraum
                     if (duration > (epochEnd - epochStart)) {
-                        channel.sendMessage("The duration of the meeting can't be longer than the requested period.").queue();
+
+                        channel.sendMessage("The duration of the meeting cannot be longer than the requested period.").queue();
                         return;
                     }
 
@@ -115,7 +123,7 @@ public class MeetingCommand implements CommandInterface {
                 break;
             case "delete":
 
-                //Wenn nur "!mmeting delete" eingegeben wurde
+                //Wenn nur "!meeting delete" eingegeben wurde
                 if (args.length == 2) {
                     channel.sendMessage(String.format("Use `%s` to delete a meeting!", patterns[1])).queue();
                     return;
@@ -126,7 +134,7 @@ public class MeetingCommand implements CommandInterface {
                     int meetingID = Integer.parseInt(args[2]);
 
                     //Versucht Meeting zu löschen
-                    if (!meetingMng.delete(meetingID)) {
+                    if (!meetingMng.delete(meetingID, user.getId())) {
                         channel.sendMessage("Could not delete the Meeting.").queue();
                         return;
                     }
@@ -183,7 +191,7 @@ public class MeetingCommand implements CommandInterface {
                     }
 
                     //Versucht Meeting zu updaten
-                    if (!meetingMng.update(meetingID, updateArgs[1], newValue)) {
+                    if (!meetingMng.update(meetingID, user.getId(), updateArgs[1], newValue)) {
                         channel.sendMessage("Could not update the Meeting.").queue();
                         return;
                     }
