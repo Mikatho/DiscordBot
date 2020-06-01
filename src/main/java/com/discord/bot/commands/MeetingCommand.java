@@ -21,10 +21,13 @@ public class MeetingCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
+        //Prüft, ob User in Datenbank exisitert
         if (!DatabaseManagement.getINSTANCE().registeredCheck(msg.getAuthor().getId())) {
             channel.sendMessage("Please use `!register` first to execute this command.").queue();
             return;
         }
+
+        String userIdRegex = "<@!\\d{18}>";
 
         //Speichert sich User der Nachricht
         User user = msg.getAuthor();
@@ -68,8 +71,8 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                //Prüft, ob User im richtigen Format übergeben wurde
-                if (!createArgs[0].matches("<@!\\d{18}>")) {
+                //Prüft, ob Participant im richtigen Format übergeben wurde
+                if (!createArgs[0].matches(userIdRegex)) {
                     channel.sendMessage("User is not valid. Please use ´@UserName´!").queue();
                     return;
                 }
@@ -170,13 +173,14 @@ public class MeetingCommand implements CommandInterface {
                     int meetingID = Integer.parseInt(updateArgs[0]);
 
                     //Prüft, ob richtiger Wert zum updaten angegeben wurde
-                    if (!updateArgs[1].matches("starttime|endtime|message")) {
+                    if (!updateArgs[1].matches("participant|starttime|endtime|message")) {
                         channel.sendMessage(String.format("Unknown value to update: `%s` does not exist.", updateArgs[1])).queue();
                         return;
                     }
 
                     //Wenn der Wert ein Datum ist wird geprüft, ob das richtige Format eingegeben wurde und das Datum existiert
                     if (updateArgs[1].contains("time")) {
+
                         try {
                             Date time = format.parse(updateArgs[2]);
                             //Epoch (ohne Millisekunden) wird in Variable zum Übergeben gespeichert
@@ -185,8 +189,17 @@ public class MeetingCommand implements CommandInterface {
                             channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                             return;
                         }
-                    //Wenn nicht die Zeit geändert werden soll
+                    } else if (updateArgs[1].equals("participant")) {
+
+                        //Prüft, ob Participant im richtigen Format übergeben wurde
+                        if (!updateArgs[2].matches(userIdRegex)) {
+                            channel.sendMessage("User is not valid. Please use ´@UserName´!").queue();
+                            return;
+                        }
+
+                        newValue = updateArgs[2].substring(3, 21);
                     } else {
+
                         newValue = updateArgs[2];
                     }
 

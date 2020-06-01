@@ -18,6 +18,12 @@ public class UserCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
+        //Prüft, ob User in Datenbank exisitert
+        if (!DatabaseManagement.getINSTANCE().registeredCheck(msg.getAuthor().getId())) {
+            channel.sendMessage("Please use `!register` first to execute this command.").queue();
+            return;
+        }
+
         //Speichert sich User der Nachricht
         User user = msg.getAuthor();
 

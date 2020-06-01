@@ -4,10 +4,10 @@ public class UserActivity {
 
     private int activityID;
 
-    private String starttime;
-    private String endtime;
+    private long starttime;
+    private long endtime;
 
-    public UserActivity(String starttime) {
+    public UserActivity(long starttime) {
 
         this.starttime = starttime;
     }
@@ -16,15 +16,15 @@ public class UserActivity {
         return activityID;
     }
 
-    public String getStarttime() {
+    public long getStarttime() {
         return starttime;
     }
 
-    public void setEndtime(String endtime) {
+    public void setEndtime(long endtime) {
         this.endtime = endtime;
     }
 
-    public String getEndtime() {
+    public long getEndtime() {
         return endtime;
     }
 }
