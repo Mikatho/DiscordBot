@@ -16,6 +16,8 @@ public class MeetingManagement {
 
     public boolean insert(String hostID, String participantID, long starttime, long endtime, int duration, String message) {
 
+        MeetingData tempMeeting;
+
         //Returnt starttime & endtime als long[starttime, endtime]
         long[] meetingtimes = dbManager.findEarliestPossibleMeetingtimes(participantID, starttime, endtime, duration);
 
@@ -25,7 +27,12 @@ public class MeetingManagement {
         }
 
         //Erstellt neue Instanz mit Daten
-        MeetingData tempMeeting = new MeetingData(hostID, participantID, meetingtimes[0], meetingtimes[1], message);
+        if (message == null) {
+            //Wenn keine Message mitgegeben wurde
+            tempMeeting = new MeetingData(hostID, participantID, meetingtimes[0], meetingtimes[1]);
+        } else {
+            tempMeeting = new MeetingData(hostID, participantID, meetingtimes[0], meetingtimes[1], message);
+        }
 
         //Versucht Meeting in Datenbank einzufügen
         return dbManager.insert(tempMeeting);

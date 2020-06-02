@@ -13,7 +13,7 @@ import java.util.Date;
 public class MeetingCommand implements CommandInterface {
 
     /*
-    !meeting create [@Participant] [starttime] [endtime] [duration in minutes] [message]
+    !meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]
     !meeting delete [meetingID]
     !meeting update [meetingID] [value to change] [new value]
      */
@@ -27,6 +27,7 @@ public class MeetingCommand implements CommandInterface {
             return;
         }
 
+        //Regex für UserID
         String userIdRegex = "<@!\\d{18}>";
 
         //Speichert sich User der Nachricht
@@ -39,7 +40,7 @@ public class MeetingCommand implements CommandInterface {
         format.setLenient(false);
 
         //Patterns des Commands
-        String[] patterns = {"!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [message]",
+        String[] patterns = {"!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]",
                 "!meeting delete [meetingID]",
                 "!meeting update [meetingID] [value to change] [new value]"};
 
@@ -66,7 +67,7 @@ public class MeetingCommand implements CommandInterface {
                 String[] createArgs = args[2].split(" ", 7);
 
                 //Wenn nicht alle Zusatz-Parameter eingegeben wurden
-                if (createArgs.length != 7) {
+                if (createArgs.length != 6 && createArgs.length != 7) {
                     channel.sendMessage(String.format("Please add the values like this:\n`%s`", patterns[0])).queue();
                     return;
                 }
@@ -104,15 +105,20 @@ public class MeetingCommand implements CommandInterface {
 
                     //Wenn die Länge des Meeting größer ist, als der angefragte Zeitraum
                     if (duration > (epochEnd - epochStart)) {
-
                         channel.sendMessage("The duration of the meeting cannot be longer than the requested period.").queue();
                         return;
                     }
 
-                    //Versucht Meeting hinzuzufügen
-                    if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, createArgs[6])) {
-                        channel.sendMessage("Could not create the Meeting.").queue();
-                        return;
+                    if (createArgs.length == 6) {
+                        if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, null)) {
+                            channel.sendMessage("Could not create the Meeting.").queue();
+                            return;
+                        }
+                    } else {
+                        if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, createArgs[6])) {
+                            channel.sendMessage("Could not create the Meeting.").queue();
+                            return;
+                        }
                     }
                 } catch (ParseException e) {
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
