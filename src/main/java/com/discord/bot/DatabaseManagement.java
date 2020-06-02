@@ -100,7 +100,7 @@ public class DatabaseManagement {
         }
     }
 
-    public boolean insert(Object obj) {
+    public Object insert(Object obj) {
 
         //Prüft welches Objekt eingefügt werden soll
         if (obj instanceof UserData) {
@@ -147,12 +147,12 @@ public class DatabaseManagement {
 
                     //Versucht ForeignKey in User_Data zu aktualisieren
                     if (!insertForeignKey(meetingID, meeting.getUserID(), meeting.getParticipantID())) {
-                        return false;
+                        return null;
                     }
-                }
 
-                System.out.println("Successfully added the Meeting to the Database!");
-                return true;
+                    System.out.println("Successfully added the Meeting to the Database!");
+                    return meetingID;
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.out.println("Could not add the Meeting to the Database!");
@@ -265,9 +265,6 @@ public class DatabaseManagement {
 
         //Prüft, ob zwischen anderen Terminen genügend Zeit ist
         for (int i = 1; i < starttimeList.size(); i++) {
-
-            System.out.println(starttimeList.toString());
-            System.out.println(endtimeList.toString());
 
             //Prüft, ob eine Pause eingelegt werden kann
             if ((starttimeList.get(i) - endtimeList.get(i - 1)) >= (duration + 2 * BREAKTIME_IN_SECONDS)) {

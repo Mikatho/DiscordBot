@@ -14,28 +14,37 @@ public class MeetingManagement {
         return INSTANCE;
     }
 
-    public boolean insert(String hostID, String participantID, long starttime, long endtime, int duration, String message) {
+    public Object[] insert(String hostID, String participantID, long starttime, long endtime, int duration, String message) {
 
         MeetingData tempMeeting;
+
+        Object[] returnValues = new Object[3];
 
         //Returnt starttime & endtime als long[starttime, endtime]
         long[] meetingtimes = dbManager.findEarliestPossibleMeetingtimes(participantID, starttime, endtime, duration);
 
+        long foundStarttime = meetingtimes[0];
+        long foundEndtime = meetingtimes[1];
+
         //Falls das Suchen nach Start- und Endtime nicht erfolgreich ausgeführt werden konnte
-        if (meetingtimes[0] == 0 || meetingtimes[1] == 0) {
-            return false;
+        if (foundStarttime == 0 || foundEndtime == 0) {
+            return returnValues;
         }
 
         //Erstellt neue Instanz mit Daten
-        if (message == null) {
+        if (message.equals("N/a")) {
             //Wenn keine Message mitgegeben wurde
-            tempMeeting = new MeetingData(hostID, participantID, meetingtimes[0], meetingtimes[1]);
+            tempMeeting = new MeetingData(hostID, participantID, foundStarttime, foundEndtime);
         } else {
-            tempMeeting = new MeetingData(hostID, participantID, meetingtimes[0], meetingtimes[1], message);
+            tempMeeting = new MeetingData(hostID, participantID, foundStarttime, foundEndtime, message);
         }
 
-        //Versucht Meeting in Datenbank einzufügen
-        return dbManager.insert(tempMeeting);
+        //Fügt Daten zu Rückgabe-Array hinzu
+        returnValues[0] = dbManager.insert(tempMeeting);
+        returnValues[1] = foundStarttime;
+        returnValues[2] = foundEndtime;
+
+        return returnValues;
     }
 
 

@@ -2,10 +2,12 @@ package com.discord.bot.commands;
 
 import com.discord.bot.DatabaseManagement;
 import com.discord.bot.MeetingManagement;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
+import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,11 +23,18 @@ public class MeetingCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
+        //Grundgerüst des Embeds zur Ausgabe von Meetings
+        EmbedBuilder embedBuilder = new EmbedBuilder()
+                .setColor(new Color(140, 158, 255))
+                .setAuthor("Meeting", null, channel.getJDA().getSelfUser().getAvatarUrl());
+
         //Prüft, ob User in Datenbank exisitert
         if (!DatabaseManagement.getINSTANCE().registeredCheck(msg.getAuthor().getId())) {
             channel.sendMessage("Please use `!register` first to execute this command.").queue();
             return;
         }
+
+        Object[] returnedValues;
 
         //Regex für UserID
         String userIdRegex = "<@!\\d{18}>";
@@ -57,6 +66,12 @@ public class MeetingCommand implements CommandInterface {
         switch (args[1].toLowerCase()) {
 
             case "create":
+
+                String messageValue;
+
+                Date foundStarttime;
+
+                Date foundEndtime;
 
                 //Wenn nur "!meeting create" eingegeben wurde
                 if (args.length == 2) {
@@ -109,17 +124,22 @@ public class MeetingCommand implements CommandInterface {
                         return;
                     }
 
+                    //Prüft, ob Message eingegeben wurde
                     if (createArgs.length == 6) {
-                        if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, null)) {
-                            channel.sendMessage("Could not create the Meeting.").queue();
-                            return;
-                        }
+                        messageValue = "N/a";
                     } else {
-                        if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, createArgs[6])) {
-                            channel.sendMessage("Could not create the Meeting.").queue();
-                            return;
-                        }
+                        messageValue = createArgs[6];
                     }
+
+                    //Wenn kein Meeting eingefügt werden konnte
+                    if ((returnedValues = meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, messageValue)) == null) {
+                        channel.sendMessage("Could not create the Meeting.").queue();
+                        return;
+                    }
+
+                    //Konvertiert die finalen Zeiten des Meetings von Epoch in Daten
+                    foundStarttime = new Date((long) returnedValues[1] * 1000);
+                    foundEndtime = new Date((long) returnedValues[2] * 1000);
                 } catch (ParseException e) {
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                     return;
@@ -128,7 +148,19 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                channel.sendMessage("Successfully added the Meeting.").queue();
+                //Embed wird mit restlichen Parametern befüllt
+                embedBuilder
+                        .addField("Meeting ID", returnedValues[0].toString(), false)
+                        .addField("Host", user.getAsMention(), true)
+                        .addField("Participant", createArgs[0], true)
+                        .addBlankField(true)
+                        .addField("Starttime", format.format(foundStarttime), true)
+                        .addField("Endtime", format.format(foundEndtime), true)
+                        .addBlankField(true)
+                        .addField("Message", messageValue, true);
+
+                channel.sendMessage("Successfully created the Meeting!").queue();
+                channel.sendMessage(embedBuilder.build()).queue();
                 break;
             case "delete":
 
