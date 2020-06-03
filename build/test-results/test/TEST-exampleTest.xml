@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="exampleTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2020-06-03T15:28:14" hostname="DESKTOP-BVBMDUH" time="0.003">
+  <properties/>
+  <testcase name="simpleCheck" classname="exampleTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
