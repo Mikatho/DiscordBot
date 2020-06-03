@@ -24,9 +24,12 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * This class is for creating and Managing public Google Calendars of all Users that work with our
+ * This class is for creating and Managing public Google Calendars for all Users that work with our
  * Discord Bot.
  *
  * If you change the system this class will be called on, delete the storedCredentials in the token folder.
@@ -35,9 +38,12 @@ import java.util.List;
  * More information on this bug:
  * https://stackoverflow.com/questions/30634827/warning-unable-to-change-permissions-for-everybody
  *
- * @Author Christian Paulsen
+ * @Author Christian Paulsen for L2G4
  */
 public class GoogleCalendarManager {
+
+    private static final Logger LOGGER = Logger.getLogger( GoogleCalendarManager.class.getName() );
+
 
     /**
      * Tag for debugging and logging
@@ -63,21 +69,21 @@ public class GoogleCalendarManager {
     /**
      * Build a Service Worker for the google Calendar API
      */
-    static Calendar service;
+    private final Calendar service;
 
     /**
      * List with users and their calendar ids
      * Key: Username
      * Value: calendar ID
      */
-    private static HashMap<String, String> userList = new HashMap<>();
+    private static final HashMap<String, String> userList = new HashMap<>();
 
     /**
      * This Method is for extracting all Users and their Calendar ids
      *
      * @return Hashmap with Usernames and gCalendar Ids.
      */
-    public static HashMap<String, String> getUserList() { return userList; };
+    public static Map<String, String> getUserList() { return userList; }
 
     /**
      * Singleton implementation with try catch block, to catch errors while connecting
@@ -88,12 +94,11 @@ public class GoogleCalendarManager {
         try {
             INSTANCE = new GoogleCalendarManager();
         } catch (IOException | GeneralSecurityException e) {
-            e.printStackTrace();
-            System.out.println(TAG + "didn't connect to Server");
+            LOGGER.log(Level.FINE, TAG + "didn't connect to Server");
         }
     }
 
-    public static GoogleCalendarManager getInstance() { return INSTANCE; };
+    public static GoogleCalendarManager getInstance() { return INSTANCE; }
 
     /**
      * private method for creating n new GoogleKalendar, only used by this class
@@ -101,20 +106,20 @@ public class GoogleCalendarManager {
      * @throws GeneralSecurityException when there is a faulty token
      */
     private GoogleCalendarManager() throws IOException, GeneralSecurityException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+        final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        service = new Calendar.Builder(httpTransport, JSON_FACTORY, getCredentials(httpTransport))
                 .setApplicationName(APPLICATION_NAME).build();
-        System.out.println(TAG + "Google Calendar successfully connected");
+        LOGGER.log(Level.FINE,TAG + "Google Calendar successfully connected");
     }
 
     /**
      * Creates an authorized Credential object.
      *
-     * @param HTTP_TRANSPORT The network HTTP Transport.
+     * @param httpTransport The network HTTP Transport.
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
      */
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+    private static Credential getCredentials(final NetHttpTransport httpTransport) throws IOException {
         // Load client secrets.
         InputStream in = GoogleCalendarManager.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
@@ -123,7 +128,7 @@ public class GoogleCalendarManager {
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
                 clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline").build();
@@ -164,7 +169,8 @@ public class GoogleCalendarManager {
         event = service.events().insert(calendarID, event).execute()
         .setVisibility("public");
 
-        System.out.printf(TAG + "A new Event was created under: %s\n", event.getHtmlLink());
+        LOGGER.log(Level.FINE,TAG + "A new Event was created under: %s\n", event.getHtmlLink());
+
         return event.getHtmlLink();
     }
 
@@ -191,7 +197,8 @@ public class GoogleCalendarManager {
 
         tempCalendar = service.calendars().insert(tempCalendar).execute();
 
-        System.out.println(TAG  + "Created a new Calendar with ID: " + tempCalendar.getId());
+        String logMessage = String.format("created a new Calendar with ID: %s",tempCalendar.getId());
+        LOGGER.log(Level.FINE,logMessage);
 
         //Put new Key value pair in userlist
         userList.put(userName, tempCalendar.getId());
@@ -205,7 +212,7 @@ public class GoogleCalendarManager {
         rule.setScope(scope).setRole("reader");
 
         // Insert new access rule (Can delete Var if not needed any further)
-        AclRule createdRule = service.acl().insert(tempCalendar.getId(), rule).execute();
+        service.acl().insert(tempCalendar.getId(), rule).execute();
 
         return tempCalendar.getId();
     }
@@ -246,30 +253,5 @@ public class GoogleCalendarManager {
     public void addUserToUserlist(String userName, String gCalendarLink) {
         userList.put(userName, gCalendarLink);
     }
-
-    private List<Event> getEvent(String userCalendarID, String eventName, String startTime) throws IOException {
-
-        DateTime now = new DateTime(System.currentTimeMillis());
-        Events events = service.events().list(userCalendarID)
-                .setTimeMin(now)
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .execute();
-
-        List<Event> items = events.getItems();
-
-        //TODO richtiges event rausfiltern
-        /*for (int i = 0; items.size() > i ; i++) {
-            if (items.get(i).get() )
-
-
-        }*/
-
-
-
-        return null;
-
-    }
-
 
 }
