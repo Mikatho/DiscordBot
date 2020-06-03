@@ -1,5 +1,16 @@
 package com.discord.bot.data;
 
+
+/**
+ * The <code>MeetingData</code> class contains all attributes for a meeting.
+ * Every arranged meeting is saved as an instance of this object in the database.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.commands.MeetingCommand
+ * @see         com.discord.bot.MeetingManagement
+ * @since       1.0
+ */
 public class MeetingData {
 
     private String hostID;
@@ -20,6 +31,9 @@ public class MeetingData {
         this.endTime = endTime;
     }
 
+    /**
+     * Overloaded class constructor. Extra variable "message".
+     */
     public MeetingData(String hostID, String participantID, long startTime, long endTime, String message) {
 
         this.hostID = hostID;
@@ -33,7 +47,7 @@ public class MeetingData {
         this.hostID = userID;
     }
 
-    public String getUserID() {
+    public final String getUserID() {
         return hostID;
     }
 
@@ -41,7 +55,7 @@ public class MeetingData {
         this.participantID = participantID;
     }
 
-    public String getParticipantID() {
+    public final String getParticipantID() {
         return participantID;
     }
 
@@ -49,7 +63,7 @@ public class MeetingData {
         this.startTime = startTime;
     }
 
-    public long getStartTime() {
+    public final long getStartTime() {
         return startTime;
     }
 
@@ -57,7 +71,7 @@ public class MeetingData {
         this.endTime = endTime;
     }
 
-    public long getEndTime() {
+    public final long getEndTime() {
         return endTime;
     }
 
@@ -65,7 +79,7 @@ public class MeetingData {
         this.message = message;
     }
 
-    public String getMessage() {
+    public final String getMessage() {
         return message;
     }
 }

@@ -1,5 +1,16 @@
 package com.discord.bot.data;
 
+
+/**
+ * The class <code>UserData</code> is saved as an object for every registered user in the database.
+ * It contains the user attributes.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.commands.UserCommand
+ * @see         com.discord.bot.UserManagement
+ * @since       1.0
+ */
 public class UserData {
 
     private String userID;
@@ -17,7 +28,7 @@ public class UserData {
         this.userID = userID;
     }
 
-    public String getUserID() {
+    public final String getUserID() {
         return userID;
     }
 
@@ -25,7 +36,7 @@ public class UserData {
         this.address = address;
     }
 
-    public String getAddress() {
+    public final String getAddress() {
         return address;
     }
 
@@ -33,7 +44,7 @@ public class UserData {
         this.interests = interests;
     }
 
-    public String[] getInterests() {
+    public final String[] getInterests() {
         return interests;
     }
 
@@ -41,7 +52,7 @@ public class UserData {
         this.competencies = competencies;
     }
 
-    public String[] getCompetencies() {
+    public final String[] getCompetencies() {
         return competencies;
     }
 
@@ -49,7 +60,7 @@ public class UserData {
         this.gCalendarLink = gCalendarLink;
     }
 
-    public String getgCalendarLink() {
+    public final String getgCalendarLink() {
         return gCalendarLink;
     }
 }
