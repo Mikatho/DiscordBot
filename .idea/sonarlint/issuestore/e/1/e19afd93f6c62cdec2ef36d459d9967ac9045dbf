@@ -1,0 +1,8 @@
+
+A
+java:S1128"+Remove this unused import 'java.util.Date'.(¸…¼ü
+I
+java:S1128".Remove this unused import 'java.util.HashMap'.(™˜”€ùÿÿÿÿ
+N	java:S106"9Replace this use of System.out or System.err by a logger.(©†‚§
+N	java:S106!"9Replace this use of System.out or System.err by a logger.(Éí±µ
+Q	java:S125"<This block of commented-out lines of code should be removed.(·“æà
