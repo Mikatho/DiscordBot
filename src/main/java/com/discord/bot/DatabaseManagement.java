@@ -100,85 +100,78 @@ public class DatabaseManagement {
         }
     }
 
-    public Object insert(Object obj) {
+    public boolean insertUser(UserData user) {
 
-        //Prüft welches Objekt eingefügt werden soll
-        if (obj instanceof UserData) {
+        //SQL-Code zum Einfügen in die Datenbank
+        String sql = "INSERT INTO user_data (userID) VALUES (?)";
 
-            //Castet Objekt in richtigen Datentypen
-            UserData user = (UserData) obj;
-
-            //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO user_data (userID) VALUES (?)";
-
-            //Versucht User in Datenbank einzufügen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                prepStmt.setString(1, user.getUserID());
-                prepStmt.executeUpdate();
-                System.out.println("Successfully added the User to the Database!");
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.out.println("Could not add the User to the Database!");
-            }
-        } else if (obj instanceof MeetingData) {
-
-            //Castet Objekt in richtigen Datentypen
-            MeetingData meeting = (MeetingData) obj;
-
-            //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO meeting_data (hostID, participantID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
-
-            //Versucht Meeting in Datenbank einzufügen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setString(1, meeting.getUserID());
-                prepStmt.setString(2, meeting.getParticipantID());
-                prepStmt.setLong(3, meeting.getStarttime());
-                prepStmt.setLong(4, meeting.getEndtime());
-                prepStmt.setString(5, meeting.getMessage());
-                prepStmt.executeUpdate();
-
-                //Holt sich automatisch generierte ID
-                rs = stmt.getGeneratedKeys();
-
-                //Speichert sich ID aus ResultSet als Integer
-                if (rs.next()) {
-                    int meetingID = rs.getInt(1);
-
-                    //Versucht ForeignKey in User_Data zu aktualisieren
-                    if (!insertForeignKey(meetingID, meeting.getUserID(), meeting.getParticipantID())) {
-                        return 0;
-                    }
-
-                    System.out.println("Successfully added the Meeting to the Database!");
-                    return meetingID;
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.out.println("Could not add the Meeting to the Database!");
-                return 0;
-            }
-        } else if (obj instanceof UserActivity) {
-
-            //Castet Objekt in richtigen Datentypen
-            UserActivity activity = (UserActivity) obj;
-
-            //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO activity_data (activityID, starttime) VALUES (?, ?)";
-
-            //Versucht Activity in Datenbank einzufügen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setInt(1, activity.getActivityID());
-                prepStmt.setLong(2, activity.getStarttime());
-                prepStmt.executeUpdate();
-                System.out.println("Successfully added the Activity to the Database!");
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.out.println("Could not add the Activity to the Database!");
-            }
+        //Versucht User in Datenbank einzufügen
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            prepStmt.setString(1, user.getUserID());
+            prepStmt.executeUpdate();
+            System.out.println("Successfully added the User to the Database!");
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Could not add the User to the Database!");
+            return false;
         }
-        return false;
+    }
+
+    public int insertMeeting(MeetingData meeting) {
+
+        //SQL-Code zum Einfügen in die Datenbank
+        String sql = "INSERT INTO meeting_data (hostID, participantID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
+
+        //Versucht Meeting in Datenbank einzufügen
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, meeting.getUserID());
+            prepStmt.setString(2, meeting.getParticipantID());
+            prepStmt.setLong(3, meeting.getStarttime());
+            prepStmt.setLong(4, meeting.getEndtime());
+            prepStmt.setString(5, meeting.getMessage());
+            prepStmt.executeUpdate();
+
+            //Holt sich automatisch generierte ID
+            rs = stmt.getGeneratedKeys();
+
+            //Speichert sich ID aus ResultSet als Integer
+            if (rs.next()) {
+                int meetingID = rs.getInt(1);
+
+                //Versucht ForeignKey in User_Data zu aktualisieren
+                if (!insertForeignKey(meetingID, meeting.getUserID(), meeting.getParticipantID())) {
+                    return 0;
+                }
+
+                System.out.println("Successfully added the Meeting to the Database!");
+                return meetingID;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Could not add the Meeting to the Database!");
+            return 0;
+        }
+        return 0;
+    }
+
+    public boolean insertActivity (UserActivity activity) {
+
+        //SQL-Code zum Einfügen in die Datenbank
+        String sql = "INSERT INTO activity_data (activityID, starttime) VALUES (?, ?)";
+
+        //Versucht Activity in Datenbank einzufügen
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setInt(1, activity.getActivityID());
+            prepStmt.setLong(2, activity.getStarttime());
+            prepStmt.executeUpdate();
+            System.out.println("Successfully added the Activity to the Database!");
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Could not add the Activity to the Database!");
+            return false;
+        }
     }
 
     public long[] findEarliestPossibleMeetingtimes(String userID, long starttime, long endtime, int duration) {

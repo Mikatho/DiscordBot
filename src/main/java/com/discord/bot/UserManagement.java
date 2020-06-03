@@ -21,7 +21,7 @@ public class UserManagement {
         UserData tempUser = new UserData(userID);
 
         //Versucht User in Datenbank einzufügen
-        return (Boolean) dbManager.insert(tempUser);
+        return dbManager.insertUser(tempUser);
     }
 
     public boolean delete(String userID) {

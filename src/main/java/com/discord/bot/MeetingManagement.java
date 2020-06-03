@@ -37,7 +37,7 @@ public class MeetingManagement {
             tempMeeting = new MeetingData(hostID, participantID, foundStarttime, foundEndtime, message);
         }
 
-        returnedValue = (Integer) dbManager.insert(tempMeeting);
+        returnedValue = dbManager.insertMeeting(tempMeeting);
 
         if (returnedValue == 0) {
             return null;
