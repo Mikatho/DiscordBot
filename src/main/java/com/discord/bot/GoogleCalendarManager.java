@@ -1,5 +1,6 @@
 package com.discord.bot;
 
+import com.discord.bot.data.UserData;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -72,20 +73,6 @@ public class GoogleCalendarManager {
     private final Calendar service;
 
     /**
-     * List with users and their calendar ids
-     * Key: Username
-     * Value: calendar ID
-     */
-    private static final HashMap<String, String> userList = new HashMap<>();
-
-    /**
-     * This Method is for extracting all Users and their Calendar ids
-     *
-     * @return Hashmap with Usernames and gCalendar Ids.
-     */
-    public static Map<String, String> getUserList() { return userList; }
-
-    /**
      * Singleton implementation with try catch block, to catch errors while connecting
      * to the Google API
      */
@@ -139,7 +126,7 @@ public class GoogleCalendarManager {
     /**
      * This functions creates a new Calendar for a specific user.
      *
-     * @param calendarID the ID of the Calendar that the event is added to
+     * @param user the userData of the User that the Calendar belongs to
      * @param eventName name of the event
      * @param eventLocation name of the event location
      * @param eventDescription name of the eventDescription
@@ -148,7 +135,7 @@ public class GoogleCalendarManager {
      * @throws IOException when the event can't be added to a users calendar
      * @return a link to the newly created Event
      */
-    public String createNewEvent(String calendarID, String eventName, String eventLocation, String eventDescription, String startTime, String endTime) throws IOException {
+    public String createNewEvent(UserData user, String eventName, String eventLocation, String eventDescription, String startTime, String endTime) throws IOException {
         Event event = new Event()
                 .setSummary(eventName)
                 .setLocation(eventLocation)
@@ -166,7 +153,7 @@ public class GoogleCalendarManager {
                 .setTimeZone(BOT_TIMEZONE);
         event.setEnd(end);
 
-        event = service.events().insert(calendarID, event).execute()
+        event = service.events().insert(user.getgCalendarLink(), event).execute()
         .setVisibility("public");
 
         LOGGER.log(Level.FINE,TAG + "A new Event was created under: %s\n", event.getHtmlLink());
@@ -177,18 +164,16 @@ public class GoogleCalendarManager {
     /**
      * Creates a Calendar for a User.
      *
-     * @param userName the name of the user that belongs to tne calendar
+     * @param user the  userData that the calendar will be created for
+     * @param cName the name of the Calendar that will be display in google calendars
      * @return String with calendar id
      * @throws IOException if the insertion fails
      */
-    public String createCalendar(String userName) throws IOException {
-        //CHECK IF USER ALREADY EXISTS
-        if (userList.containsKey(userName)) {
-            return userList.get(userName);
-        }
+    public String createCalendar(UserData user, String cName) throws IOException {
+
 
         // CREATE A NEW CALENDAR //
-        String calendarName = userName + "'s Terminkalender";
+        String calendarName = cName + "'s Terminkalender";
 
         // Create a new calendar
         com.google.api.services.calendar.model.Calendar tempCalendar = new com.google.api.services.calendar.model.Calendar()
@@ -199,9 +184,6 @@ public class GoogleCalendarManager {
 
         String logMessage = String.format("created a new Calendar with ID: %s",tempCalendar.getId());
         LOGGER.log(Level.FINE,logMessage);
-
-        //Put new Key value pair in userlist
-        userList.put(userName, tempCalendar.getId());
 
         // Create access rule with associated scope
         AclRule rule = new AclRule();
@@ -217,41 +199,18 @@ public class GoogleCalendarManager {
         return tempCalendar.getId();
     }
 
-    /**
-     * Returns the Calendar ID of a particular user.
-     *
-     * @param userName the name of the user
-     * @return the Calendar ID or an Error String
-     */
-    public String getUserCalLink(String userName) {
-        if (!(userList.containsKey(userName))) {
-            return TAG + "User is not registered in gCalendarDatabase";
-        }
-        return userList.get(userName);
-    }
 
     /**
      * Returns a public link to a Calendar so the User can add it to their browser.
      *
-     * @param userName The name of the user the link is needed for
+     * @param user the user the link is needed for
      * @return the link to the public google Calendar of that person.
      */
-    public String getPublicCalendarLink(String userName) {
-        if (!(userList.containsKey(userName))) {
+    public String getPublicCalendarLink(UserData user) {
+        if (user.getgCalendarLink() == null) {
             return TAG + "User is not registered in gCalendarDatabase";
         }
-        return "https://calendar.google.com/calendar/r?cid=" + userList.get(userName);
-    }
-
-    /**
-     * This method is for loading in the users and their links from the database. This is needed to access most of
-     * the functions in this class
-     *
-     * @param userName the name of the user
-     * @param gCalendarLink the link of the calendar of that user
-     */
-    public void addUserToUserlist(String userName, String gCalendarLink) {
-        userList.put(userName, gCalendarLink);
+        return "https://calendar.google.com/calendar/r?cid=" + user.getgCalendarLink();
     }
 
 }
