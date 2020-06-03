@@ -1,12 +1,9 @@
 package com.discord.bot.commands;
 
-import com.discord.bot.DatabaseManagement;
 import com.discord.bot.UserManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-
-import java.util.Arrays;
 
 public class UserCommand implements CommandInterface {
 
@@ -18,17 +15,20 @@ public class UserCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        //Prüft, ob User in Datenbank exisitert
-        if (!DatabaseManagement.getINSTANCE().registeredCheck(msg.getAuthor().getId())) {
-            channel.sendMessage("Please use `!register` first to execute this command.").queue();
-            return;
-        }
+        //Patters des Commands
+        String[] patterns = {"!user data", "!user update address [new value]", "!user update interests [new value1, new value2, etc.]", "!user update competencies [new value1, new value2, etc.]"};
+
 
         //Speichert sich User der Nachricht
         User user = msg.getAuthor();
 
-        //Patters des Commands
-        String[] patterns = {"!user data", "!user update address [new value]", "!user update interests [new value1, new value2, etc.]", "!user update competencies [new value1, new value2, etc.]"};
+        UserManagement userManager = UserManagement.getINSTANCE();
+
+        //Prüft, ob User in Datenbank exisitert
+        if (!userManager.userIsRegistered(msg.getAuthor().getId())) {
+            channel.sendMessage("Please use `!register` first to execute this command.").queue();
+            return;
+        }
 
         //Prüft, ob nur der Command an sich geschrieben wurde
         if (!msg.getContentRaw().contains(" ")) {
@@ -42,7 +42,13 @@ public class UserCommand implements CommandInterface {
         switch (args[1].toLowerCase()) {
             case "data":
                 //Speichert sich Return-Array ab
-                Object[] receivedData = DatabaseManagement.getINSTANCE().returnData(msg.getAuthor().getId());
+                Object[] receivedData = userManager.returnUser(msg.getAuthor().getId());
+
+                //Wenn UserData nicht zurückgegeben werden konnte
+                if (receivedData[0] == null) {
+                    channel.sendMessage("Could not get your data from the database.").queue();
+                    return;
+                }
 
                 //Ruft Daten des Users aus seiner Instanz auf
                 String data = "Nickname: " + msg.getAuthor().getName()
@@ -67,7 +73,7 @@ public class UserCommand implements CommandInterface {
                 }
 
                 //Versucht User zu updaten
-                if (!UserManagement.getINSTANCE().update(user.getId(), args[2], args[3])) {
+                if (!userManager.update(user.getId(), args[2], args[3])) {
                     channel.sendMessage("Could not update your " + args[2]).queue();
                     return;
                 }

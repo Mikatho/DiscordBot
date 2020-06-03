@@ -1,9 +1,6 @@
 package com.discord.bot;
 
-import com.discord.bot.data.UserActivity;
 import com.discord.bot.data.UserData;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 public class UserManagement {
 
@@ -44,5 +41,15 @@ public class UserManagement {
     public boolean stopActivity(String time) {
 
         return true;
+    }
+
+    public boolean userIsRegistered (String userID) {
+
+        return DatabaseManagement.getINSTANCE().registeredCheck(userID);
+    }
+
+    public Object [] returnUser(String userID) {
+
+        return dbManager.returnData(userID);
     }
 }

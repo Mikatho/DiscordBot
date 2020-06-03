@@ -69,4 +69,9 @@ public class MeetingManagement {
         //Versucht Meeting in Datenbank zu updaten
         return dbManager.updateMeeting(meetingID, column, newValue, hostID);
     }
+
+    public boolean userIsRegistered (String userID) {
+
+        return DatabaseManagement.getINSTANCE().registeredCheck(userID);
+    }
 }
