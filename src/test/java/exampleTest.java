@@ -1,9 +1,7 @@
-import com.discord.bot.GoogleCalendarManager;
 import com.discord.bot.data.UserData;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 
 public class exampleTest {
 
