@@ -147,7 +147,7 @@ public class DatabaseManagement {
 
                     //Versucht ForeignKey in User_Data zu aktualisieren
                     if (!insertForeignKey(meetingID, meeting.getUserID(), meeting.getParticipantID())) {
-                        return null;
+                        return 0;
                     }
 
                     System.out.println("Successfully added the Meeting to the Database!");
@@ -156,6 +156,7 @@ public class DatabaseManagement {
             } catch (SQLException e) {
                 e.printStackTrace();
                 System.out.println("Could not add the Meeting to the Database!");
+                return 0;
             }
         } else if (obj instanceof UserActivity) {
 

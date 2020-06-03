@@ -2,6 +2,8 @@ package com.discord.bot.data;
 
 public class MeetingData {
 
+    private int meetingID;
+
     private String hostID;
 
     private String participantID;
@@ -27,6 +29,14 @@ public class MeetingData {
         this.starttime = starttime;
         this.endtime = endtime;
         this.message = message;
+    }
+
+    public void setMeetingID(int meetingID) {
+        this.meetingID = meetingID;
+    }
+
+    public int getMeetingID() {
+        return meetingID;
     }
 
     public void setUserID(String userID) {

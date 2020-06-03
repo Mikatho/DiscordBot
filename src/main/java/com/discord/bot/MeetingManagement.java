@@ -2,8 +2,6 @@ package com.discord.bot;
 
 import com.discord.bot.data.MeetingData;
 
-import java.util.Arrays;
-
 public class MeetingManagement {
 
     private static final MeetingManagement INSTANCE = new MeetingManagement();
@@ -14,11 +12,11 @@ public class MeetingManagement {
         return INSTANCE;
     }
 
-    public Object[] insert(String hostID, String participantID, long starttime, long endtime, int duration, String message) {
+    public MeetingData insert(String hostID, String participantID, long starttime, long endtime, int duration, String message) {
 
         MeetingData tempMeeting;
 
-        Object[] returnValues = new Object[3];
+        int returnedValue;
 
         //Returnt starttime & endtime als long[starttime, endtime]
         long[] meetingtimes = dbManager.findEarliestPossibleMeetingtimes(participantID, starttime, endtime, duration);
@@ -28,7 +26,7 @@ public class MeetingManagement {
 
         //Falls das Suchen nach Start- und Endtime nicht erfolgreich ausgeführt werden konnte
         if (foundStarttime == 0 || foundEndtime == 0) {
-            return returnValues;
+            return null;
         }
 
         //Erstellt neue Instanz mit Daten
@@ -39,12 +37,14 @@ public class MeetingManagement {
             tempMeeting = new MeetingData(hostID, participantID, foundStarttime, foundEndtime, message);
         }
 
-        //Fügt Daten zu Rückgabe-Array hinzu
-        returnValues[0] = dbManager.insert(tempMeeting);
-        returnValues[1] = foundStarttime;
-        returnValues[2] = foundEndtime;
+        returnedValue = (Integer) dbManager.insert(tempMeeting);
 
-        return returnValues;
+        if (returnedValue == 0) {
+            return null;
+        }
+        tempMeeting.setMeetingID(returnedValue);
+
+        return tempMeeting;
     }
 
 

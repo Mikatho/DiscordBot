@@ -2,6 +2,7 @@ package com.discord.bot.commands;
 
 import com.discord.bot.DatabaseManagement;
 import com.discord.bot.MeetingManagement;
+import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -30,11 +31,10 @@ public class MeetingCommand implements CommandInterface {
 
         //Prüft, ob User in Datenbank exisitert
         if (!DatabaseManagement.getINSTANCE().registeredCheck(msg.getAuthor().getId())) {
-            channel.sendMessage("Please use `!register` first to execute this command.").queue();
             return;
         }
 
-        Object[] returnedValues;
+        MeetingData returnedData;
 
         //Regex für UserID
         String userIdRegex = "<@!\\d{18}>";
@@ -132,14 +132,14 @@ public class MeetingCommand implements CommandInterface {
                     }
 
                     //Wenn kein Meeting eingefügt werden konnte
-                    if ((returnedValues = meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, messageValue)) == null) {
+                    if ((returnedData = meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, duration, messageValue)) == null) {
                         channel.sendMessage("Could not create the Meeting.").queue();
                         return;
                     }
 
                     //Konvertiert die finalen Zeiten des Meetings von Epoch in Daten
-                    foundStarttime = new Date((long) returnedValues[1] * 1000);
-                    foundEndtime = new Date((long) returnedValues[2] * 1000);
+                    foundStarttime = new Date(returnedData.getStarttime() * 1000);
+                    foundEndtime = new Date(returnedData.getEndtime() * 1000);
                 } catch (ParseException e) {
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                     return;
@@ -150,7 +150,7 @@ public class MeetingCommand implements CommandInterface {
 
                 //Embed wird mit restlichen Parametern befüllt
                 embedBuilder
-                        .addField("Meeting ID", returnedValues[0].toString(), false)
+                        .addField("Meeting ID", Integer.toString(returnedData.getMeetingID()), false)
                         .addField("Host", user.getAsMention(), true)
                         .addField("Participant", createArgs[0], true)
                         .addBlankField(true)
