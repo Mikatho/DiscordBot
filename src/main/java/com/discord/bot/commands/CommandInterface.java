@@ -5,8 +5,8 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 
 
 /**
- * Every class in the Command-Pattern has to implement the <code>CommandInterface</code>. It Overrides the
- * <code>#executeCommand(MessageChannel channel, Message msg)</code> method, which gets the Discord inputs from
+ * Every class in the Command-Pattern has to implement the <code>CommandInterface</code>. It overrides the
+ * <code>#executeCommand(MessageChannel channel, Message msg)</code> method which gets the Discord inputs from
  * the <code>CommandManager</code> class.
  *
  * @author      L2G4
@@ -28,7 +28,7 @@ public interface CommandInterface {
 
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
-     * method is executed, because Discords inputs have been made.
+     * method is executed, because Discords inputs was made.
      *
      * @param   channel   Discord channel.
      * @param   msg       the Discord input.

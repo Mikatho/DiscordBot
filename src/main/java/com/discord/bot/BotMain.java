@@ -10,11 +10,29 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+
+/**
+ * The <code>BotMain</code> class contains the methods to initialize, start, and shutdown the Bot.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.BotMain
+ * @see         com.discord.bot.listeners.CommandListener
+ * @see         DatabaseManagement#getINSTANCE()
+ * @see         com.discord.bot.DatabaseManagement
+ * @since       1.0
+ */
 public class BotMain {
 
     private JDA jda;
     private JDABuilder jdaBuilder;
 
+    /**
+     * Create instance of <code>BotMain()</code>
+     *
+     * @exception   // TODO: 04.06.2020
+     * @param   args
+     */
     public static void main(String[] args) {
 
         try {
@@ -24,6 +42,13 @@ public class BotMain {
         }
     }
 
+    /**
+     * The <code>BotMain()</code> method makes a declaration of the jdaBuilder and JDA.
+     * It calls the method connect() in <code>DatabaseManagement</code> to build the database
+     * and also holds the BotTokken. The method executes the Discord Bot.
+     *
+     * @throws LoginException   toDo
+     */
     public BotMain() throws LoginException {
 
         final String BOT_TOKEN = "Njk0MTkxMzY3NzUxOTkxMzQ3.XqiLrg.mmC1Fvf6zRWdJN2dfsRMUu7WMhs";
@@ -32,7 +57,9 @@ public class BotMain {
         jdaBuilder = JDABuilder.createDefault(BOT_TOKEN);
         jdaBuilder.setStatus(OnlineStatus.ONLINE);
 
-        //Listener für den Bot werden initialisiert
+        /**
+         * Initialize Command Listener.
+         */
         jdaBuilder.addEventListeners(new CommandListener());
 
         jda = jdaBuilder.build();
@@ -41,17 +68,26 @@ public class BotMain {
         shutdown();
     }
 
+    /**
+     * The <code>shutdown()</code> method closes all connections and shuts down the Bot.
+     *
+     * @exception // TODO: 04.06.2020
+     */
     public void shutdown() {
 
         new Thread(() -> {
             String line = "";
 
-            //Reader zum Lesen der Konsoleneingaben
+            /**
+             * Reader for the console inputs.
+             */
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             try {
                 while ((line = reader.readLine()) != null) {
                     if (line.equals("shutdown")) {
-                        //Sofern JDA (Bot) initialisiert wurde
+                        /**
+                         * Check, if Bot is initialized.
+                         */
                         if (jda != null) {
                             jdaBuilder.setStatus(OnlineStatus.OFFLINE);
                             jda.shutdownNow();
@@ -61,7 +97,9 @@ public class BotMain {
                         reader.close();
                         return;
                     } else {
-                        //Falls man etwas anderes als "shutdown" eingibt
+                        /**
+                         * If your input isn´t "shutdown".
+                         */
                         System.out.println("Use 'shutdown' to shutdown the Bot.");
                     }
                 }
