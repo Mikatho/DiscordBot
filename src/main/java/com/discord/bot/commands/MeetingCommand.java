@@ -169,7 +169,11 @@ public class MeetingCommand implements CommandInterface {
                 channel.sendMessage("Successfully created the meeting!").queue();
                 channel.sendMessage(embedBuilder.build()).queue();
 
-                String eventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantID, "N/a", messageValue, returnedData.getStarttime() * 1000, returnedData.getEndtime() * 1000);
+                String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
+
+                System.out.println(participantName);
+
+                String eventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, returnedData.getStarttime() * 1000, returnedData.getEndtime() * 1000);
 
                 if (eventLink == null) {
                     channel.sendMessage("Could not add meeting to your Google Calendar.").queue();

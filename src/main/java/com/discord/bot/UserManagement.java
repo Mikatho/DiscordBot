@@ -57,13 +57,18 @@ public class UserManagement {
         return DatabaseManagement.getINSTANCE().registeredCheck(userID);
     }
 
-    public String googleCalendarLink(String userID, String nickname) {
+    public String googleCalendarID(String nickname) {
 
         try {
-            return GoogleCalendarManager.getInstance().createCalendar(new UserData(userID), nickname);
+            return GoogleCalendarManager.getInstance().createCalendar(nickname);
         } catch (IOException e) {
             System.out.println("Could not create Google Calendar.");
             return null;
         }
+    }
+
+    public String googleCalendarLink(String calendarID) {
+
+            return GoogleCalendarManager.getInstance().getPublicCalendarLink(calendarID);
     }
 }

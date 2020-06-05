@@ -80,12 +80,10 @@ public class MeetingManagement {
 
     public String googleCalendarEvent(String userID, String eventName, String eventLocation, String eventDescription, long starttime, long endtime) {
 
-        UserData tempUser = new UserData(userID);
-
-        tempUser.setgCalendarLink((String) dbManager.returnData(userID)[3]);
+        String calendarID = (String) dbManager.returnData(userID)[3];
 
         try {
-            return GoogleCalendarManager.getInstance().createNewEvent(tempUser, eventName, eventLocation, eventDescription, starttime, endtime);
+            return GoogleCalendarManager.getInstance().createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
         } catch (IOException e) {
             System.out.println("Could not create Event in Google Calendar.");
             return null;
