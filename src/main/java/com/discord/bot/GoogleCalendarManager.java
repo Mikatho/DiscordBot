@@ -1,6 +1,5 @@
 package com.discord.bot;
 
-import com.discord.bot.data.UserData;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -37,7 +36,7 @@ import java.util.logging.Logger;
  * More information on this bug:
  * https://stackoverflow.com/questions/30634827/warning-unable-to-change-permissions-for-everybody
  *
- * @Author Christian Paulsen for L2G4
+ * @Author L2G4 SEG
  */
 public class GoogleCalendarManager {
 
@@ -124,16 +123,16 @@ public class GoogleCalendarManager {
     /**
      * This functions creates a new Calendar for a specific user.
      *
-     * @param user the userData of the User that the Calendar belongs to
+     * @param userCalID the id of the User Calender
      * @param eventName name of the event
      * @param eventLocation name of the event location
      * @param eventDescription name of the eventDescription
-     * @param starttime with following format: "YYYY-MM-DD'T'HH:MM:SS" -> "2020-05-28T17:00:00"
-     * @param endtime with following format: "YYYY-MM-DD'T'HH:MM:SS" -> "2020-05-28T17:00:00"
+     * @param epochStart start time in epoch format
+     * @param epochEnd end time in epoch format
      * @throws IOException when the event can't be added to a users calendar
      * @return a link to the newly created Event
      */
-    public String createNewEvent(UserData user, String eventName, String eventLocation, String eventDescription, long epochStart, long epochEnd) throws IOException {
+    public String createNewEvent(String userCalID, String eventName, String eventLocation, String eventDescription, long epochStart, long epochEnd) throws IOException {
 
         Event event = new Event()
                 .setSummary(eventName)
@@ -152,7 +151,7 @@ public class GoogleCalendarManager {
                 .setTimeZone(BOT_TIMEZONE);
         event.setEnd(end);
 
-        event = service.events().insert(user.getgCalendarLink(), event).execute()
+        event = service.events().insert(userCalID, event).execute()
         .setVisibility("public");
 
         LOGGER.log(Level.FINE,TAG + "A new Event was created under: %s\n", event.getHtmlLink());
@@ -163,12 +162,11 @@ public class GoogleCalendarManager {
     /**
      * Creates a Calendar for a User.
      *
-     * @param user the  userData that the calendar will be created for
-     * @param cName the name of the Calendar that will be display in google calendars
+     * @param cName the name of the Calendar that will be displayed in google calendars
      * @return String with calendar id
      * @throws IOException if the insertion fails
      */
-    public String createCalendar(UserData user, String cName) throws IOException {
+    public String createCalendar(String cName) throws IOException {
 
         // CREATE A NEW CALENDAR //
         String calendarName = cName + "'s Terminkalender";
@@ -194,24 +192,19 @@ public class GoogleCalendarManager {
         // Insert new access rule (Can delete Var if not needed any further)
         service.acl().insert(tempCalendar.getId(), rule).execute();
 
-        user.setgCalendarLink(tempCalendar.getId());
-
-        return getPublicCalendarLink(user);
+        return tempCalendar.getId();
     }
 
 
     /**
      * Returns a public link to a Calendar so the User can add it to their browser.
      *
-     * @param user the user the link is needed for
+     * @param userCalID the id of the User Calender
      * @return the link to the public google Calendar of that person.
      */
-    public String getPublicCalendarLink(UserData user) {
-        if (user.getgCalendarLink() == null) {
-            System.out.println(TAG + "User is not registered in gCalendarDatabase");
-            return null;
-        }
-        return "https://calendar.google.com/calendar/r?cid=" + user.getgCalendarLink();
+    public String getPublicCalendarLink(String userCalID) {
+
+        return "https://calendar.google.com/calendar/r?cid=" + userCalID;
     }
 
 }
