@@ -4,19 +4,42 @@ import com.discord.bot.LoggingManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
+
+/**
+ * The <code>LogCommand</code> Class implements the <code>CommandInterface</code>
+ * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
+ * method. It controls syntax and interprets the commands to call the right method in the
+ * <code>LoggingManagement</code> class.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.commands.CommandInterface
+ * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @see         com.discord.bot.LoggingManagement
+ * @see         LoggingManagement#getINSTANCE()
+ * @since       1.0
+ */
 public class LogCommand implements CommandInterface {
 
     /*
     !log show
     !log save
      */
-
+    /**
+     * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
+     * method is executed, because a Discord input with [!log] command was made.
+     *
+     * @param channel   Discord channel
+     * @param msg       the Discord inputs.
+     */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
         String[] patterns = {"!log show", "!log save"};
 
-        //Prüft, ob nur der Command an sich geschrieben wurde
+        /**
+        * Check if the command is typed correctly.
+        */
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n"
                     + "```" + patterns[0] + "\n" + patterns[1] + "```").queue();
@@ -25,7 +48,9 @@ public class LogCommand implements CommandInterface {
 
         String[] args = msg.getContentRaw().split(" ");
 
-        //Prüft ersten Zusatz-Parameter des Commandsaufrufs
+        /**
+         * Check the second parameter of the command.
+         */
         switch (args[1].toLowerCase()) {
             case "show":
                 channel.sendMessage(LoggingManagement.getINSTANCE().logToConsole()).queue();

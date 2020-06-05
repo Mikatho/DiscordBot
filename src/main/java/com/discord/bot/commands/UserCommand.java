@@ -12,7 +12,7 @@ import java.util.Arrays;
 /**
  * The <code>UserCommand</code> Class implements the <code>CommandInterface</code>
  * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
- * method. It controls syntax and interprets the command to call the right method in the
+ * method. It controls syntax and interprets the commands to call the right method in the
  * <code>UserManagement</code> class.
  *
  * @author      L2G4
@@ -31,26 +31,29 @@ public class UserCommand implements CommandInterface {
      */
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
-     * method is executed, because a Discord input have been made.
+     * method is executed, because a Discord input with [!user] attribute was made.
      *
-     * @param channel   Discord channel
+     * @param channel   Discord channel.
      * @param msg       the Discord inputs.
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        //Speichert sich User der Nachricht
         User user = msg.getAuthor();
         Object[] receivedData;  // contains all user User data
-        String data;    // Ausgabe aller UserData
-        String searchID;    // UserID der gesuchten Person //user search [searchID]
+        String data;    // contains all UserData
+        String searchID;    // UserID of wanted person //user search [searchID]
 
-        //Patters des Commands
+        /**
+         * Command patterns.
+         */
         String[] patterns = {"!user data", "!user update address [new value]",
                 "!user update interests [new value1, new value2, etc.]",
                 "!user update competencies [new value1, new value2, etc.]"};
 
-        //Prüft, ob nur der Command an sich geschrieben wurde
+        /**
+         * Check if the command [update] is written without other parameter.
+         */
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n" +
                     "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\n" + patterns[3] + "```").queue();
@@ -61,9 +64,15 @@ public class UserCommand implements CommandInterface {
 
         switch (args[1].toLowerCase()) {
             case "data":
-                //Speichert sich Return-Array ab
+
+                /**
+                 * Get userData and save them in return array.
+                 */
                 receivedData = UserManagement.getINSTANCE().search(msg.getAuthor().getId());
-                //Ruft Daten des Users aus seiner Instanz auf
+
+                /**
+                 * Format and send receivedData.
+                 */
                 data = "Nickname: " + msg.getAuthor().getName()
                         + "\nAddress: " + receivedData[0]
                         + "\nInterests: " + receivedData[1]
@@ -73,19 +82,26 @@ public class UserCommand implements CommandInterface {
             case "update":
                 args[2] = args[2].toLowerCase();
 
-                //Prüft, ob erster Zusatz-Parameter existiert
+                /**
+                 * Check if first additional parameter exists: [interests} / [competencies] / [address].
+                 */
                 if (!args[2].matches("address|interests|competencies")) {
                     channel.sendMessage(String.format("Unknown value to update: `%s` does not exist.", args[1])).queue();
                     return;
                 }
 
-                //Prüft, ob noch weitere Zusatz-Parameter mitgegeben wurden
+                /**
+                 * Check for more additional parameter
+                 */
                 if (args.length == 3) {
                     channel.sendMessage("Please add the new values!").queue();
                     return;
                 }
 
-                //Versucht User zu updaten
+                /**
+                 * Call update() method in <code>UserManagement</code> to update
+                 * the manipulated userData.
+                 */
                 if (!UserManagement.getINSTANCE().update(user.getId(), args[2], args[3])) {
                     channel.sendMessage("Could not update your " + args[2]).queue();
                     return;
@@ -96,7 +112,7 @@ public class UserCommand implements CommandInterface {
             case "search":
 
                 /**
-                 * abfrage ob ein dritter Parameter, die UserID mitgegeben wurde.
+                 * Check if the input contains a third parameter[userID].
                  */
                 if (args.length == 2) {
                     channel.sendMessage("Please add the userID [@userName]!").queue();
@@ -104,21 +120,24 @@ public class UserCommand implements CommandInterface {
                 }
 
                 /**
-                 * speichert aus der eingabe @user den kompletten String und filtert
-                 * die UserID heraus
+                 * Save the input [@user] and splits the string to get the userID.
                  */
                 searchID = msg.getContentRaw().substring( 16, 34 );
 
                 /**
-                 * prüft ob die userID überhaupt in der Datenbank vorhanden ist
+                 * Check if there is an entry of the userID.
                  */
                 if(!DatabaseManagement.getINSTANCE().registeredCheck( searchID )) {
                     channel.sendMessage("User doesn´t exist").queue();
                     return;
                 }
 
+                /**
+                 * ReceivedData calls the search(searchID(@user)) method in UserManagement to
+                 * get the userData as Object[].
+                 */
                 receivedData = UserManagement.getINSTANCE().search( searchID );
-                //receivedData = DatabaseManagement.getINSTANCE().returnData( searchID );
+
                 data =    "\nAddress: " + receivedData[0]
                         + "\nInterests: " + receivedData[1]
                         + "\nCompetencies: " + receivedData[2];

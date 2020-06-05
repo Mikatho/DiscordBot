@@ -10,8 +10,8 @@ import javax.annotation.Nonnull;
 
 
 /**
- * Extend the <code>ListenerAdapter</code> to divide events from Discord,
- * filter the bot messages to send them to <code>CommandManager
+ * Extend the <code>ListenerAdapter</code> to divide events from Discord.
+ * Filter the bot messages to send them to <code>CommandManager
  * #execute(String cmd, MessageChannel channel, Message msg)</code> method.
  *
  * @author      L2G4
@@ -24,11 +24,10 @@ import javax.annotation.Nonnull;
  */
 public class CommandListener extends ListenerAdapter {
 
-    //Commands können in allen Arten von Chats geschrieben werden (Server, PM, etc.)
     /**
-     * Detect that a Message is received in either a guild- or private Discord channel.
+     * Detect that a Message is received in either a guild or private Discord channel.
      * The <code>#onMessageReceived(@Nonnull MessageReceivedEvent event)</code>
-     * method get them and separates the BotCommand(starts with '!').
+     * method gets them and separate the BotCommand(starts with '!').
      *
      * @param   event   Message channel. Includes public and private channel.
      */
@@ -38,11 +37,15 @@ public class CommandListener extends ListenerAdapter {
         String message = event.getMessage().getContentRaw();
         MessageChannel channel = event.getChannel();
 
-        //Guckt, ob es sich um einen Command handelt
+        /**
+         * Check if the input is a command.
+         */
         if (message.startsWith("!")) {
             String[] args = message.split(" ");
 
-            //Wenn es den Command nicht gibt
+            /**
+             * Call execute method in CommandManager.
+             */
             if (!CommandManager.getInstance().execute(args[0], channel, event.getMessage())) {
                 channel.sendMessage("Unknown Command.").queue();
             }

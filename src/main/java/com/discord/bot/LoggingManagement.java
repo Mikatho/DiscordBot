@@ -12,19 +12,39 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.StringJoiner;
 
+
+/**
+ * toDo
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.LoggingManagement
+ * @since       1.0
+ */
 public class LoggingManagement {
 
-    private static final LoggingManagement INSTANCE = new LoggingManagement();
+    private static final LoggingManagement INSTANCE = new LoggingManagement();  // creates INSTANCE of Class
 
     private static final int LOG_CAPACITY = 10;
 
     private LinkedList<String> commandLog = new LinkedList<>();
 
+    /**
+     * This method return an instance of the <code>LoggingManagement</code> object.
+     *
+     * @return  INSTANCE    instance of the LoggingManagement object
+     */
     public static LoggingManagement getINSTANCE() {
         return INSTANCE;
     }
 
-    //Löscht Daten in Logfile, indem Datei mit leerem String überschrieben wird
+
+
+    /**
+     * Delete data in Logfile by overwrite the entries with an empty string.
+     *
+     * @exception   // TODO: 04.06.2020
+     */
     public void clear() {
 
         try {
@@ -36,20 +56,34 @@ public class LoggingManagement {
         }
     }
 
+    /**
+     * Add the input time of the commands to the entries.
+     *
+     * @param command   todo
+     */
     public void addToLog(String command) {
 
-        //Fügt zum Command die Zeit des Aufrufs hinzu
+        /**
+         * Add the input time to the command.
+         */
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         LocalDateTime localTime = LocalDateTime.now();
 
         commandLog.addLast(formatter.format(localTime) + " " + command);
     }
 
+    /**
+     * Log all commands to a Limit in a String.
+     *
+     * @return  joiner  contains all entered commands.
+     */
     public String logToConsole() {
 
         StringJoiner joiner = new StringJoiner("\n");
 
-        //Stellt sicher, dass nur gewisse Anzahl an Commands gepostet werden
+        /**
+         * Set a max, that only a few commands are shown.
+         */
         if (commandLog.size() <= LOG_CAPACITY) {
             for (String item : commandLog) {
                 joiner.add(item);
@@ -64,12 +98,21 @@ public class LoggingManagement {
         return joiner.toString();
     }
 
+    /**
+     * Save all logs in a file.
+     *
+     * @exception
+     *
+     * @exception
+     */
     public void saveToFile() {
 
         String fileName = "commands.log";
 
         try {
-            //Datei wird erstellt, falls noch nicht vohanden
+            /**
+             * Create file if it doesn´t exist.
+             */
             File file = new File(fileName);
             if (!file.exists()) {
                 file.createNewFile();
@@ -78,7 +121,9 @@ public class LoggingManagement {
             e.printStackTrace();
         }
 
-        //Schreibt alle Commands der Liste in die Datei und cleart die Liste
+        /**
+         * Save all commands in a file and clear the list.
+         */
         try {
             FileWriter fw = new FileWriter(fileName, true);
             BufferedWriter bw = new BufferedWriter(fw);

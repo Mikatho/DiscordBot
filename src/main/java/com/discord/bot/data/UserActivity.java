@@ -3,8 +3,8 @@ package com.discord.bot.data;
 
 /**
  * The <code>UserActivity</code> class is saved as an object in the database.
- * It contains the working start- and end-time.
- *
+ * It contains the working starting and ending time.
+
  * @author      L2G4
  * @version     %I%, %G%
  * @see         com.discord.bot.commands.ActivityCommand

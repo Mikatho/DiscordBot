@@ -10,6 +10,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+
+/**
+ * The <code>MeetingCommand</code> Class implements the <code>CommandInterface</code>
+ * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
+ * method. It controls syntax and interprets the commands to call the right method in the
+ * <code>MeetingManagement</code> class.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.MeetingManagement
+ * @see         com.discord.bot.data.MeetingData
+ * @see         com.discord.bot.commands.CommandInterface
+ * @since       1.0
+ */
 public class MeetingCommand implements CommandInterface {
 
     /*
@@ -17,7 +31,13 @@ public class MeetingCommand implements CommandInterface {
     !meeting delete [meetingID]
     !meeting update [meetingID] [value to change] [new value]
      */
-
+    /**
+     * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
+     * method is executed, because a Discord input with [!meeting] command was made.
+     *
+     * @param channel   Discord channel
+     * @param msg       the Discord inputs.
+     */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
@@ -26,21 +46,25 @@ public class MeetingCommand implements CommandInterface {
             return;
         }
 
-        //Speichert sich User der Nachricht
         User user = msg.getAuthor();
-
         MeetingManagement meetingMng = MeetingManagement.getINSTANCE();
 
-        //Setzt Datumsformat vorraus und stellt sicher, dass das Datum existiert
+        /**
+         * Check date-format.
+         */
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         format.setLenient(false);
 
-        //Patterns des Commands
+        /**
+         * Command pattern.
+         */
         String[] patterns = {"!meeting create [@Participant] [starttime] [endtime] [message]",
                 "!meeting delete [meetingID]",
                 "!meeting update [meetingID] [value to change] [new value]"};
 
-        //Prüft, ob nur der Command an sich geschrieben wurde
+        /**
+         * Check if the command [meeting] is written without other parameter.
+         */
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n"
                     + "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\nNote: Dateformat " + format.toPattern().toUpperCase() + "```").queue();
@@ -49,12 +73,16 @@ public class MeetingCommand implements CommandInterface {
 
         String[] args = msg.getContentRaw().split(" ", 3);
 
-        //Prüft ersten Zusatz-Parameter des Commandaufrufs
+        /**
+         * Check for first additional parameter: [create} / [delete] / [update].
+         */
         switch (args[1].toLowerCase()) {
 
             case "create":
 
-                //Wenn nur "!meeting create" eingegeben wurde
+                /**
+                 * Check if the command [!meeting create] is written without other parameter.
+                 */
                 if (args.length == 2) {
                     channel.sendMessage(String.format("Use `%s` to create a meeting!", patterns[0])).queue();
                     return;
@@ -62,7 +90,9 @@ public class MeetingCommand implements CommandInterface {
 
                 String[] createArgs = args[2].split(" ", 6);
 
-                //Wenn nicht alle Zusatz-Parameter eingegeben wurden
+                /**
+                 * Check if all additional parameter exists: [@Participant] [starttime] [endtime] [message].
+                 */
                 if (createArgs.length != 6) {
                     channel.sendMessage(String.format("Please add the values like this:\n`%s`", patterns[0])).queue();
                     return;
@@ -74,27 +104,34 @@ public class MeetingCommand implements CommandInterface {
                 }
                 String participantID = createArgs[0].substring(3, 21);
 
-                //Stellt Zeiten aus den Zusatz-Parametern her
+                /**
+                 * Create time with the additional parameter.
+                 */
                 String starttime = createArgs[1] + " " + createArgs[2];
                 String endtime = createArgs[3] + " " + createArgs[4];
 
-                //Versucht Zeiten richtig zu formatieren und überprüft, ob Datum & Uhrzeit existieren
                 try {
-                    //Parsed String in Datum
                     Date dateStart = format.parse(starttime);
-                    //Speichert sich Epoch vom Datum (ohne Millisekunden)
+
+                    /**
+                     * Saved date in Epoch.
+                     */
                     long epochStart = dateStart.getTime() / 1000;
 
                     Date dateEnd = format.parse(endtime);
                     long epochEnd = dateEnd.getTime() / 1000;
 
-                    //Versucht Meeting hinzuzufügen
+                    /**
+                     * Add meeting.
+                     */
                     if (!meetingMng.insert(user.getId(), participantID, epochStart, epochEnd, createArgs[5])) {
                         channel.sendMessage("Could not create the Meeting.").queue();
                         return;
                     }
                 } catch (ParseException e) {
-                    channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
+                    channel.sendMessage("Date is not valid according to `"
+                            + format.toPattern().toUpperCase()
+                            + "` pattern.").queue();
                     return;
                 }
 
@@ -102,17 +139,23 @@ public class MeetingCommand implements CommandInterface {
                 break;
             case "delete":
 
-                //Wenn nur "!mmeting delete" eingegeben wurde
+                /**
+                 * Check if the command [!meeting delete] is written without other parameter.
+                 */
                 if (args.length == 2) {
                     channel.sendMessage(String.format("Use `%s` to delete a meeting!", patterns[1])).queue();
                     return;
                 }
 
                 try {
-                    //Versucht MeetingID in Zahl zu konvertieren
+                    /**
+                     * Parse meetingID to int.
+                     */
                     int meetingID = Integer.parseInt(args[2]);
 
-                    //Versucht Meeting zu löschen
+                    /**
+                     * Delete meeting
+                     */
                     if (!meetingMng.delete(meetingID)) {
                         channel.sendMessage("Could not delete the Meeting.").queue();
                         return;
@@ -125,7 +168,9 @@ public class MeetingCommand implements CommandInterface {
                 break;
             case "update":
 
-                //Wenn nur "!meeting update" eingegeben wurde
+                /**
+                 * Check if the command [!meeting update] is written without other parameter.
+                 */
                 if (args.length == 2) {
                     channel.sendMessage(String.format("Use `%s` to update a meeting!", patterns[2])).queue();
                     return;
@@ -133,43 +178,61 @@ public class MeetingCommand implements CommandInterface {
 
                 String[] updateArgs = args[2].split(" ", 3);
 
-                //Wenn nicht alle Zusatz-Parameter eingegeben wurden
+                /**
+                 * Check if all additional parameter exists: [meetingID] [value to change] [new value].
+                 */
                 if (updateArgs.length != 3) {
                     channel.sendMessage(String.format("Please add the values like this:\n`%s`", patterns[2])).queue();
                     return;
                 }
 
-                //Variable zum Speichern des neuen Wertes
+                /**
+                 * Var for new Value to transfer.
+                 */
                 Object newValue;
 
                 updateArgs[1] = updateArgs[1].toLowerCase();
 
                 try {
-                    //Versucht MeetingID in Zahl zu konvertieren
+                    /**
+                     * Parse meetingID to int.
+                     */
                     int meetingID = Integer.parseInt(updateArgs[0]);
 
-                    //Prüft, ob richtiger Wert zum updaten angegeben wurde
+                    /**
+                     * Check if value is correct format.
+                     */
                     if (!updateArgs[1].matches("starttime|endtime|message")) {
                         channel.sendMessage(String.format("Unknown value to update: `%s` does not exist.", updateArgs[1])).queue();
                         return;
                     }
 
-                    //Wenn der Wert ein Datum ist wird geprüft, ob das richtige Format eingegeben wurde und das Datum existiert
+                    /**
+                     * If value is a date, check format and if date is correct.
+                     */
                     if (updateArgs[1].contains("time")) {
                         try {
                             Date time = format.parse(updateArgs[2]);
-                            //Epoch (ohne Millisekunden) wird in Variable zum Übergeben gespeichert
+                            /**
+                             * Epoch (without Millisec) are saved in variable to transfer.
+                             */
                             newValue = time.getTime() / 1000;
                         } catch (ParseException e) {
-                            channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
+                            channel.sendMessage("Date is not valid according to `"
+                                    + format.toPattern().toUpperCase()
+                                    + "` pattern.").queue();
                             return;
                         }
-                    //Wenn nicht die Zeit geändert werden soll
+                    /**
+                    * If time should not change.
+                    */
                     } else {
                         newValue = updateArgs[2];
                     }
 
-                    //Versucht Meeting zu updaten
+                    /**
+                     * Update meeting.
+                     */
                     if (!meetingMng.update(meetingID, updateArgs[1], newValue)) {
                         channel.sendMessage("Could not update the Meeting.").queue();
                         return;

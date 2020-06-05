@@ -7,6 +7,23 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+
+/**
+ * The <code>ActivityCommand</code> Class implements the <code>CommandInterface</code>
+ * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
+ * method. It controls syntax and interpret the commands to call the right method in the
+ * <code>UserManagement</code> class.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.UserManagement
+ * @see         UserManagement#getINSTANCE() 
+ * @see         com.discord.bot.UserManagement#startActivity(String) 
+ * @see         com.discord.bot.UserManagement#stopActivity(String) 
+ * @see         com.discord.bot.commands.CommandInterface
+ * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since       1.0
+ */
 public class ActivityCommand implements CommandInterface {
 
     /*
@@ -14,13 +31,21 @@ public class ActivityCommand implements CommandInterface {
     !activity start
     !activity stop
      */
-
+    /**
+     * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
+     * method is executed, because a Discord input with [!activity] command was made.
+     *
+     * @param   channel   Discord channel.
+     * @param   msg       the Discord input.
+     */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
         String[] patterns = {"!activity running", "!activity start", "!activity stop"};
 
-        //Prüft, ob nur der Command an sich geschrieben wurde
+        /**
+         * Check if the command is typed correctly.
+         */
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n"
                     + "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "```").queue();
@@ -29,13 +54,15 @@ public class ActivityCommand implements CommandInterface {
 
         String[] args = msg.getContentRaw().split(" ");
 
-        //Holt sich Uhrzeit des Commandaufrufs und wandelt sie in richtiges Pattern um
+        /**
+         * Get the time of the command call and converts it into the correct pattern.
+         */
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         LocalDateTime localTime = LocalDateTime.now();
 
         switch (args[1].toLowerCase()) {
             case "running":
-                //Check if activity is running
+                //Check if activity is running   todo
                 break;
             case "start":
                 UserManagement.getINSTANCE().startActivity(formatter.format(localTime));

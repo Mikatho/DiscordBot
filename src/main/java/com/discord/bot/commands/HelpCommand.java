@@ -3,8 +3,27 @@ package com.discord.bot.commands;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
+
+/**
+ * Contain all commands and the function to send them to a users private channel.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.CommandManager
+ * @see         com.discord.bot.commands.CommandInterface
+ * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since       1.0
+ */
 public class HelpCommand implements CommandInterface {
 
+    /**
+     * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
+     * method is executed, because the Discord input [!help] was made. It returns all command patterns to the
+     * users private discord channel.
+     *
+     * @param channel   Discord channel
+     * @param msg       the Discord inputs.
+     */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
@@ -19,6 +38,9 @@ public class HelpCommand implements CommandInterface {
                 "!user update competencies [new value1, new value2, etc.]",
                 "!user search [userId]"};
 
+        /**
+         * Send a private message with all commands.
+         */
         msg.getAuthor().openPrivateChannel().complete().sendMessage("Commands: "
                 + "\nprivate chat:\n"
                 + "\nactivity commands: " + "```" + activityPatterns[0] + "\n" + activityPatterns[1] + "\n" + activityPatterns[2] + "```"

@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 
 
 /**
- * Contains all methods which access the database.
+ * Contain all methods which access the database.
  * [clear], [connect], [disconnect], [createTable], [insert], [insertForeignKey], [delete user],
  * [delete meeting], [update user], [update meeting], [returnData], [registeredCheck]
  * Execute all function calls from <code>UserManagement</code> and <code>MeetingManagement</code>
@@ -27,7 +27,7 @@ import java.util.StringJoiner;
  */
 public class DatabaseManagement {
 
-    private static final DatabaseManagement INSTANCE = new DatabaseManagement();
+    private static final DatabaseManagement INSTANCE = new DatabaseManagement();    // creates INSTANCE of Class
 
     private Connection conn;
     private Statement stmt;
@@ -36,13 +36,17 @@ public class DatabaseManagement {
     /**
      * This method return an instance of the DatabaseManagement object.
      *
-     * @return  INSTANCE    instance of the DatabaseManagement object
+     * @return  INSTANCE    instance of the DatabaseManagement object.
      */
     public static DatabaseManagement getINSTANCE() {
         return INSTANCE;
     }
 
-    //Löscht Daten in Datenbank
+    /**
+     * Delete all entries in database.
+     *
+     * @exception   // TODO: 04.06.2020
+     */
     public void clear() {
         String meeting = "DELETE FROM meeting_data;";
         String activity = "DELETE FROM user_activity;";
@@ -57,12 +61,20 @@ public class DatabaseManagement {
         }
     }
 
+    /**
+     * Check if the database.db still exist and connect to the database.
+     * If the file do not exist it will create a new file.
+     *
+     * @throws  // TODO: 04.06.2020
+     */
     public void connect() {
 
         conn = null;
 
         try {
-            //Erstellt neue Datenbank-Datei, falls nicht vorhanden
+            /**
+             * If database.db do not exist, create new database.
+             */
             File file = new File("database.db");
             if (!file.exists()) {
                 file.createNewFile();
@@ -82,6 +94,11 @@ public class DatabaseManagement {
         }
     }
 
+    /**
+     * Close the connection to the database.
+     *
+     * @exception   // TODO: 04.06.2020
+     */
     public void disconnect() {
         try {
             if (rs != null) {
@@ -99,7 +116,12 @@ public class DatabaseManagement {
         }
     }
 
-    //Erstellt Tabellen, indem man SQL-Text zum Erstellen der Spalten als String übergibt
+    /**
+     * Create tables by transfer SQL Code as String to create columns.
+     *
+     * @param   strings     SQL
+     * @exception   // TODO: 04.06.2020
+     */
     public void createTable(String... strings) {
 
         StringJoiner joiner = new StringJoiner(",");
@@ -116,18 +138,37 @@ public class DatabaseManagement {
         }
     }
 
+    /**
+     * Check which object the method get: [UserData], [MeetingData], [UserActivity] and
+     * insert the data in the right table in database.
+     *
+     * @param   obj     instance of [UserData], [MeetingData] or [UserActivity]
+     * @exception   // TODO: 04.06.2020
+     * @exception   // TODO: 04.06.2020  
+     * @exception // TODO: 04.06.2020  
+     * @return  <code>true</code> successfully added to the Database;
+     *                   <code>false</code> could not add.
+     */
     public boolean insert(Object obj) {
 
-        //Prüft welches Objekt eingefügt werden soll
+        /**
+         * Check which object should insert: [UserData], [MeetingData], [UserActivity].
+         */
         if (obj instanceof UserData) {
 
-            //Castet Objekt in richtigen Datentypen
+            /**
+             * Cast object to UserData.
+             */
             UserData user = (UserData) obj;
 
-            //SQL-Code zum Einfügen in die Datenbank
+            /**
+             * String with SQL code to insert UserData in user_data table in database.db.
+             */
             String sql = "INSERT INTO user_data (userID) VALUES (?)";
 
-            //Versucht User in Datenbank einzufügen
+            /**
+             * Insert userData in database.
+             */
             try (PreparedStatement prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 prepStmt.setString(1, user.getUserID());
                 prepStmt.executeUpdate();
@@ -139,13 +180,19 @@ public class DatabaseManagement {
             }
         } else if (obj instanceof MeetingData) {
 
-            //Castet Objekt in richtigen Datentypen
+            /**
+             * Cast object to MeetingData.
+             */
             MeetingData meeting = (MeetingData) obj;
 
-            //SQL-Code zum Einfügen in die Datenbank
+            /**
+             * String with SQL code to insert MeetingData in meeting_data table in database.db.
+             */
             String sql = "INSERT INTO meeting_data (hostID, participantID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
 
-            //Versucht Meeting in Datenbank einzufügen
+            /**
+             * Insert meetingData in database.
+             */
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setString(1, meeting.getUserID());
                 prepStmt.setString(2, meeting.getParticipantID());
@@ -175,13 +222,19 @@ public class DatabaseManagement {
             }
         } else if (obj instanceof UserActivity) {
 
-            //Castet Objekt in richtigen Datentypen
+            /**
+             * Cast object to UserActivity.
+             */
             UserActivity activity = (UserActivity) obj;
 
-            //SQL-Code zum Einfügen in die Datenbank
+            /**
+             * String with SQL code to insert UserActivity in user_activity table in database.db.
+             */
             String sql = "INSERT INTO user_activity (activityID, starttime) VALUES (?, ?)";
 
-            //Versucht Activity in Datenbank einzufügen
+            /**
+             * Insert activityData in database.
+             */
             try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
                 prepStmt.setInt(1, activity.getActivityID());
                 prepStmt.setString(2, activity.getStarttime());
@@ -196,7 +249,17 @@ public class DatabaseManagement {
         return false;
     }
 
-    //Funktion um ForeignKeys von User_Data zu aktualisieren
+    /**
+     * The method updated the ForeignKeys from the table User_Data.
+     *
+     * @param   column          todo
+     * @param   columnID        todo
+     * @param   hostID          unique Discord userID from host
+     * @param   participantID   unique Discord userID from participant
+     * @exception // TODO: 04.06.2020
+     * @return  <code>true</code> wenn ;
+     * *                  <code>false</code> if data could not be added.
+     */
     public boolean insertForeignKey(String column, Integer columnID, String hostID, String participantID) {
 
         String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ? OR userID = ?";
@@ -213,6 +276,14 @@ public class DatabaseManagement {
         }
     }
 
+    /**
+     * Delete the desired user.
+     *
+     * @param   userID  unique Discord userID
+     * @exception // TODO: 04.06.2020
+     * @return  <code>true</code> if user deleted from database;
+     * *                  <code>false</code> if user doesn´t exist.
+     */
     public boolean deleteUser(String userID) {
 
         //SQL-Code zum Löschen aus der Datenbank
@@ -231,6 +302,14 @@ public class DatabaseManagement {
         }
     }
 
+    /**
+     * Delete a meeting. Therefore the method get the meetingID.
+     *
+     * @param   meetingID   unique generated meeting ID.
+     * @exception // TODO: 04.06.2020
+     * @return  <code>true</code> if meeting deleted from database;
+     *                  <code>false</code> if meeting doesn´t exist.
+     */
     public boolean deleteMeeting(int meetingID) {
 
         //SQL-Code zum Löschen aus der Datenbank
@@ -248,12 +327,23 @@ public class DatabaseManagement {
         }
     }
 
+    /**
+     * Update the attribute [address], [interests] or [competencies] in userData(userID).
+     *
+     * @param   userID      unique Discord userID
+     * @param   column      todo
+     * @param   newValue    new entry for the database.db
+     * @exception   // TODO: 04.06.2020  
+     * @return  <code>true</code> if database is succesfull updated;
+     *                  <code>false</code> could not update.
+     */
     public boolean updateUser(String userID, String column, String newValue) {
 
-        //SQL-Code zum Updaten der Werte
         String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
 
-        //Versucht Datenbank zu updaten
+        /**
+         * Update the database.
+         */
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
             prepStmt.setString(1, newValue);
             prepStmt.setString(2, userID);
@@ -265,12 +355,20 @@ public class DatabaseManagement {
         }
     }
 
+    /**
+     * Update the meetingData with the new transferred values.
+     * 
+     * @param meetingID     unique generated meeting ID.
+     * @param column        [@Participant] [starttime] [endtime] [message]
+     * @param newValue      new entry for the database.db
+     * @exception   // TODO: 04.06.2020                       
+     * @return  <code>true</code> If meeting update the meeting;
+     *                  <code>false</code> Meeting could not be updated.
+     */
     public boolean updateMeeting(int meetingID, String column, Object newValue) {
-
-        //SQL-Code zum Updaten der Werte
+        
         String sql = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
-
-        //Versucht Datenbank zu updaten
+        
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
             prepStmt.setObject(1, newValue);
             prepStmt.setInt(2, meetingID);
@@ -282,7 +380,14 @@ public class DatabaseManagement {
         }
     }
 
-    //Funktion um UserData abzurufen
+    /**
+     * <code>ReturnData(String userID)</code> method gets the userData from Database.db and
+     * return them as an object[].
+     *
+     * @param   userID  unique Discord userID.
+     * @exception   // TODO: 04.06.2020
+     * @return  data    contains user data instance.
+     */
     public Object[] returnData(String userID) {
 
         String sql = "SELECT * FROM user_data WHERE userID = ?";
@@ -302,10 +407,19 @@ public class DatabaseManagement {
         return data;
     }
 
-    //Checkt, ob User in Datenbank registriert ist
+    /**
+     * Search the userID in <code>database.db</code> to check if the user is registered.
+     *
+     * @param       userID          unique Discord userID.
+     * @exception   SQLException    database access denied.
+     * @return  <code>true</code> if there is a user entry;
+     *                  <code>false</code> check for user failed(catch) / no user entry (return rs.getBoolean(0);).
+     */
     public boolean registeredCheck(String userID) {
 
-        //Sql-Code um zu gucken, ob User in Datenbank registriert ist
+        /**
+         * SQL Code: Check if there is an entry of userID in the database.
+         */
         String sql = "SELECT COUNT (*) FROM user_data WHERE userID = ?";
 
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
@@ -314,7 +428,6 @@ public class DatabaseManagement {
             rs = prepStmt.executeQuery();
 
             if (rs.next()) {
-                //Return True, wenn User registriert ist, False, wenn nicht
                 return rs.getBoolean(1);
             }
         } catch (SQLException e) {
