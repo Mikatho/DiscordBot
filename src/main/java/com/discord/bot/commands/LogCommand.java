@@ -14,7 +14,9 @@ public class LogCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        String[] patterns = {"!log show", "!log save"};
+        String[] patterns = {
+                "!log show",
+                "!log save"};
 
         //Prüft, ob nur der Command an sich geschrieben wurde
         if (!msg.getContentRaw().contains(" ")) {

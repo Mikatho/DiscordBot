@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +41,7 @@ import java.util.logging.Logger;
  */
 public class GoogleCalendarManager {
 
-    private static final Logger LOGGER = Logger.getLogger( GoogleCalendarManager.class.getName() );
+    private static final Logger LOGGER = Logger.getLogger(GoogleCalendarManager.class.getName());
 
 
     /**
@@ -130,24 +128,25 @@ public class GoogleCalendarManager {
      * @param eventName name of the event
      * @param eventLocation name of the event location
      * @param eventDescription name of the eventDescription
-     * @param startTime with following format: "YYYY-MM-DD'T'HH:MM:SS" -> "2020-05-28T17:00:00"
-     * @param endTime with following format: "YYYY-MM-DD'T'HH:MM:SS" -> "2020-05-28T17:00:00"
+     * @param starttime with following format: "YYYY-MM-DD'T'HH:MM:SS" -> "2020-05-28T17:00:00"
+     * @param endtime with following format: "YYYY-MM-DD'T'HH:MM:SS" -> "2020-05-28T17:00:00"
      * @throws IOException when the event can't be added to a users calendar
      * @return a link to the newly created Event
      */
-    public String createNewEvent(UserData user, String eventName, String eventLocation, String eventDescription, String startTime, String endTime) throws IOException {
+    public String createNewEvent(UserData user, String eventName, String eventLocation, String eventDescription, long epochStart, long epochEnd) throws IOException {
+
         Event event = new Event()
                 .setSummary(eventName)
                 .setLocation(eventLocation)
                 .setDescription(eventDescription);
 
-        DateTime startDateTime = new DateTime(startTime);
+        DateTime startDateTime = new DateTime(epochStart);
         EventDateTime start = new EventDateTime()
                 .setDateTime(startDateTime)
                 .setTimeZone(BOT_TIMEZONE);
         event.setStart(start);
 
-        DateTime endDateTime = new DateTime(endTime);
+        DateTime endDateTime = new DateTime(epochEnd);
         EventDateTime end = new EventDateTime()
                 .setDateTime(endDateTime)
                 .setTimeZone(BOT_TIMEZONE);
@@ -170,7 +169,6 @@ public class GoogleCalendarManager {
      * @throws IOException if the insertion fails
      */
     public String createCalendar(UserData user, String cName) throws IOException {
-
 
         // CREATE A NEW CALENDAR //
         String calendarName = cName + "'s Terminkalender";
@@ -196,7 +194,9 @@ public class GoogleCalendarManager {
         // Insert new access rule (Can delete Var if not needed any further)
         service.acl().insert(tempCalendar.getId(), rule).execute();
 
-        return tempCalendar.getId();
+        user.setgCalendarLink(tempCalendar.getId());
+
+        return getPublicCalendarLink(user);
     }
 
 
@@ -208,7 +208,8 @@ public class GoogleCalendarManager {
      */
     public String getPublicCalendarLink(UserData user) {
         if (user.getgCalendarLink() == null) {
-            return TAG + "User is not registered in gCalendarDatabase";
+            System.out.println(TAG + "User is not registered in gCalendarDatabase");
+            return null;
         }
         return "https://calendar.google.com/calendar/r?cid=" + user.getgCalendarLink();
     }

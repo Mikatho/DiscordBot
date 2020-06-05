@@ -1,9 +1,9 @@
 package com.discord.bot;
 
-import com.discord.bot.data.UserActivity;
 import com.discord.bot.data.UserData;
+import net.dv8tion.jda.api.entities.User;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
 
 public class UserManagement {
 
@@ -21,7 +21,7 @@ public class UserManagement {
         UserData tempUser = new UserData(userID);
 
         //Versucht User in Datenbank einzufügen
-        return dbManager.insert(tempUser);
+        return dbManager.insertUser(tempUser);
     }
 
     public boolean delete(String userID) {
@@ -38,9 +38,8 @@ public class UserManagement {
 
     public Object[] search(String userID) {
 
-        //Versucht UserData aus Datenbank zu holen
-        Object[] data = dbManager.returnData(userID);
-        return data;
+        //Versucht User in Datenbank zu finden und zurückzugeben
+        return dbManager.returnData(userID);
     }
 
     public boolean startActivity(String time) {
@@ -51,5 +50,20 @@ public class UserManagement {
     public boolean stopActivity(String time) {
 
         return true;
+    }
+
+    public boolean userIsRegistered(String userID) {
+
+        return DatabaseManagement.getINSTANCE().registeredCheck(userID);
+    }
+
+    public String googleCalendarLink(String userID, String nickname) {
+
+        try {
+            return GoogleCalendarManager.getInstance().createCalendar(new UserData(userID), nickname);
+        } catch (IOException e) {
+            System.out.println("Could not create Google Calendar.");
+            return null;
+        }
     }
 }

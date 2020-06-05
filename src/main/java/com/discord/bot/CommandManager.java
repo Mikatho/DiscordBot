@@ -21,7 +21,7 @@ public class CommandManager {
 
         //Werden vorrausstichtlich wieder gelöscht/ersetzt
         commandsPM.put("register", new RegisterCommand());
-        commandsPM.put("delete", new DeleteCommand());
+        commandsPM.put("unregister", new UnregisterCommand());
         commandsPM.put("clear", new ClearCommand());
 
         //Commands für Server-Nachrichten

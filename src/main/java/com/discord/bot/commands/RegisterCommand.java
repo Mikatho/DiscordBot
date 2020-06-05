@@ -14,12 +14,23 @@ public class RegisterCommand implements CommandInterface {
         //Speichert sich User der Nachricht
         User user = msg.getAuthor();
 
+        UserManagement userManager = UserManagement.getINSTANCE();
+
         //Versucht den User zu registrieren
-        if (!UserManagement.getINSTANCE().register(user.getId())) {
+        if (!userManager.register(user.getId())) {
             channel.sendMessage(user.getAsMention() + " could not be added to the Database!").queue();
             return;
         }
 
-        msg.getAuthor().openPrivateChannel().queue((userChannel) -> userChannel.sendMessage("Welcome kindly sir.").queue());
+        channel.sendMessage("Welcome kindly sir.\nCreating your Google-Calendar...\n").queue();
+
+        String calendarLink = userManager.googleCalendarLink(user.getId(), user.getName());
+
+        if (calendarLink == null) {
+            channel.sendMessage("Unfortunately we could not create a Google Calendar for you.").queue();
+        } else {
+            userManager.update(user.getId(), "gCalendarLink", calendarLink);
+            channel.sendMessage("Here is your Link to your Google-Calendar:\n" + calendarLink).queue();
+        }
     }
 }

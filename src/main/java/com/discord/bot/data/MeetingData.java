@@ -13,34 +13,43 @@ package com.discord.bot.data;
  */
 public class MeetingData {
 
+    private int meetingID;
+
     private String hostID;
 
     private String participantID;
 
-    private long startTime;
+    private long starttime;
 
-    private long endTime;
+    private long endtime;
 
     private String message;
 
-    public MeetingData(String hostID, String participantID, long startTime, long endTime) {
+    public MeetingData(String hostID, String participantID, long starttime, long endtime) {
 
         this.hostID = hostID;
         this.participantID = participantID;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.starttime = starttime;
+        this.endtime = endtime;
     }
 
     /**
      * Overloaded class constructor. Extra variable "message".
      */
-    public MeetingData(String hostID, String participantID, long startTime, long endTime, String message) {
-
+    public MeetingData(String hostID, String participantID, long starttime, long endtime, String message) {
         this.hostID = hostID;
         this.participantID = participantID;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.starttime = starttime;
+        this.endtime = endtime;
         this.message = message;
+    }
+
+    public void setMeetingID(int meetingID) {
+        this.meetingID = meetingID;
+    }
+
+    public int getMeetingID() {
+        return meetingID;
     }
 
     public void setUserID(String userID) {
@@ -59,20 +68,20 @@ public class MeetingData {
         return participantID;
     }
 
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
+    public void setStarttime(long starttime) {
+        this.starttime = starttime;
     }
 
-    public final long getStartTime() {
-        return startTime;
+    public final long getStarttime() {
+        return starttime;
     }
 
-    public void setEndTime(long endTime) {
-        this.endTime = endTime;
+    public void setEndtime(long endtime) {
+        this.endtime = endtime;
     }
 
-    public final long getEndTime() {
-        return endTime;
+    public final long getEndtime() {
+        return endtime;
     }
 
     public void setMessage(String message) {

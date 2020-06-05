@@ -7,6 +7,7 @@ import com.discord.bot.data.UserData;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.StringJoiner;
 
 
@@ -44,14 +45,17 @@ public class DatabaseManagement {
 
     //Löscht Daten in Datenbank
     public void clear() {
-        String meeting = "DELETE FROM meeting_data;";
-        String activity = "DELETE FROM user_activity;";
+
+        String foreignMeetingUser = "DELETE FROM meetings_of_user;";
         String user = "DELETE FROM user_data;";
+        String meeting = "DELETE FROM meeting_data;";
+        String activity = "DELETE FROM activity_data;";
 
         try {
+            stmt.execute(foreignMeetingUser);
+            stmt.execute(user);
             stmt.execute(meeting);
             stmt.execute(activity);
-            stmt.execute(user);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -74,9 +78,10 @@ public class DatabaseManagement {
             System.out.println("Connection to Database created.");
 
             stmt = conn.createStatement();
-            createTable("user_data", "userID text PRIMARY KEY", "address text", "interests text", "competencies text", "gCalendarLink text", "meetings INTEGER", "activities INTEGER", "FOREIGN KEY (meetings) REFERENCES meeting_data (meetingID)", "FOREIGN KEY (activities) REFERENCES user_activity (activityID)");
+            createTable("user_data", "userID text PRIMARY KEY", "address text", "interests text", "competencies text", "gCalendarLink text", "activities INTEGER");
             createTable("meeting_data", "meetingID integer PRIMARY KEY AUTOINCREMENT", "hostID text NOT NULL", "participantID text NOT NULL", "starttime INTEGER NOT NULL", "endtime INTEGER NOT NULL", "message text");
-            createTable("user_activity", "activityID integer PRIMARY KEY AUTOINCREMENT", "starttime text NOT NULL", "endtime text");
+            createTable("activity_data", "activityID integer PRIMARY KEY AUTOINCREMENT", "starttime INTEGER NOT NULL", "endtime INTEGER");
+            createTable("meetings_of_user", "meetingID integer NOT NULL", "userID text NOT NULL", "FOREIGN KEY (meetingID) REFERENCES meeting_data (meetingID)", "FOREIGN KEY (userID) REFERENCES user_data (userID)");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
@@ -116,104 +121,281 @@ public class DatabaseManagement {
         }
     }
 
-    public boolean insert(Object obj) {
+    public boolean insertUser(UserData user) {
 
-        //Prüft welches Objekt eingefügt werden soll
-        if (obj instanceof UserData) {
+        //SQL-Code zum Einfügen in die Datenbank
+        String sql = "INSERT INTO user_data (userID) VALUES (?)";
 
-            //Castet Objekt in richtigen Datentypen
-            UserData user = (UserData) obj;
+        //Versucht User in Datenbank einzufügen
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            prepStmt.setString(1, user.getUserID());
+            prepStmt.executeUpdate();
+            System.out.println("Successfully added the User to the Database!");
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Could not add the User to the Database!");
+            return false;
+        }
+    }
 
-            //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO user_data (userID) VALUES (?)";
+    public int insertMeeting(MeetingData meeting) {
 
-            //Versucht User in Datenbank einzufügen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                prepStmt.setString(1, user.getUserID());
-                prepStmt.executeUpdate();
-                System.out.println("Successfully added the User to the Database!");
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.out.println("Could not add the User to the Database!");
-            }
-        } else if (obj instanceof MeetingData) {
+        //SQL-Code zum Einfügen in die Datenbank
+        String sql = "INSERT INTO meeting_data (hostID, participantID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
 
-            //Castet Objekt in richtigen Datentypen
-            MeetingData meeting = (MeetingData) obj;
+        //Versucht Meeting in Datenbank einzufügen
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, meeting.getUserID());
+            prepStmt.setString(2, meeting.getParticipantID());
+            prepStmt.setLong(3, meeting.getStarttime());
+            prepStmt.setLong(4, meeting.getEndtime());
+            prepStmt.setString(5, meeting.getMessage());
+            prepStmt.executeUpdate();
 
-            //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO meeting_data (hostID, participantID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
+            //Holt sich automatisch generierte ID
+            rs = stmt.getGeneratedKeys();
 
-            //Versucht Meeting in Datenbank einzufügen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setString(1, meeting.getUserID());
-                prepStmt.setString(2, meeting.getParticipantID());
-                prepStmt.setLong(3, meeting.getStartTime());
-                prepStmt.setLong(4, meeting.getEndTime());
-                prepStmt.setString(5, meeting.getMessage());
-                prepStmt.executeUpdate();
+            //Speichert sich ID aus ResultSet als Integer
+            if (rs.next()) {
+                int meetingID = rs.getInt(1);
 
-                //Holt sich automatisch generierte ID
-                rs = stmt.getGeneratedKeys();
-
-                //Speichert sich ID aus ResultSet als Integer
-                if (rs.next()) {
-                    int meetingID = rs.getInt(1);
-
-                    //Versucht ForeignKey in User_Data zu aktualisieren
-                    if (!insertForeignKey("meetings", meetingID, meeting.getUserID(), meeting.getParticipantID())) {
-                        return false;
-                    }
+                //Versucht ForeignKey in User_Data zu aktualisieren
+                if (!insertForeignKey(meetingID, meeting.getUserID(), meeting.getParticipantID())) {
+                    return 0;
                 }
 
                 System.out.println("Successfully added the Meeting to the Database!");
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.out.println("Could not add the Meeting to the Database!");
+                return meetingID;
             }
-        } else if (obj instanceof UserActivity) {
-
-            //Castet Objekt in richtigen Datentypen
-            UserActivity activity = (UserActivity) obj;
-
-            //SQL-Code zum Einfügen in die Datenbank
-            String sql = "INSERT INTO user_activity (activityID, starttime) VALUES (?, ?)";
-
-            //Versucht Activity in Datenbank einzufügen
-            try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
-                prepStmt.setInt(1, activity.getActivityID());
-                prepStmt.setString(2, activity.getStarttime());
-                prepStmt.executeUpdate();
-                System.out.println("Successfully added the Activity to the Database!");
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.out.println("Could not add the Activity to the Database!");
-            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Could not add the Meeting to the Database!");
+            return 0;
         }
-        return false;
+        return 0;
     }
 
-    //Funktion um ForeignKeys von User_Data zu aktualisieren
-    public boolean insertForeignKey(String column, Integer columnID, String hostID, String participantID) {
+    public boolean insertActivity (UserActivity activity) {
 
-        String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ? OR userID = ?";
+        //SQL-Code zum Einfügen in die Datenbank
+        String sql = "INSERT INTO activity_data (activityID, starttime) VALUES (?, ?)";
+
+        //Versucht Activity in Datenbank einzufügen
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setInt(1, activity.getActivityID());
+            prepStmt.setLong(2, activity.getStarttime());
+            prepStmt.executeUpdate();
+            System.out.println("Successfully added the Activity to the Database!");
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Could not add the Activity to the Database!");
+            return false;
+        }
+    }
+
+    public long[] findEarliestPossibleMeetingtimes(String userID, long starttime, long endtime, int duration) {
+
+        //Länge der Pause zwischen Meetings in Sekunden
+        final int BREAKTIME_IN_SECONDS = 300;
+
+        //Variable die zurückgegeben wird
+        long[] meetingtimes = new long[2];
+
+        ArrayList<Long> starttimeList = new ArrayList<>();
+        ArrayList<Long> endtimeList = new ArrayList<>();
+
+        //Sucht alle zeitlichen Daten in dem angefragten Zeitraum heraus und sortiert diese
+        String meetings = "SELECT starttime, endtime FROM meeting_data WHERE (? IN (hostID, participantID)) AND ((starttime BETWEEN ? AND ?) OR (endtime BETWEEN ? AND ?)) ORDER BY starttime ASC";
+        //Sucht heraus, ob ein Meeting über den gesamten Zeitraum läuft
+        String runningMeeting = "SELECT meetingID FROM meeting_data WHERE (? IN (hostID, participantID)) AND (starttime < ? AND endtime > ?)";
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(meetings)) {
+            prepStmt.setString(1, userID);
+            prepStmt.setLong(2, starttime - BREAKTIME_IN_SECONDS);
+            prepStmt.setLong(3, endtime + BREAKTIME_IN_SECONDS);
+            prepStmt.setLong(4, starttime - BREAKTIME_IN_SECONDS);
+            prepStmt.setLong(5, endtime + BREAKTIME_IN_SECONDS);
+            rs = prepStmt.executeQuery();
+
+            //Fügt herausgesuchte Daten in jeweilige Liste
+            while (rs.next()) {
+                starttimeList.add(rs.getLong("starttime"));
+                endtimeList.add(rs.getLong("endtime"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Could not get all meetings of the user properly!");
+            return meetingtimes;
+        }
+
+        //Wenn es keine anderen Termine in dem Zeitraum gibt
+        if (starttimeList.isEmpty() && endtimeList.isEmpty()) {
+
+            try (PreparedStatement prepStmt = conn.prepareStatement(runningMeeting)) {
+                prepStmt.setString(1, userID);
+                prepStmt.setLong(2, starttime - BREAKTIME_IN_SECONDS);
+                prepStmt.setLong(3, endtime + BREAKTIME_IN_SECONDS);
+                rs = prepStmt.executeQuery();
+
+                //Prüft, ob etwas zurückgegeben wurde
+                if (!rs.next()) {
+                    //Nichts wurde zurückgegben -> es läuft kein Meeting über den Zeitraum
+                    meetingtimes[0] = starttime;
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                }
+
+                return meetingtimes;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                System.out.println("Could not test if there is one meeting during the period!");
+                return meetingtimes;
+            }
+        }
+
+        //Wenn es genau einen anderen Termin in dem Zeitraum gibt
+        if (starttimeList.size() == 1) {
+
+            //Prüf, in welchem Zeitraum der Termin liegt
+            if (endtimeList.get(0) < starttime) {
+
+                meetingtimes[0] = starttime + BREAKTIME_IN_SECONDS;
+                meetingtimes[1] = meetingtimes[0] + duration;
+            } else if ((starttimeList.get(0) - starttime) >= duration) {
+
+                meetingtimes[0] = starttime;
+                meetingtimes[1] = meetingtimes[0] + duration;
+            } else if ((endtime - endtimeList.get(0)) >= (duration + BREAKTIME_IN_SECONDS)) {
+
+                meetingtimes[0] = endtimeList.get(0) + BREAKTIME_IN_SECONDS;
+                meetingtimes[1] = meetingtimes[0] + duration;
+            } else if ((endtime - endtimeList.get(0)) >= duration) {
+
+                meetingtimes[0] = endtimeList.get(0);
+                meetingtimes[1] = meetingtimes[0] + duration;
+            }
+            return meetingtimes;
+        }
+
+        //Prüft, ob zwischen anderen Terminen genügend Zeit ist
+        for (int i = 1; i < starttimeList.size(); i++) {
+
+            //Prüft, ob eine Pause eingelegt werden kann
+            if ((starttimeList.get(i) - endtimeList.get(i - 1)) >= (duration + 2 * BREAKTIME_IN_SECONDS)) {
+
+                meetingtimes[0] = endtimeList.get(i - 1) + BREAKTIME_IN_SECONDS;
+                meetingtimes[1] = meetingtimes[0] + duration;
+                return meetingtimes;
+            }
+
+            //Prüft Grenzfälle
+            if (endtimeList.get(i - 1) < starttime) {
+
+                if ((starttimeList.get(i) - starttime) >= duration) {
+
+                    meetingtimes[0] = starttime;
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                    return meetingtimes;
+                }
+            } else if (starttimeList.get(i) > endtime) {
+
+                if ((endtime - endtimeList.get(i - 1)) >= duration) {
+
+                    meetingtimes[0] = endtimeList.get(i - 1);
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                    return meetingtimes;
+                }
+            } else {
+
+                if ((starttimeList.get(i) - endtimeList.get(i - 1)) >= duration) {
+
+                    meetingtimes[0] = endtimeList.get(i - 1);
+                    meetingtimes[1] = meetingtimes[0] + duration;
+                    return meetingtimes;
+                }
+            }
+        }
+
+        //Wenn kein passender Zeitraum zwischen den Terminen gefunden wurde
+        if ((endtime - endtimeList.get(endtimeList.size() - 1)) >= (duration + BREAKTIME_IN_SECONDS)) {
+
+            meetingtimes[0] = endtimeList.get(endtimeList.size() - 1) + BREAKTIME_IN_SECONDS;
+            meetingtimes[1] = meetingtimes[0] + duration;
+        } else if ((endtime - endtimeList.get(endtimeList.size() - 1)) >= duration) {
+
+            meetingtimes[0] = endtimeList.get(endtimeList.size() - 1);
+            meetingtimes[1] = meetingtimes[0] + duration;
+        }
+        return meetingtimes;
+    }
+
+    //Funktion um ForeignKey-Daten zu erstellen
+    public boolean insertForeignKey(Integer columnID, String hostID, String participantID) {
+
+        String sql;
+
+        //Wenn der User mit sich selber einen Termin vereinbart (damit nicht 2x dasselbe eingefügt wird)
+        if (hostID.equals(participantID)) {
+
+            sql = "INSERT INTO meetings_of_user (meetingID, userID) VALUES (?, ?)";
+        } else {
+
+            sql = "INSERT INTO meetings_of_user (meetingID, userID) VALUES (?, ?), (?, ?)";
+        }
 
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
             prepStmt.setInt(1, columnID);
             prepStmt.setString(2, hostID);
-            prepStmt.setString(3, participantID);
+
+            //Wenn der User mit jemand anderen einen Termin vereinbart (damit keine Exception geworfen wird)
+            if (!hostID.equals(participantID)) {
+
+                prepStmt.setInt(3, columnID);
+                prepStmt.setString(4, participantID);
+            }
             prepStmt.executeUpdate();
             return true;
         } catch (SQLException e) {
-            System.out.println("Data could not be added to User!");
+            System.out.println("Data could not be added to 'Meetings_of_User'!");
+            return false;
+        }
+    }
+
+    //Funktion um ForeignKey-Daten zu löschen
+    public boolean deleteForeignKey(String userID) {
+
+        String sql = "DELETE FROM meetings_of_user WHERE userID = ?";
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setString(1, userID);
+            prepStmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("User could not be deleted from 'Meetings_of_User'!");
+            return false;
+        }
+    }
+    //Method-Overload, da meetingID = userID sein kann
+    public boolean deleteForeignKey(int meetingID) {
+
+        String sql = "DELETE FROM meetings_of_user WHERE meetingID = ?";
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setInt(1, meetingID);
+            prepStmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Meeting could not be deleted from 'Meetings_of_User'!");
             return false;
         }
     }
 
     public boolean deleteUser(String userID) {
+
+        if(!deleteForeignKey(userID)) {
+            return false;
+        }
 
         //SQL-Code zum Löschen aus der Datenbank
         String sql = "DELETE FROM user_data WHERE userID = ?";
@@ -227,11 +409,15 @@ public class DatabaseManagement {
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("User does not exist!");
-            return  false;
+            return false;
         }
     }
 
     public boolean deleteMeeting(int meetingID) {
+
+        if(!deleteForeignKey(meetingID)) {
+            return false;
+        }
 
         //SQL-Code zum Löschen aus der Datenbank
         String sql = "DELETE FROM meeting_data WHERE meetingID = ?";
@@ -265,21 +451,38 @@ public class DatabaseManagement {
         }
     }
 
-    public boolean updateMeeting(int meetingID, String column, Object newValue) {
+    public boolean updateMeeting(int meetingID, String column, Object newValue, String hostID) {
 
         //SQL-Code zum Updaten der Werte
-        String sql = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
+        String sqlUpdate = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
 
         //Versucht Datenbank zu updaten
-        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement prepStmt = conn.prepareStatement(sqlUpdate)) {
             prepStmt.setObject(1, newValue);
             prepStmt.setInt(2, meetingID);
             prepStmt.executeUpdate();
-            return true;
         } catch (SQLException e) {
             System.out.println("Meeting could not be updated!");
             return false;
         }
+
+        //Aktualisiert ForeignKey, wenn Participant geupdated werden soll
+        if (column.equals("participant")) {
+
+            //Updated Meeting mit der richtigen meetingID und nicht der hostID (= Meeting mit der ParticipantID)
+            String sqlUpdateForeign = "UPDATE meetings_of_user SET userID = ? WHERE meetingID = ? AND userID != ?";
+
+            try (PreparedStatement prepStmt = conn.prepareStatement(sqlUpdateForeign)) {
+                prepStmt.setObject(1, newValue);
+                prepStmt.setInt(2, meetingID);
+                prepStmt.setString(3, hostID);
+                prepStmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println("Participant could not be updated in 'Meetings_Of_User'!");
+                return false;
+            }
+        }
+        return true;
     }
 
     //Funktion um UserData abzurufen
@@ -287,22 +490,23 @@ public class DatabaseManagement {
 
         String sql = "SELECT * FROM user_data WHERE userID = ?";
 
-        Object[] data = new Object[3];
+        Object[] data = new Object[4];
 
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
             prepStmt.setString(1, userID);
-            ResultSet rsData = prepStmt.executeQuery();
+            rs = prepStmt.executeQuery();
 
-            data[0] = rsData.getString("address");
-            data[1] = rsData.getString("interests");
-            data[2] = rsData.getString("competencies");
+            data[0] = rs.getString("address");
+            data[1] = rs.getString("interests");
+            data[2] = rs.getString("competencies");
+            data[3] = rs.getString("gCalendarLink");
         } catch (SQLException e) {
             System.out.println("Could not get User data properly!");
         }
         return data;
     }
 
-    //Checkt, ob User in Datenbank registriert ist
+    //Prüft, ob User in Datenbank registriert ist
     public boolean registeredCheck(String userID) {
 
         //Sql-Code um zu gucken, ob User in Datenbank registriert ist
@@ -310,7 +514,6 @@ public class DatabaseManagement {
 
         try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
             prepStmt.setString(1, userID);
-
             rs = prepStmt.executeQuery();
 
             if (rs.next()) {
@@ -321,6 +524,22 @@ public class DatabaseManagement {
             System.out.println("Failed to check for User!");
             return false;
         }
-        return true;
+        return false;
+    }
+
+    //Prüft, ob User für die Aktion berechtigt ist
+    public boolean authorizationCheck(int meetingID, String userID) {
+
+        String sql = "SELECT hostID FROM meeting_data WHERE meetingID = ?";
+
+        try (PreparedStatement prepStmt = conn.prepareStatement(sql)) {
+            prepStmt.setInt(1, meetingID);
+            rs = prepStmt.executeQuery();
+
+            return rs.getString(1).equals(userID);
+        } catch (SQLException e) {
+            System.out.println("Failed to check if user exists.");
+            return false;
+        }
     }
 }

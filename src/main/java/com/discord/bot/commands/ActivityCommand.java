@@ -18,7 +18,10 @@ public class ActivityCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        String[] patterns = {"!activity running", "!activity start", "!activity stop"};
+        String[] patterns = {
+                "!activity running",
+                "!activity start",
+                "!activity stop"};
 
         //Prüft, ob nur der Command an sich geschrieben wurde
         if (!msg.getContentRaw().contains(" ")) {
