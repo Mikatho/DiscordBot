@@ -44,10 +44,18 @@ public class CommandListener extends ListenerAdapter {
             String[] args = message.split(" ");
 
             /**
+             * Skips everything else if message comes from the bot itself
+             */
+            if (event.getAuthor().getId().equals(channel.getJDA().getSelfUser().getId())) {
+                return;
+            }
+
+            /**
              * Call execute method in CommandManager.
              */
+
             if (!CommandManager.getInstance().execute(args[0], channel, event.getMessage())) {
-                channel.sendMessage("Unknown Command.").queue();
+                channel.sendMessage("Unknown Command. Use `!help` to see an overview of all available commands.").queue();
             }
         }
     }

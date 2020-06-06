@@ -1,9 +1,9 @@
 package com.discord.bot;
 
 import com.discord.bot.data.MeetingData;
-import com.discord.bot.data.UserData;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class MeetingManagement {
 
@@ -40,7 +40,11 @@ public class MeetingManagement {
             tempMeeting = new MeetingData(hostID, participantID, foundStarttime, foundEndtime, message);
         }
 
-        returnedValue = dbManager.insertMeeting(tempMeeting);
+        try {
+            returnedValue = dbManager.insertMeeting(tempMeeting);
+        } catch (SQLException e) {
+            return null;
+        }
 
         if (returnedValue == 0) {
             return null;
@@ -54,18 +58,30 @@ public class MeetingManagement {
     public boolean delete(Integer meetingID, String userID) {
 
         //Wenn User nicht die nötige Berechtigung hat
-        if (!dbManager.authorizationCheck(meetingID, userID)) {
+        try {
+            if (!dbManager.authorizationCheck(meetingID, userID)) {
+                return false;
+            }
+        } catch (SQLException e) {
             return false;
         }
 
         //Versucht Meeting aus Datenbank zu löschen
-        return dbManager.deleteMeeting(meetingID);
+        try {
+            return dbManager.deleteMeeting(meetingID);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public boolean update(Integer meetingID, String hostID, String column, Object newValue) {
 
         //Wenn User nicht die nötige Berechtigung hat
-        if (!dbManager.authorizationCheck(meetingID, hostID)) {
+        try {
+            if (!dbManager.authorizationCheck(meetingID, hostID)) {
+                return false;
+            }
+        } catch (SQLException e) {
             return false;
         }
 
@@ -73,19 +89,24 @@ public class MeetingManagement {
         return dbManager.updateMeeting(meetingID, column, newValue, hostID);
     }
 
+    //Prüft, ob User registriert ist
     public boolean userIsRegistered (String userID) {
 
-        return DatabaseManagement.getINSTANCE().registeredCheck(userID);
+        try {
+            return DatabaseManagement.getINSTANCE().registeredCheck(userID);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
+    //Returnt Google Calendar Event
     public String googleCalendarEvent(String userID, String eventName, String eventLocation, String eventDescription, long starttime, long endtime) {
 
         String calendarID = (String) dbManager.returnData(userID)[3];
 
         try {
-            return GoogleCalendarManager.getInstance().createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
+            return GoogleCalendarManagement.getInstance().createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
         } catch (IOException e) {
-            System.out.println("Could not create Event in Google Calendar.");
             return null;
         }
     }

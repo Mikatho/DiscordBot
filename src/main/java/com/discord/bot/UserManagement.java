@@ -1,9 +1,9 @@
 package com.discord.bot;
 
 import com.discord.bot.data.UserData;
-import net.dv8tion.jda.api.entities.User;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class UserManagement {
 
@@ -21,19 +21,31 @@ public class UserManagement {
         UserData tempUser = new UserData(userID);
 
         //Versucht User in Datenbank einzufügen
-        return dbManager.insertUser(tempUser);
+        try {
+            return dbManager.insertUser(tempUser);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public boolean delete(String userID) {
 
         //Versucht User aus Datenbank zu löschen
-        return dbManager.deleteUser(userID);
+        try {
+            return dbManager.deleteUser(userID);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public boolean update(String userID, String column, String newValue) {
 
         //Versucht User in Datenbank zu updaten
-        return dbManager.updateUser(userID, column, newValue);
+        try {
+            return dbManager.updateUser(userID, column, newValue);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public Object[] search(String userID) {
@@ -52,23 +64,27 @@ public class UserManagement {
         return true;
     }
 
+    //Prüft, ob User registriert ist
     public boolean userIsRegistered(String userID) {
 
-        return DatabaseManagement.getINSTANCE().registeredCheck(userID);
+        try {
+            return DatabaseManagement.getINSTANCE().registeredCheck(userID);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public String googleCalendarID(String nickname) {
 
         try {
-            return GoogleCalendarManager.getInstance().createCalendar(nickname);
+            return GoogleCalendarManagement.getInstance().createCalendar(nickname);
         } catch (IOException e) {
-            System.out.println("Could not create Google Calendar.");
             return null;
         }
     }
 
     public String googleCalendarLink(String calendarID) {
 
-            return GoogleCalendarManager.getInstance().getPublicCalendarLink(calendarID);
+            return GoogleCalendarManagement.getInstance().getPublicCalendarLink(calendarID);
     }
 }

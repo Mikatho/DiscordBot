@@ -24,11 +24,13 @@ public class RegisterCommand implements CommandInterface {
 
         channel.sendMessage("Welcome kindly sir.\nCreating your Google-Calendar...\n").queue();
 
+        //ID des Google Calendars wird erstellt
         String calendarID = userManager.googleCalendarID(user.getName());
 
         if (calendarID == null) {
             channel.sendMessage("Unfortunately we could not create a Google Calendar for you.").queue();
         } else {
+            //Google Calendar Link wird dem User in der Datenbank hinzugefügt
             userManager.update(user.getId(), "gCalendarLink", calendarID);
             channel.sendMessage("Here is your Link to your Google-Calendar:\n" + userManager.googleCalendarLink(calendarID)).queue();
         }

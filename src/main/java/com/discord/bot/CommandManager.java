@@ -31,7 +31,7 @@ public class CommandManager {
      * Create instances of all objects in CommandPattern and integrate them in ConcurrentHashMaps.
      *
      * @see com.discord.bot.commands.RegisterCommand
-     * @see com.discord.bot.commands.DeleteCommand
+     * @see com.discord.bot.commands.UnregisterCommand
      * @see com.discord.bot.commands.ClearCommand
      * @see com.discord.bot.commands.HelpCommand
      * @see com.discord.bot.commands.LogCommand
@@ -45,7 +45,7 @@ public class CommandManager {
         commandsGuild = new ConcurrentHashMap<>();
         commandsPM = new ConcurrentHashMap<>();
 
-        //Werden vorrausstichtlich wieder gelöscht/ersetzt
+        //Commands für private Nachrichten
         commandsPM.put("register", new RegisterCommand());
         commandsPM.put("unregister", new UnregisterCommand());
         commandsPM.put("clear", new ClearCommand());
@@ -55,6 +55,10 @@ public class CommandManager {
         commandsGuild.put("log", new LogCommand());
         commandsGuild.put("meeting", new MeetingCommand());
         commandsGuild.put("user", new UserCommand());
+        //Bot-Bot-Commands
+        commandsGuild.put("_meeting", new BotMeetingCommand());
+
+        commandsGuild.put("test", new TestCommand());
 
         //Commands für private Nachrichten an den Bot
         commandsPM.put("activity", new ActivityCommand());
@@ -98,14 +102,16 @@ public class CommandManager {
 
         /**
          * If command doesn´t exists in associated HashMap
+         * If the message is comming from the Bot itself
          */
         if (cmdInter == null) {
             return false;
         }
 
         /**
-         * execute command.
+         * executes command
          */
+
         cmdInter.executeCommand(channel, msg);
         return true;
     }

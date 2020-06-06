@@ -5,6 +5,8 @@ import com.discord.bot.LoggingManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
+import java.sql.SQLException;
+
 
 /**
  * The <code>ClearCommand</code> Class implements the <code>CommandInterface</code>
@@ -37,7 +39,11 @@ public class ClearCommand implements CommandInterface {
         /**
          * Delete entries in database and log-file.
          */
-        DatabaseManagement.getINSTANCE().clear();
+        try {
+            DatabaseManagement.getINSTANCE().clear();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         LoggingManagement.getINSTANCE().clear();
     }
 }

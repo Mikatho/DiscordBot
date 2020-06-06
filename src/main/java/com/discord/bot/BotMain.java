@@ -9,6 +9,7 @@ import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 
 
 /**
@@ -30,8 +31,8 @@ public class BotMain {
     /**
      * Create instance of <code>BotMain()</code>
      *
-     * @exception   // TODO: 04.06.2020
-     * @param   args
+     * @param args
+     * @throws // TODO: 04.06.2020
      */
     public static void main(String[] args) {
 
@@ -47,12 +48,17 @@ public class BotMain {
      * It calls the method connect() in <code>DatabaseManagement</code> to build the database
      * and also holds the BotTokken. The method executes the Discord Bot.
      *
-     * @throws LoginException   toDo
+     * @throws LoginException toDo
      */
     public BotMain() throws LoginException {
 
         final String BOT_TOKEN = "Njk0MTkxMzY3NzUxOTkxMzQ3.XqiLrg.mmC1Fvf6zRWdJN2dfsRMUu7WMhs";
-        DatabaseManagement.getINSTANCE().connect();
+
+        try {
+            DatabaseManagement.getINSTANCE().connect();
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+        }
 
         jdaBuilder = JDABuilder.createDefault(BOT_TOKEN);
         jdaBuilder.setStatus(OnlineStatus.ONLINE);
@@ -71,7 +77,7 @@ public class BotMain {
     /**
      * The <code>shutdown()</code> method closes all connections and shuts down the Bot.
      *
-     * @exception // TODO: 04.06.2020
+     * @throws // TODO: 04.06.2020
      */
     public void shutdown() {
 
@@ -103,7 +109,7 @@ public class BotMain {
                         System.out.println("Use 'shutdown' to shutdown the Bot.");
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
         }).start();

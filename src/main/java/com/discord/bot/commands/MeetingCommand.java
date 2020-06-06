@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.User;
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 
 public class MeetingCommand implements CommandInterface {
@@ -34,7 +35,6 @@ public class MeetingCommand implements CommandInterface {
                 .setColor(new Color(140, 158, 255))
                 .setAuthor("Meeting", null, channel.getJDA().getSelfUser().getAvatarUrl());
 
-
         MeetingData returnedData;
 
         //Regex für UserID
@@ -42,6 +42,10 @@ public class MeetingCommand implements CommandInterface {
 
         //Speichert sich User der Nachricht
         User user = msg.getAuthor();
+
+        //Datumsobjekte der Eingabe
+        Date dateStart;
+        Date dateEnd;
 
         MeetingManagement meetingManager = MeetingManagement.getINSTANCE();
 
@@ -108,12 +112,12 @@ public class MeetingCommand implements CommandInterface {
                 //Versucht Zeiten richtig zu formatieren und überprüft, ob Datum & Uhrzeit existieren
                 try {
                     //Parsed String in Datum
-                    Date dateStart = format.parse(starttime);
-                    //Speichert sich Epoch vom Datum (ohne Millisekunden)
-                    epochStart = dateStart.getTime() / 1000;
+                    dateStart = format.parse(starttime);
+                    //Speichert sich Epoch vom Datum
+                    epochStart = dateStart.getTime();
 
-                    Date dateEnd = format.parse(endtime);
-                    epochEnd = dateEnd.getTime() / 1000;
+                    dateEnd = format.parse(endtime);
+                    epochEnd = dateEnd.getTime();
 
                     //Prüft, ob Endzeit des Zeitraums nach Startzeit liegt
                     if (!(epochStart < epochEnd)) {
@@ -122,8 +126,8 @@ public class MeetingCommand implements CommandInterface {
                         return;
                     }
 
-                    //Dauer des Meetings in Sekunden
-                    duration = Integer.parseInt(createArgs[5]) * 60;
+                    //Dauer des Meetings in Millisekunden
+                    duration = Integer.parseInt(createArgs[5]) * 60 * 1000;
                 } catch (ParseException e) {
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                     return;
@@ -145,6 +149,15 @@ public class MeetingCommand implements CommandInterface {
                     messageValue = createArgs[6];
                 }
 
+                //Wenn User nicht in unserer Datenbank ist
+                if (!meetingManager.userIsRegistered(participantID)) {
+
+                    SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+                    channel.sendMessage(String.format("!_meeting exampleUniqueID %s %s %s %s %s", user.getAsMention(), isoFormat.format(dateStart) + "+00:00", createArgs[4], createArgs[5], createArgs[0])).queue();
+                    return;
+                }
+
                 //Wenn kein Meeting eingefügt werden konnte
                 if ((returnedData = meetingManager.insert(user.getId(), participantID, epochStart, epochEnd, duration, messageValue)) == null) {
                     channel.sendMessage("Could not create the meeting.").queue();
@@ -152,8 +165,8 @@ public class MeetingCommand implements CommandInterface {
                 }
 
                 //Konvertiert die finalen Zeiten des Meetings von Epoch in Daten
-                foundStarttime = new Date(returnedData.getStarttime() * 1000);
-                foundEndtime = new Date(returnedData.getEndtime() * 1000);
+                foundStarttime = new Date(returnedData.getStarttime());
+                foundEndtime = new Date(returnedData.getEndtime());
 
                 //Embed wird mit restlichen Parametern befüllt
                 embedBuilder
@@ -171,9 +184,8 @@ public class MeetingCommand implements CommandInterface {
 
                 String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
 
-                System.out.println(participantName);
-
-                String eventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, returnedData.getStarttime() * 1000, returnedData.getEndtime() * 1000);
+                //Link zum Google Calendar Event wird erstellt
+                String eventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, returnedData.getStarttime(), returnedData.getEndtime());
 
                 if (eventLink == null) {
                     channel.sendMessage("Could not add meeting to your Google Calendar.").queue();
