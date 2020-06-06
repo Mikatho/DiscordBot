@@ -119,13 +119,6 @@ public class MeetingCommand implements CommandInterface {
                     dateEnd = format.parse(endtime);
                     epochEnd = dateEnd.getTime();
 
-                    //Prüft, ob Endzeit des Zeitraums nach Startzeit liegt
-                    if (!(epochStart < epochEnd)) {
-
-                        channel.sendMessage("The endtime has to be later than the starttime. ").queue();
-                        return;
-                    }
-
                     //Dauer des Meetings in Millisekunden
                     duration = Integer.parseInt(createArgs[5]) * 60 * 1000;
                 } catch (ParseException e) {
@@ -133,6 +126,13 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 } catch (NumberFormatException e) {
                     channel.sendMessage("Please add a duration of the meeting!\n Note: Duration has to be in minutes (only the number).").queue();
+                    return;
+                }
+
+                //Prüft, ob Endzeit des Zeitraums nach Startzeit liegt
+                if (!(epochStart < epochEnd)) {
+
+                    channel.sendMessage("The endtime has to be later than the starttime. ").queue();
                     return;
                 }
 

@@ -23,13 +23,20 @@ public class BotMeetingCommand implements CommandInterface {
 
         String[] args = msg.getContentRaw().split(" ");
 
+        //Wenn es die erste Nachricht vom anderen Bot ist
+        if (args.length == 6) {
+
+        } else {
+
+        }
+
         MeetingData returnedData;
 
         String foreignUserID = args[2].substring(3, 21);
 
         String requestedUserID = args[6].substring(3, 21);
 
-        String endtime = args[3].substring(0, 11) + args[4] + ":00+00:00";
+        String endtime = args[3].substring(0, 11) + args[4] + ":00" + args[3].substring(19);
 
         long epochStart;
         long epochEnd;
@@ -69,32 +76,10 @@ public class BotMeetingCommand implements CommandInterface {
         String timeOfEndtime = format.format(foundEndtime).split(" ")[1];
 
         //Gibt Bestätigung mit Daten an den Bot zurück
-        channel.sendMessage(String.format("!_meeting %s %s %s", args[1], isoFormat.format(epochStart) + "+00:00", timeOfEndtime)).queue();
+        msg.getAuthor().openPrivateChannel().complete().sendMessage(String.format("!_meeting %s %s %s", args[1], isoFormat.format(epochStart) + "+00:00", timeOfEndtime)).queue();
 
-        //Embed für den User als Rückgabe
-        EmbedBuilder embedBuilder = new EmbedBuilder()
-                .setColor(new Color(140, 158, 255))
-                .setAuthor("Meeting", null, channel.getJDA().getSelfUser().getAvatarUrl())
-                .addField("Meeting ID", Integer.toString(returnedData.getMeetingID()), false)
-                .addField("Host", args[2], true)
-                .addField("Participant", args[6], true)
-                .addBlankField(true)
-                .addField("Starttime", format.format(foundStarttime), true)
-                .addField("Endtime", format.format(foundEndtime), true)
-                .addBlankField(true)
-                .addField("Message", "N/a", true);
-
-        channel.sendMessage(embedBuilder.build()).queue();
-
-        String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
-
-        //Link zum Google Calendar Event wird erstellt
-        String eventLink = meetingManager.googleCalendarEvent(requestedUserID, "Meeting with " + participantName, "N/a", "N/a", returnedData.getStarttime(), returnedData.getEndtime());
-
-        if (eventLink == null) {
-            channel.sendMessage("Could not add meeting to your Google Calendar.").queue();
-        } else {
-            channel.sendMessage("Here is the Google Calendar-Link to your event:\n" + eventLink).queue();
-        }
+        /**TODO
+         * Bestätigung des Termins an unseren User
+         */
     }
 }

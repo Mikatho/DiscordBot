@@ -52,10 +52,16 @@ public class CommandListener extends ListenerAdapter {
 
             /**
              * Call execute method in CommandManager.
+             * returnedValue = 0 --> execute was successfull
+             * returnedValue = 1 --> command doesn't exist at all
+             * returnedValue = 2 --> command was written in wrong chat type
              */
+            int commandExists = CommandManager.getInstance().execute(args[0], channel, event.getMessage());
 
-            if (!CommandManager.getInstance().execute(args[0], channel, event.getMessage())) {
+            if (commandExists == 1) {
                 channel.sendMessage("Unknown Command. Use `!help` to see an overview of all available commands.").queue();
+            } else if (commandExists == 2) {
+                channel.sendMessage("Command is private chat only.").queue();
             }
         }
     }
