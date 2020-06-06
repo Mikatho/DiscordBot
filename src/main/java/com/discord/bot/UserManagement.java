@@ -22,7 +22,8 @@ public class UserManagement {
 
         //Versucht User in Datenbank einzufügen
         try {
-            return dbManager.insertUser(tempUser);
+            dbManager.insertUser(tempUser);
+            return true;
         } catch (SQLException e) {
             return false;
         }
@@ -42,7 +43,8 @@ public class UserManagement {
 
         //Versucht User in Datenbank zu updaten
         try {
-            return dbManager.updateUser(userID, column, newValue);
+            dbManager.updateUser(userID, column, newValue);
+            return true;
         } catch (SQLException e) {
             return false;
         }
@@ -51,7 +53,11 @@ public class UserManagement {
     public Object[] search(String userID) {
 
         //Versucht User in Datenbank zu finden und zurückzugeben
-        return dbManager.returnData(userID);
+        try {
+            return dbManager.returnData(userID);
+        } catch (SQLException e) {
+            return null;
+        }
     }
 
     public boolean startActivity(String time) {

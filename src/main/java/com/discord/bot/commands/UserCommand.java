@@ -5,6 +5,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.Objects;
+
 
 /**
  * The <code>UserCommand</code> Class implements the <code>CommandInterface</code>
@@ -69,11 +71,11 @@ public class UserCommand implements CommandInterface {
         switch (args[1].toLowerCase()) {
             case "data":
                 //Speichert sich Return-Array ab
-                receivedData = UserManagement.getINSTANCE().search(msg.getAuthor().getId());
+                receivedData = userManager.search(msg.getAuthor().getId());
 
                 //Wenn UserData nicht zurückgegeben werden konnte
-                if (receivedData[0] == null) {
-                    channel.sendMessage("Could not get your data from the database.").queue();
+                if (receivedData == null) {
+                    channel.sendMessage("Unfortunately we could not load your data.").queue();
                     return;
                 }
 
@@ -82,7 +84,7 @@ public class UserCommand implements CommandInterface {
                         + "\nAddress: " + receivedData[0]
                         + "\nInterests: " + receivedData[1]
                         + "\nCompetencies: " + receivedData[2]
-                        + "\nGoogle Calendar Link: " + receivedData[3];
+                        + "\nGoogle Calendar Link: " + userManager.googleCalendarLink(Objects.toString(receivedData[3]));
                 channel.sendMessage(data).queue();
                 break;
             case "search":
@@ -109,11 +111,22 @@ public class UserCommand implements CommandInterface {
                     return;
                 }
 
-                receivedData = UserManagement.getINSTANCE().search(searchID);
+                receivedData = userManager.search(searchID);
 
-                data = "\nAddress: " + receivedData[0]
+                if (receivedData == null) {
+                    channel.sendMessage("Unfortunately we could not load the data.").queue();
+                    return;
+                }
+
+                //Ruft Daten des Users aus seiner Instanz auf
+
+                String nickname = msg.getContentDisplay().split(" ")[2].substring(1);
+
+                data = "Nickname: " + nickname
+                        + "\nAddress: " + receivedData[0]
                         + "\nInterests: " + receivedData[1]
-                        + "\nCompetencies: " + receivedData[2];
+                        + "\nCompetencies: " + receivedData[2]
+                        + "\nGoogle Calendar Link: " + userManager.googleCalendarLink(Objects.toString(receivedData[3]));
 
                 channel.sendMessage(data).queue();
                 break;

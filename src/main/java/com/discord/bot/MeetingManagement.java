@@ -22,7 +22,12 @@ public class MeetingManagement {
         int returnedValue;
 
         //Returnt starttime & endtime als long[starttime, endtime]
-        long[] meetingtimes = dbManager.findEarliestPossibleMeetingtimes(participantID, starttime, endtime, duration);
+        long[] meetingtimes;
+        try {
+            meetingtimes = dbManager.findEarliestPossibleMeetingtimes(participantID, starttime, endtime, duration);
+        } catch (SQLException e) {
+            return null;
+        }
 
         long foundStarttime = meetingtimes[0];
         long foundEndtime = meetingtimes[1];
@@ -86,7 +91,12 @@ public class MeetingManagement {
         }
 
         //Versucht Meeting in Datenbank zu updaten
-        return dbManager.updateMeeting(meetingID, column, newValue, hostID);
+        try {
+            dbManager.updateMeeting(meetingID, column, newValue, hostID);
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     //Prüft, ob User registriert ist
@@ -102,11 +112,10 @@ public class MeetingManagement {
     //Returnt Google Calendar Event
     public String googleCalendarEvent(String userID, String eventName, String eventLocation, String eventDescription, long starttime, long endtime) {
 
-        String calendarID = (String) dbManager.returnData(userID)[3];
-
         try {
+            String calendarID = (String) dbManager.returnData(userID)[3];
             return GoogleCalendarManagement.getInstance().createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
-        } catch (IOException e) {
+        } catch (SQLException | IOException e) {
             return null;
         }
     }
