@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 import java.awt.*;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -122,7 +123,7 @@ public class MeetingCommand implements CommandInterface {
                     //Dauer des Meetings in Millisekunden
                     duration = Integer.parseInt(createArgs[5]) * 60 * 1000;
                 } catch (ParseException e) {
-                    channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
+                    channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern or date does not exist.").queue();
                     return;
                 } catch (NumberFormatException e) {
                     channel.sendMessage("Please add a duration of the meeting!\n Note: Duration has to be in minutes (only the number).").queue();
@@ -139,6 +140,17 @@ public class MeetingCommand implements CommandInterface {
                 //Wenn die Länge des Meeting größer ist, als der angefragte Zeitraum
                 if (duration > (epochEnd - epochStart)) {
                     channel.sendMessage("The duration of the meeting cannot be longer than the requested period.").queue();
+                    return;
+                }
+
+                //Wenn User zu dem Zeitpunkt keine Zeit hat
+                try {
+                    if (meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochEnd, duration)[0] == 0) {
+                        channel.sendMessage("You don't have time in this period.").queue();
+                        return;
+                    }
+                } catch (SQLException e) {
+                    channel.sendMessage("Could not receive meeting data.").queue();
                     return;
                 }
 

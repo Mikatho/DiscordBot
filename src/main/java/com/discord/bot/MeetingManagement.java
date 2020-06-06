@@ -21,10 +21,11 @@ public class MeetingManagement {
 
         int returnedValue;
 
-        //Returnt starttime & endtime als long[starttime, endtime]
         long[] meetingtimes;
+
+        //Returnt starttime & endtime als long[starttime, endtime]
         try {
-            meetingtimes = dbManager.findEarliestPossibleMeetingtimes(participantID, starttime, endtime, duration);
+            meetingtimes = earliestPossibleMeeting(participantID, starttime, endtime, duration);
         } catch (SQLException e) {
             return null;
         }
@@ -32,7 +33,7 @@ public class MeetingManagement {
         long foundStarttime = meetingtimes[0];
         long foundEndtime = meetingtimes[1];
 
-        //Falls das Suchen nach Start- und Endtime nicht erfolgreich ausgeführt werden konnte
+        //Falls das Suchen nach Start- und Endtime nicht erfolgreich war
         if (foundStarttime == 0 || foundEndtime == 0) {
             return null;
         }
@@ -107,6 +108,11 @@ public class MeetingManagement {
         } catch (SQLException e) {
             return false;
         }
+    }
+
+    public long[] earliestPossibleMeeting(String userID, long starttime, long endtime, int duration) throws SQLException {
+
+        return dbManager.findEarliestPossibleMeetingtimes(userID, starttime, endtime, duration);
     }
 
     //Returnt Google Calendar Event

@@ -61,7 +61,7 @@ public class CommandListener extends ListenerAdapter {
             if (commandExists == 1) {
                 channel.sendMessage("Unknown Command. Use `!help` to see an overview of all available commands.").queue();
             } else if (commandExists == 2) {
-                channel.sendMessage("Command is private chat only.").queue();
+                channel.sendMessage("This command is for private chat only.").queue();
             }
         }
     }
