@@ -167,7 +167,15 @@ public class MeetingCommand implements CommandInterface {
 
                     SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-                    channel.sendMessage(String.format("!_meeting exampleUniqueID %s %s %s %s %s", user.getAsMention(), isoFormat.format(dateStart) + "+00:00", createArgs[4], createArgs[5], createArgs[0])).queue();
+                    String answerCommand = "!_meeting "
+                            + "exampleUniqueID" + " "
+                            + user.getAsMention() + " "
+                            + isoFormat.format(dateStart) + "+00:00 "
+                            + createArgs[4] + " "
+                            + createArgs[5] + " "
+                            + createArgs[0];
+
+                    channel.sendMessage(answerCommand).queue();
                     return;
                 }
 

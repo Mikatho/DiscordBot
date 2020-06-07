@@ -4,6 +4,7 @@ import com.discord.bot.data.MeetingData;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MeetingManagement {
 
@@ -13,8 +14,20 @@ public class MeetingManagement {
 
     private GoogleCalendarManagement calendarManager = GoogleCalendarManagement.getInstance();
 
+    private ConcurrentHashMap<String, String> botMessageHolder = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<String, Integer> botDurationHolder = new ConcurrentHashMap<>();
+
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
+    }
+
+    public ConcurrentHashMap<String, String> getBotMessageHolder() {
+        return botMessageHolder;
+    }
+
+    public ConcurrentHashMap<String, Integer> getBotDurationHolder() {
+        return botDurationHolder;
     }
 
     public MeetingData insert(String hostID, String participantID, long starttime, long endtime, int duration, String message) {

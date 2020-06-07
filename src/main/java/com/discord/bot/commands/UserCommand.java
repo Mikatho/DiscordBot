@@ -130,8 +130,7 @@ public class UserCommand implements CommandInterface {
                 data = "Nickname: " + nickname
                         + "\nAddress: " + receivedData[0]
                         + "\nInterests: " + receivedData[1]
-                        + "\nCompetencies: " + receivedData[2]
-                        + "\nGoogle Calendar Link: " + userManager.googleCalendarLink(Objects.toString(receivedData[3]));
+                        + "\nCompetencies: " + receivedData[2];
 
                 channel.sendMessage(data).queue();
                 break;
