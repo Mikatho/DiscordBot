@@ -101,9 +101,10 @@ public class MeetingCommand implements CommandInterface {
 
                 //Prüft, ob Participant im richtigen Format übergeben wurde
                 if (!createArgs[0].matches(userIdRegex)) {
-                    channel.sendMessage("User is not valid. Please use ´@UserName´!").queue();
+                    channel.sendMessage("User is not valid. Please use ´ @UserName ´!").queue();
                     return;
                 }
+
                 String participantID = createArgs[0].substring(3, 21);
 
                 //Stellt Zeiten aus den Zusatz-Parametern her
@@ -191,18 +192,20 @@ public class MeetingCommand implements CommandInterface {
                         .addBlankField(true)
                         .addField("Message", messageValue, true);
 
-                channel.sendMessage("Successfully created the meeting!").queue();
+                channel.sendMessage(String.format("%s %s Successfully created the meeting!", user.getAsMention(), createArgs[0])).queue();
                 channel.sendMessage(embedBuilder.build()).queue();
 
                 String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
 
                 //Link zum Google Calendar Event wird erstellt
-                String eventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, returnedData.getStarttime(), returnedData.getEndtime());
+                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, returnedData.getStarttime(), returnedData.getEndtime());
 
-                if (eventLink == null) {
+                meetingManager.googleCalendarEvent(participantID, "Meeting with " + user.getName(), "N/a", messageValue, returnedData.getStarttime(), returnedData.getEndtime());
+
+                if (hostEventLink == null) {
                     channel.sendMessage("Could not add meeting to your Google Calendar.").queue();
                 } else {
-                    channel.sendMessage("Here is the Google Calendar-Link to your event:\n" + eventLink).queue();
+                    channel.sendMessage("Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
                 }
                 break;
             case "delete":
@@ -217,13 +220,19 @@ public class MeetingCommand implements CommandInterface {
                     //Versucht MeetingID in Zahl zu konvertieren
                     int meetingID = Integer.parseInt(args[2]);
 
-                    //Versucht Meeting zu löschen
-                    if (!meetingManager.delete(meetingID, user.getId())) {
-                        channel.sendMessage("Could not delete the Meeting.").queue();
+                    //versucht Meeting aus Google Calendar zu löschen
+                    if (!meetingManager.deleteGoogleCalendarEvent(user.getId(), meetingID)) {
+                        channel.sendMessage("Could not delete the meeting out of your Google Calendar.").queue();
                         return;
                     }
 
-                    channel.sendMessage("Successfully deleted the Meeting.").queue();
+                    //Versucht Meeting zu löschen
+                    if (!meetingManager.delete(meetingID, user.getId())) {
+                        channel.sendMessage("Could not delete the meeting.").queue();
+                        return;
+                    }
+
+                    channel.sendMessage("Successfully deleted the meeting.").queue();
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
@@ -274,7 +283,7 @@ public class MeetingCommand implements CommandInterface {
 
                         //Prüft, ob Participant im richtigen Format übergeben wurde
                         if (!updateArgs[2].matches(userIdRegex)) {
-                            channel.sendMessage("User is not valid. Please use ´@UserName´!").queue();
+                            channel.sendMessage("User is not valid. Please use ´ @UserName ´!").queue();
                             return;
                         }
 

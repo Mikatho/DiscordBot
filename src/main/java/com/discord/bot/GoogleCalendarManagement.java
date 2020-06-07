@@ -232,7 +232,7 @@ public class GoogleCalendarManagement {
            } else {
             //Get the Time the event starts so we can compare it
             EventDateTime gEventTime = items.get(0).getStart();
-            if (gEventTime.getDateTime().getValue() == epochStart * 1000) {
+            if (gEventTime.getDateTime().getValue() == epochStart) {
                 //Extract the event id of the event we want to delete
                 String eventID = items.get(0).getId();
                 service.events().delete(calendarID, eventID).execute();

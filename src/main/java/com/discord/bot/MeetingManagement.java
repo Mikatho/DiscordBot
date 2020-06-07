@@ -11,6 +11,8 @@ public class MeetingManagement {
 
     private DatabaseManagement dbManager = DatabaseManagement.getINSTANCE();
 
+    private GoogleCalendarManagement calendarManager = GoogleCalendarManagement.getInstance();
+
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
     }
@@ -119,10 +121,22 @@ public class MeetingManagement {
     public String googleCalendarEvent(String userID, String eventName, String eventLocation, String eventDescription, long starttime, long endtime) {
 
         try {
-            String calendarID = (String) dbManager.returnData(userID)[3];
-            return GoogleCalendarManagement.getInstance().createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
+            String calendarID = (String) dbManager.returnDataUser(userID)[3];
+            return calendarManager.createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
         } catch (SQLException | IOException e) {
             return null;
+        }
+    }
+
+    //Versucht Google Calender Event zu löschen
+    public boolean deleteGoogleCalendarEvent(String userID, int meetingID) {
+
+        try {
+            String calendarID = (String) dbManager.returnDataUser(userID)[3];
+            long epochStart = (long) dbManager.returnDataMeeting(meetingID)[2];
+            return calendarManager.deleteEvent(calendarID, epochStart);
+        } catch (IOException | SQLException e) {
+            return false;
         }
     }
 }

@@ -54,7 +54,7 @@ public class UserManagement {
 
         //Versucht User in Datenbank zu finden und zurückzugeben
         try {
-            return dbManager.returnData(userID);
+            return dbManager.returnDataUser(userID);
         } catch (SQLException e) {
             return null;
         }

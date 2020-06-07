@@ -101,6 +101,11 @@ public class UserCommand implements CommandInterface {
                  * speichert aus der eingabe @user den kompletten String und filtert
                  * die UserID heraus
                  */
+                if (!args[2].matches("<@!\\d{18}>")) {
+                    channel.sendMessage("User is not valid. Please use ` @UserName `!").queue();
+                    return;
+                }
+
                 String searchID = args[2].substring(3, 21);
 
                 /**
@@ -120,7 +125,7 @@ public class UserCommand implements CommandInterface {
 
                 //Ruft Daten des Users aus seiner Instanz auf
 
-                String nickname = msg.getContentDisplay().split(" ")[2].substring(1);
+                String nickname = msg.getContentDisplay().split(" ")[2];
 
                 data = "Nickname: " + nickname
                         + "\nAddress: " + receivedData[0]

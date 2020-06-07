@@ -358,7 +358,6 @@ public class DatabaseManagement {
         PreparedStatement prepStmt = conn.prepareStatement(sql);
         prepStmt.setInt(1, meetingID);
         prepStmt.executeUpdate();
-        System.out.println("Successfully deleted the Meeting from the Database!");
         return true;
     }
 
@@ -402,7 +401,7 @@ public class DatabaseManagement {
     }
 
     //Funktion um UserData abzurufen
-    public Object[] returnData(String userID) throws SQLException {
+    public Object[] returnDataUser(String userID) throws SQLException {
 
         String sql = "SELECT * FROM user_data WHERE userID = ?";
 
@@ -416,6 +415,26 @@ public class DatabaseManagement {
         data[1] = rs.getString("interests");
         data[2] = rs.getString("competencies");
         data[3] = rs.getString("gCalendarLink");
+
+        return data;
+    }
+
+    //Funktion um MeetingData abzurufen
+    public Object[] returnDataMeeting(int meetingID) throws SQLException {
+
+        String sql = "SELECT * FROM meeting_data WHERE meetingID = ?";
+
+        Object[] data = new Object[5];
+
+        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt.setInt(1, meetingID);
+        rs = prepStmt.executeQuery();
+
+        data[0] = rs.getString("hostID");
+        data[1] = rs.getString("participantID");
+        data[2] = rs.getLong("starttime");
+        data[3] = rs.getLong("endtime");
+        data[4] = rs.getString("message");
 
         return data;
     }
