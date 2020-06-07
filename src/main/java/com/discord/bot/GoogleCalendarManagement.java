@@ -207,4 +207,35 @@ public class GoogleCalendarManagement {
         return "https://calendar.google.com/calendar/r?cid=" + userCalID;
     }
 
+    /**
+     * Delete a event at the given start time
+     *
+     * @param calendarID the id of the calendar
+     * @param epochStart the start time of the event that should be deleted in epoch
+     * @return true if the deletion was sucessfull
+     * @throws IOException when the service worker doesn't find the calendar
+     */
+    public boolean deleteEvent (String calendarID, long epochStart) throws IOException {
+
+        DateTime desiredDate = new DateTime(epochStart);
+        Events events = service.events().list(calendarID)
+                .setMaxResults(1)
+                .setTimeMin(desiredDate)
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .execute();
+        List<Event> items = events.getItems();
+
+
+        if (items.isEmpty()) {
+            LOGGER.log(Level.FINE,"There was no event in the specified date and time");
+            return false;
+           } else {
+            String eventID = items.get(1).getId();
+            service.events().delete(calendarID, eventID);
+            LOGGER.log(Level.FINE,"Deleted a event");
+            return true;
+        }
+    }
+
 }
