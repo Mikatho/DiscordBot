@@ -231,10 +231,12 @@ public class GoogleCalendarManagement {
             return false;
            } else {
             //Get the Time the event starts so we can compare it
-            EventDateTime gEventTime = items.get(1).getStart();
-            if (gEventTime.getDateTime().getValue() == desiredDate.getValue()) {
-                String eventID = items.get(1).getId();
-                service.events().delete(calendarID, eventID);
+            EventDateTime gEventTime = items.get(0).getStart();
+            if (gEventTime.getDateTime().getValue() == epochStart * 1000) {
+                //Extract the event id of the event we want to delete
+                String eventID = items.get(0).getId();
+                service.events().delete(calendarID, eventID).execute();
+
                 LOGGER.log(Level.FINE,TAG + "Sucessfully deleted a event");
                 return true;
             } else {
