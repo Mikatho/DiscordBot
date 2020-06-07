@@ -226,15 +226,21 @@ public class GoogleCalendarManagement {
                 .execute();
         List<Event> items = events.getItems();
 
-
         if (items.isEmpty()) {
-            LOGGER.log(Level.FINE,"There was no event in the specified date and time");
+            LOGGER.log(Level.FINE,TAG + "There was no event in the specified date and time");
             return false;
            } else {
-            String eventID = items.get(1).getId();
-            service.events().delete(calendarID, eventID);
-            LOGGER.log(Level.FINE,"Deleted a event");
-            return true;
+            //Get the Time the event starts so we can compare it
+            EventDateTime gEventTime = items.get(1).getStart();
+            if (gEventTime.getDateTime().getValue() == desiredDate.getValue()) {
+                String eventID = items.get(1).getId();
+                service.events().delete(calendarID, eventID);
+                LOGGER.log(Level.FINE,TAG + "Sucessfully deleted a event");
+                return true;
+            } else {
+                LOGGER.log(Level.FINE,TAG + "Event Time != the time of the event to delete");
+                return false;
+            }
         }
     }
 
