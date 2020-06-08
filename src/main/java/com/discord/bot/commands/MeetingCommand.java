@@ -1,7 +1,6 @@
 package com.discord.bot.commands;
 
 import com.discord.bot.MeetingManagement;
-import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -36,13 +35,15 @@ public class MeetingCommand implements CommandInterface {
                 .setColor(new Color(140, 158, 255))
                 .setAuthor("Meeting", null, channel.getJDA().getSelfUser().getAvatarUrl());
 
-        MeetingData returnedData;
-
         //Regex für UserID
         String userIdRegex = "<@!\\d{18}>";
 
         //Speichert sich User der Nachricht
         User user = msg.getAuthor();
+
+        int returnedMeetingID;
+
+        long[] earliestMeetingTimes;
 
         //Datumsobjekte der Eingabe
         Date dateStart;
@@ -146,8 +147,10 @@ public class MeetingCommand implements CommandInterface {
 
                 //Wenn User zu dem Zeitpunkt keine Zeit hat
                 try {
-                    if (meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochEnd, duration)[0] == 0) {
-                        channel.sendMessage("You don't have time in this period.").queue();
+                    earliestMeetingTimes = meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochEnd, duration);
+
+                    if (earliestMeetingTimes[0] == 0) {
+                        channel.sendMessage("You do not have free time during this period.").queue();
                         return;
                     }
                 } catch (SQLException e) {
@@ -180,35 +183,36 @@ public class MeetingCommand implements CommandInterface {
                 }
 
                 //Wenn kein Meeting eingefügt werden konnte
-                if ((returnedData = meetingManager.insert(user.getId(), participantID, epochStart, epochEnd, duration, messageValue)) == null) {
+                if ((returnedMeetingID = meetingManager.insert(user.getId(), participantID, earliestMeetingTimes[0], earliestMeetingTimes[1], messageValue)) == 0) {
                     channel.sendMessage("Could not create the meeting.").queue();
                     return;
                 }
 
-                //Konvertiert die finalen Zeiten des Meetings von Epoch in Daten
-                foundStarttime = new Date(returnedData.getStarttime());
-                foundEndtime = new Date(returnedData.getEndtime());
-
                 //Embed wird mit restlichen Parametern befüllt
                 embedBuilder
-                        .addField("Meeting ID", Integer.toString(returnedData.getMeetingID()), false)
+                        .addField("Meeting ID", Integer.toString(returnedMeetingID), false)
                         .addField("Host", user.getAsMention(), true)
                         .addField("Participant", createArgs[0], true)
                         .addBlankField(true)
-                        .addField("Starttime", format.format(foundStarttime), true)
-                        .addField("Endtime", format.format(foundEndtime), true)
+                        .addField("Starttime", format.format(earliestMeetingTimes[0]), true)
+                        .addField("Endtime", format.format(earliestMeetingTimes[1]), true)
                         .addBlankField(true)
                         .addField("Message", messageValue, true);
 
-                channel.sendMessage(String.format("%s %s Successfully created the meeting!", user.getAsMention(), createArgs[0])).queue();
-                channel.sendMessage(embedBuilder.build()).queue();
-
                 String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
 
-                //Link zum Google Calendar Event wird erstellt
-                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, returnedData.getStarttime(), returnedData.getEndtime());
+                //Wenn User mit sich selbst Meeting erstellt wird er bei Nachricht nicht doppelt erwähnt
+                if (user.getName().equals(participantName)) {
+                    channel.sendMessage(String.format("%s Successfully created the meeting!", user.getAsMention())).queue();
+                } else {
+                    channel.sendMessage(String.format("%s %s Successfully created the meeting!", user.getAsMention(), createArgs[0])).queue();
+                }
+                channel.sendMessage(embedBuilder.build()).queue();
 
-                meetingManager.googleCalendarEvent(participantID, "Meeting with " + user.getName(), "N/a", messageValue, returnedData.getStarttime(), returnedData.getEndtime());
+                //Link zum Google Calendar Event wird erstellt
+                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, earliestMeetingTimes[0], earliestMeetingTimes[1]);
+
+                meetingManager.googleCalendarEvent(participantID, "Meeting with " + user.getName(), "N/a", messageValue, earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
                 if (hostEventLink == null) {
                     channel.sendMessage("Could not add meeting to your Google Calendar.").queue();

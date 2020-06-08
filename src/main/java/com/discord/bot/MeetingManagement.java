@@ -16,7 +16,7 @@ public class MeetingManagement {
 
     private ConcurrentHashMap<String, String> botMessageHolder = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<String, Integer> botDurationHolder = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Object[]> botValueHolder = new ConcurrentHashMap<>();
 
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
@@ -26,53 +26,27 @@ public class MeetingManagement {
         return botMessageHolder;
     }
 
-    public ConcurrentHashMap<String, Integer> getBotDurationHolder() {
-        return botDurationHolder;
+    public ConcurrentHashMap<String, Object[]> getBotValueHolder() {
+        return botValueHolder;
     }
 
-    public MeetingData insert(String hostID, String participantID, long starttime, long endtime, int duration, String message) {
+    public int insert(String hostID, String participantID, long starttime, long endtime, String message) {
 
         MeetingData tempMeeting;
-
-        int returnedValue;
-
-        long[] meetingtimes;
-
-        //Returnt starttime & endtime als long[starttime, endtime]
-        try {
-            meetingtimes = earliestPossibleMeeting(participantID, starttime, endtime, duration);
-        } catch (SQLException e) {
-            return null;
-        }
-
-        long foundStarttime = meetingtimes[0];
-        long foundEndtime = meetingtimes[1];
-
-        //Falls das Suchen nach Start- und Endtime nicht erfolgreich war
-        if (foundStarttime == 0 || foundEndtime == 0) {
-            return null;
-        }
 
         //Erstellt neue Instanz mit Daten
         if (message.equals("N/a")) {
             //Wenn keine Message mitgegeben wurde
-            tempMeeting = new MeetingData(hostID, participantID, foundStarttime, foundEndtime);
+            tempMeeting = new MeetingData(hostID, participantID, starttime, endtime);
         } else {
-            tempMeeting = new MeetingData(hostID, participantID, foundStarttime, foundEndtime, message);
+            tempMeeting = new MeetingData(hostID, participantID, starttime, endtime, message);
         }
 
         try {
-            returnedValue = dbManager.insertMeeting(tempMeeting);
+            return dbManager.insertMeeting(tempMeeting);
         } catch (SQLException e) {
-            return null;
+            return 0;
         }
-
-        if (returnedValue == 0) {
-            return null;
-        }
-        tempMeeting.setMeetingID(returnedValue);
-
-        return tempMeeting;
     }
 
 

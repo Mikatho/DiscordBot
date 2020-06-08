@@ -1,7 +1,6 @@
 package com.discord.bot.commands;
 
 import com.discord.bot.MeetingManagement;
-import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -24,7 +23,14 @@ public class BotMeetingCommand implements CommandInterface {
 
         String[] args = msg.getContentRaw().split(" ");
 
-        long[] returnedData;
+        int returnedMeetingID;
+
+        long[] earliestMeetingTimes;
+
+        String commandAnswer;
+
+        String foreignUserID;
+        String ourUserID;
 
         String starttime;
         String endtime;
@@ -48,19 +54,17 @@ public class BotMeetingCommand implements CommandInterface {
         //Wenn es die erste Nachricht vom anderen Bot ist
         if (args.length == 7) {
 
-            String requestedUserID = args[6].substring(3, 21);
+            foreignUserID = args[2].substring(3, 21);
 
-            if (!meetingManager.userIsRegistered(requestedUserID)) {
+            ourUserID = args[6].substring(3, 21);
+
+            if (!meetingManager.userIsRegistered(ourUserID)) {
                 return;
             }
 
-            duration = Integer.parseInt(args[5])*60*1000;
-
             meetingManager.getBotMessageHolder().put(args[1], msg.getContentRaw());
 
-            meetingManager.getBotDurationHolder().put(args[1], duration);
-
-            String foreignUserID = args[2].substring(3, 21);
+            duration = Integer.parseInt(args[5])*60*1000;
 
             starttime = args[3];
 
@@ -86,28 +90,38 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            try {
-                if ((returnedData = meetingManager.earliestPossibleMeeting(requestedUserID, epochStart, epochEnd, duration))[0] == 0) {
+            meetingManager.getBotValueHolder().put(args[1], new Object[]{foreignUserID, ourUserID, duration, epochEnd});
 
-                    channel.sendMessage("!_meeting " + args[1] + " noTime").queue();
-                    return;
-                }
+            try {
+                earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochEnd, duration);
             } catch (SQLException e) {
                 channel.sendMessage("!_meeting " + args[1] + " noTime").queue();
                 return;
             }
 
-            timeOfEndtime = format.format(epochEnd).split(" ")[1];
+            if (earliestMeetingTimes[0] == 0) {
 
-            String commandAnswer = "!_meeting "
+                channel.sendMessage("!_meeting " + args[1] + " noTime").queue();
+                return;
+            }
+
+            timeOfEndtime = format.format(earliestMeetingTimes[1]).split(" ")[1];
+
+            commandAnswer = "!_meeting "
                     + args[1] + " "
-                    + isoFormat.format(epochStart) + timezone + " "
+                    + isoFormat.format(earliestMeetingTimes[0]) + timezone + " "
                     + timeOfEndtime;
 
             //Gibt Bestätigung mit Daten an den Bot zurück
             msg.getAuthor().openPrivateChannel().complete().sendMessage(commandAnswer).queue();
         } else {
-            duration = meetingManager.getBotDurationHolder().get(args[1]);
+            foreignUserID = (String) meetingManager.getBotValueHolder().get(args[1])[0];
+
+            ourUserID = (String) meetingManager.getBotValueHolder().get(args[1])[1];
+
+            duration = (int) meetingManager.getBotValueHolder().get(args[1])[2];
+
+            epochEnd = (long) meetingManager.getBotValueHolder().get(args[1])[3];
 
             meetingManager.getBotMessageHolder().put(args[1], msg.getContentRaw());
 
@@ -126,15 +140,33 @@ public class BotMeetingCommand implements CommandInterface {
 
             epochEnd = epochStart + duration;
 
+            try {
+                if ((earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochEnd, duration))[0] == 0) {
 
+                    channel.sendMessage("!_meeting " + args[1] + " noTime").queue();
+                    return;
+                }
+            } catch (SQLException e) {
+                channel.sendMessage("!_meeting " + args[1] + " noTime").queue();
+                return;
+            }
+
+            commandAnswer = "!_meeting "
+                    + args[1] + " "
+                    + isoFormat.format(earliestMeetingTimes[0]) + timezone;
+
+            channel.sendMessage(commandAnswer).queue();
+
+            if (commandAnswer.equals(meetingManager.getBotMessageHolder().get(args[1]))) {
+                if ((returnedMeetingID = meetingManager.insert(foreignUserID, ourUserID, earliestMeetingTimes[0], earliestMeetingTimes[1], "N/a")) == 0) {
+
+                    channel.sendMessage("Could not create the meeting.").queue();
+                    return;
+                }
+                /**TODO
+                 * Bestätigung des Termins an unseren User
+                 */
+            }
         }
-
-        Date foundStarttime = new Date(returnedData.getStarttime());
-
-        Date foundEndtime = new Date(returnedData.getEndtime());
-
-        /**TODO
-         * Bestätigung des Termins an unseren User
-         */
     }
 }
