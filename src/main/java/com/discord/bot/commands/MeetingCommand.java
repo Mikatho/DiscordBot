@@ -238,6 +238,12 @@ public class MeetingCommand implements CommandInterface {
                         return;
                     }
 
+                    participantID = (String) meetingManager.search(meetingID)[1];
+
+                    if (meetingManager.userIsRegistered(participantID)) {
+                        meetingManager.deleteGoogleCalendarEvent(participantID, meetingID);
+                    }
+
                     //Versucht Meeting zu löschen
                     if (!meetingManager.delete(meetingID, user.getId())) {
                         channel.sendMessage("Could not delete the meeting.").queue();

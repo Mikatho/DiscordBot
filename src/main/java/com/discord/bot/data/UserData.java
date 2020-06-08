@@ -17,9 +17,9 @@ public class UserData {
 
     private String address;
 
-    private String[] interests;
+    private String interests;
 
-    private String[] competencies;
+    private String competencies;
 
     private String gCalendarLink;
 
@@ -40,19 +40,19 @@ public class UserData {
         return address;
     }
 
-    public void setInterests(String[] interests) {
+    public void setInterests(String interests) {
         this.interests = interests;
     }
 
-    public final String[] getInterests() {
+    public final String getInterests() {
         return interests;
     }
 
-    public void setCompetencies(String[] competencies) {
+    public void setCompetencies(String competencies) {
         this.competencies = competencies;
     }
 
-    public final String[] getCompetencies() {
+    public final String getCompetencies() {
         return competencies;
     }
 

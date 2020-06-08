@@ -115,6 +115,16 @@ public class MeetingManagement {
         }
     }
 
+    public Object[] search(int meetingID) {
+
+        //Versucht User in Datenbank zu finden und zurückzugeben
+        try {
+            return dbManager.returnDataMeeting(meetingID);
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
     //Versucht Google Calender Event zu löschen
     public boolean deleteGoogleCalendarEvent(String userID, int meetingID) {
 
