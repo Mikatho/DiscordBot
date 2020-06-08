@@ -72,10 +72,6 @@ public class BotMeetingCommand implements CommandInterface {
 
             endtime = args[3].substring(0, 11) + args[4] + ":00" + timezone;
 
-            Date foundStarttime;
-
-            Date foundEndtime;
-
             String timeOfEndtime;
 
             //Versucht Zeiten in Epoch zu parsen

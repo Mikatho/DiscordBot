@@ -34,8 +34,8 @@ public class CommandListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
 
-        String message = event.getMessage().getContentRaw();
         MessageChannel channel = event.getChannel();
+        String message = event.getMessage().getContentRaw();
 
         /**
          * Check if the input is a command.

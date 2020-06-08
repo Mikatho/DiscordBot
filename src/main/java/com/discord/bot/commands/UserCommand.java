@@ -66,7 +66,7 @@ public class UserCommand implements CommandInterface {
             return;
         }
 
-        String[] args = msg.getContentRaw().split(" ", 4);
+        String[] args = msg.getContentRaw().replaceAll(" +", " ").split(" ", 4);
 
         switch (args[1].toLowerCase()) {
             case "data":

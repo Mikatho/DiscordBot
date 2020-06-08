@@ -48,7 +48,7 @@ public class LogCommand implements CommandInterface {
             return;
         }
 
-        String[] args = msg.getContentRaw().split(" ");
+        String[] args = msg.getContentRaw().replaceAll(" +", " ").split(" ");
 
         /**
          * Check the second parameter of the command.

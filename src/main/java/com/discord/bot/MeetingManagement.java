@@ -1,7 +1,9 @@
 package com.discord.bot;
 
 import com.discord.bot.data.MeetingData;
+import net.dv8tion.jda.api.EmbedBuilder;
 
+import java.awt.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -135,5 +137,21 @@ public class MeetingManagement {
         } catch (IOException | SQLException e) {
             return false;
         }
+    }
+
+    //Baut Embed für Meetings
+    public EmbedBuilder buildEmbed(String avatar, int meetingID, String host, String participant, String starttime, String endtime, String message) {
+
+        return new EmbedBuilder()
+                .setColor(new Color(140, 158, 255))
+                .setAuthor("Meeting", null, avatar)
+                .addField("Meeting ID", Integer.toString(meetingID), false)
+                .addField("Host", host, true)
+                .addField("Participant", participant, true)
+                .addBlankField(true)
+                .addField("Starttime", starttime, true)
+                .addField("Endtime", endtime, true)
+                .addBlankField(true)
+                .addField("Message", message, true);
     }
 }

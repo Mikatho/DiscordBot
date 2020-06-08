@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
-import java.awt.*;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,11 +28,6 @@ public class MeetingCommand implements CommandInterface {
                 "!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]",
                 "!meeting delete [meetingID]",
                 "!meeting update [meetingID] [value to change] [new value]"};
-
-        //Grundgerüst des Embeds zur Ausgabe von Meetings
-        EmbedBuilder embedBuilder = new EmbedBuilder()
-                .setColor(new Color(140, 158, 255))
-                .setAuthor("Meeting", null, channel.getJDA().getSelfUser().getAvatarUrl());
 
         //Regex für UserID
         String userIdRegex = "<@!\\d{18}>";
@@ -67,7 +61,7 @@ public class MeetingCommand implements CommandInterface {
             return;
         }
 
-        String[] args = msg.getContentRaw().split(" ", 3);
+        String[] args = msg.getContentRaw().replaceAll(" +", " ").split(" ", 3);
 
         //Prüft ersten Zusatz-Parameter des Commandaufrufs
         switch (args[1].toLowerCase()) {
@@ -188,16 +182,7 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                //Embed wird mit restlichen Parametern befüllt
-                embedBuilder
-                        .addField("Meeting ID", Integer.toString(returnedMeetingID), false)
-                        .addField("Host", user.getAsMention(), true)
-                        .addField("Participant", createArgs[0], true)
-                        .addBlankField(true)
-                        .addField("Starttime", format.format(earliestMeetingTimes[0]), true)
-                        .addField("Endtime", format.format(earliestMeetingTimes[1]), true)
-                        .addBlankField(true)
-                        .addField("Message", messageValue, true);
+                EmbedBuilder embed = meetingManager.buildEmbed(channel.getJDA().getSelfUser().getAvatarUrl(), returnedMeetingID, user.getAsMention(), createArgs[0], format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), messageValue);
 
                 String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
 
@@ -207,7 +192,7 @@ public class MeetingCommand implements CommandInterface {
                 } else {
                     channel.sendMessage(String.format("%s %s Successfully created the meeting!", user.getAsMention(), createArgs[0])).queue();
                 }
-                channel.sendMessage(embedBuilder.build()).queue();
+                channel.sendMessage(embed.build()).queue();
 
                 //Link zum Google Calendar Event wird erstellt
                 String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, earliestMeetingTimes[0], earliestMeetingTimes[1]);
