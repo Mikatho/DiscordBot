@@ -63,6 +63,8 @@ public class MeetingCommand implements CommandInterface {
 
         String[] args = msg.getContentRaw().replaceAll(" +", " ").split(" ", 3);
 
+        int meetingID;
+
         //Prüft ersten Zusatz-Parameter des Commandaufrufs
         switch (args[1].toLowerCase()) {
 
@@ -215,30 +217,37 @@ public class MeetingCommand implements CommandInterface {
 
                 try {
                     //Versucht MeetingID in Zahl zu konvertieren
-                    int meetingID = Integer.parseInt(args[2]);
-
-                    //versucht Meeting aus Google Calendar zu löschen
-                    if (!meetingManager.deleteGoogleCalendarEvent(user.getId(), meetingID)) {
-                        channel.sendMessage("Could not delete the meeting out of your Google Calendar.").queue();
-                        return;
-                    }
-
-                    participantID = (String) meetingManager.search(meetingID)[1];
-
-                    if (meetingManager.userIsRegistered(participantID)) {
-                        meetingManager.deleteGoogleCalendarEvent(participantID, meetingID);
-                    }
-
-                    //Versucht Meeting zu löschen
-                    if (!meetingManager.delete(meetingID, user.getId())) {
-                        channel.sendMessage("Could not delete the meeting.").queue();
-                        return;
-                    }
-
-                    channel.sendMessage("Successfully deleted the meeting.").queue();
+                    meetingID = Integer.parseInt(args[2]);
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    channel.sendMessage("Your meetingID is not a valid number.").queue();
+                    return;
                 }
+
+                //Prüft, ob User berechtigt ist, um das Meeting zu löschen
+                if (!meetingManager.authorizationCheck(meetingID, user.getId())) {
+                    channel.sendMessage("You are not the host of the meeting! Therefore you are not allowed to delete it!").queue();
+                    return;
+                }
+
+                //versucht Meeting aus Google Calendar zu löschen
+                if (!meetingManager.deleteGoogleCalendarEvent(user.getId(), meetingID)) {
+                    channel.sendMessage("Could not delete the meeting out of your Google Calendar.").queue();
+                    return;
+                }
+
+                participantID = (String) meetingManager.search(meetingID)[1];
+
+                if (meetingManager.userIsRegistered(participantID)) {
+                    meetingManager.deleteGoogleCalendarEvent(participantID, meetingID);
+                }
+
+                //Versucht Meeting zu löschen
+                if (!meetingManager.delete(meetingID)) {
+                    channel.sendMessage("Could not delete the meeting.").queue();
+                    return;
+                }
+
+                channel.sendMessage("Successfully deleted the meeting.").queue();
                 break;
             case "update":
 
@@ -263,49 +272,56 @@ public class MeetingCommand implements CommandInterface {
 
                 try {
                     //Versucht MeetingID in Zahl zu konvertieren
-                    int meetingID = Integer.parseInt(updateArgs[0]);
-
-                    //Prüft, ob richtiger Wert zum updaten angegeben wurde
-                    if (!updateArgs[1].matches("participant|starttime|endtime|message")) {
-                        channel.sendMessage(String.format("Unknown value to update: `%s` does not exist.", updateArgs[1])).queue();
-                        return;
-                    }
-
-                    //Wenn der Wert ein Datum ist wird geprüft, ob das richtige Format eingegeben wurde und das Datum existiert
-                    if (updateArgs[1].contains("time")) {
-
-                        try {
-                            Date time = format.parse(updateArgs[2]);
-                            //Epoch (ohne Millisekunden) wird in Variable zum Übergeben gespeichert
-                            newValue = time.getTime() / 1000;
-                        } catch (ParseException e) {
-                            channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
-                            return;
-                        }
-                    } else if (updateArgs[1].equals("participant")) {
-
-                        //Prüft, ob Participant im richtigen Format übergeben wurde
-                        if (!updateArgs[2].matches(userIdRegex)) {
-                            channel.sendMessage("User is not valid. Please use ´ @UserName ´!").queue();
-                            return;
-                        }
-
-                        newValue = updateArgs[2].substring(3, 21);
-                    } else {
-
-                        newValue = updateArgs[2];
-                    }
-
-                    //Versucht Meeting zu updaten
-                    if (!meetingManager.update(meetingID, user.getId(), updateArgs[1], newValue)) {
-                        channel.sendMessage("Could not update the Meeting.").queue();
-                        return;
-                    }
-
-                    channel.sendMessage("Successfully updated the Meeting.").queue();
+                    meetingID = Integer.parseInt(updateArgs[0]);
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    channel.sendMessage("Your meetingID is not a valid number.").queue();
+                    return;
                 }
+
+                //Prüft, ob User berechtigt ist, um das Meeting zu bearbeiten
+                if (!meetingManager.authorizationCheck(meetingID, user.getId())) {
+                    channel.sendMessage("You are not the host of the meeting! Therefore you are not allowed to update it!").queue();
+                    return;
+                }
+
+                //Prüft, ob richtiger Wert zum updaten angegeben wurde
+                if (!updateArgs[1].matches("participant|starttime|endtime|message")) {
+                    channel.sendMessage(String.format("Unknown value to update: `%s` does not exist.", updateArgs[1])).queue();
+                    return;
+                }
+
+                //Wenn der Wert ein Datum ist wird geprüft, ob das richtige Format eingegeben wurde und das Datum existiert
+                if (updateArgs[1].contains("time")) {
+
+                    try {
+                        Date time = format.parse(updateArgs[2]);
+                        //Epoch (ohne Millisekunden) wird in Variable zum Übergeben gespeichert
+                        newValue = time.getTime() / 1000;
+                    } catch (ParseException e) {
+                        channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
+                        return;
+                    }
+                } else if (updateArgs[1].equals("participant")) {
+
+                    //Prüft, ob Participant im richtigen Format übergeben wurde
+                    if (!updateArgs[2].matches(userIdRegex)) {
+                        channel.sendMessage("User is not valid. Please use ´ @UserName ´!").queue();
+                        return;
+                    }
+
+                    newValue = updateArgs[2].substring(3, 21);
+                } else {
+
+                    newValue = updateArgs[2];
+                }
+
+                //Versucht Meeting zu updaten
+                if (!meetingManager.update(meetingID, user.getId(), updateArgs[1], newValue)) {
+                    channel.sendMessage("Could not update the Meeting.").queue();
+                    return;
+                }
+
+                channel.sendMessage("Successfully updated the Meeting.").queue();
                 break;
             default:
                 channel.sendMessage(String.format("Unknown command: `%s` does not exist.", args[1])).queue();

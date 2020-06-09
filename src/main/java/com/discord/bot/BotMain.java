@@ -4,6 +4,9 @@ import com.discord.bot.listeners.CommandListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
@@ -60,8 +63,10 @@ public class BotMain {
             e.printStackTrace();
         }
 
-        jdaBuilder = JDABuilder.createDefault(BOT_TOKEN);
-        jdaBuilder.setStatus(OnlineStatus.ONLINE);
+        jdaBuilder = JDABuilder.createDefault(BOT_TOKEN)
+                .setStatus(OnlineStatus.ONLINE)
+                .setChunkingFilter(ChunkingFilter.ALL)
+                .enableIntents(GatewayIntent.GUILD_MEMBERS);
 
         /**
          * Initialize Command Listener.

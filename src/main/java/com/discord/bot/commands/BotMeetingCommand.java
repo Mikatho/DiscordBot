@@ -154,11 +154,13 @@ public class BotMeetingCommand implements CommandInterface {
             channel.sendMessage(commandAnswer).queue();
 
             if (commandAnswer.equals(meetingManager.getBotMessageHolder().get(args[1]))) {
+
                 if ((returnedMeetingID = meetingManager.insert(foreignUserID, ourUserID, earliestMeetingTimes[0], earliestMeetingTimes[1], "N/a")) == 0) {
 
                     channel.sendMessage("Could not create the meeting.").queue();
                     return;
                 }
+
                 /**TODO
                  * Bestätigung des Termins an unseren User
                  */
