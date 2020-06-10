@@ -27,6 +27,9 @@ public class HelpCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
+        /**
+         * String arrays with all command categories.
+         */
         String[] activityPatterns = {"!activity running", "!activity start", "!activity stop"};
         String[] deletePatterns = {"!delete [userID]"};
         String[] logPatterns = {"!log show", "!log save"};
