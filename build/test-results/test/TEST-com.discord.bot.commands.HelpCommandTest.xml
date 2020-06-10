@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.discord.bot.commands.HelpCommandTest" tests="1" skipped="0" failures="1" errors="0" timestamp="2020-06-10T13:25:29" hostname="DESKTOP-BVBMDUH" time="1.666">
+<testsuite name="com.discord.bot.commands.HelpCommandTest" tests="1" skipped="0" failures="1" errors="0" timestamp="2020-06-10T13:30:38" hostname="DESKTOP-BVBMDUH" time="2.598">
   <properties/>
-  <testcase name="helpCommandCheck" classname="com.discord.bot.commands.HelpCommandTest" time="1.666">
+  <testcase name="helpCommandCheck" classname="com.discord.bot.commands.HelpCommandTest" time="2.598">
     <failure message="java.lang.NullPointerException" type="java.lang.NullPointerException">java.lang.NullPointerException
 	at com.discord.bot.commands.HelpCommand.executeCommand(HelpCommand.java:56)
 	at com.discord.bot.commands.HelpCommandTest.helpCommandCheck(HelpCommandTest.java:43)

@@ -35,9 +35,9 @@ public class HelpCommandTest {
         when(vPrivateChannel.complete()).thenReturn(vPrivateChannel1);
 
         MessageAction vMessageAction = mock(MessageAction.class);
-        when(vPrivateChannel1.sendMessage("test")).thenReturn(vMessageAction);
-
         doNothing().when(vMessageAction).queue();
+
+        when(vPrivateChannel1.sendMessage("test")).thenReturn(vMessageAction);
 
         HelpCommand helpCommand = new HelpCommand();
         helpCommand.executeCommand(vMessageChannel, vMessage);
