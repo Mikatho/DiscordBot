@@ -41,7 +41,10 @@ public class HelpCommand implements CommandInterface {
         /**
          * Send a private message with all commands.
          */
-        msg.getAuthor().openPrivateChannel().complete().sendMessage("Commands: "
+        msg.getAuthor()
+                .openPrivateChannel()
+                .complete()
+                .sendMessage("Commands: "
                 + "\nprivate chat:\n"
                 + "\nactivity commands: " + "```" + activityPatterns[0] + "\n" + activityPatterns[1] + "\n" + activityPatterns[2] + "```"
                 + "\nuser commands: " + "```" + userPatterns[0] + "\n" + userPatterns[1] + "\n" + userPatterns[2] + "\n"
@@ -51,5 +54,9 @@ public class HelpCommand implements CommandInterface {
                 + "\nlog commands: " + "```" + logPatterns[0] + "\n" + logPatterns[1] + "```"
                 + "\nmeeting commands: " + "```" + meetingPatterns[0] + "\n" + meetingPatterns[1] + "\n" + meetingPatterns[2] + "```"
                 ).queue();
+
+        System.out.println("yea");
     }
+
+
 }
