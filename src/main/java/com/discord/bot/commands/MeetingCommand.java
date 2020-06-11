@@ -28,6 +28,8 @@ public class MeetingCommand implements CommandInterface {
      * @param msg       the Discord inputs.
      */
 
+    private static boolean flag = false;
+
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
@@ -110,10 +112,6 @@ public class MeetingCommand implements CommandInterface {
                 int duration;
 
                 String messageValue;
-
-                Date foundStarttime;
-
-                Date foundEndtime;
 
                 /**
                  * If the command is just [!meeting create] without all required parameters.
@@ -224,15 +222,42 @@ public class MeetingCommand implements CommandInterface {
 
                     SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+                    String uniqueID = "exampleUniqueID";
+
                     String answerCommand = "!_meeting "
-                            + "exampleUniqueID" + " "
+                            + uniqueID + " "
                             + user.getAsMention() + " "
                             + isoFormat.format(dateStart) + "+00:00 "
                             + createArgs[4] + " "
                             + createArgs[5] + " "
                             + createArgs[0];
 
+                    meetingManager.getBotMessageHolder().put(uniqueID, msg.getContentRaw());
+
+                    meetingManager.getBotValueHolder().put(args[1], new Object[]{user.getId(), participantID, duration, epochEnd, messageValue, true});
+
                     channel.sendMessage(answerCommand).queue();
+
+                    //Defines how long the while loop will run
+                    long timeout = System.currentTimeMillis() + 2000;
+
+                    while (System.currentTimeMillis() < timeout) {
+                        //If user belongs to a bot
+                        if (flag) {
+                            flag = false;
+                            user.openPrivateChannel().complete().sendMessage("Trying to arrange a meeting...").queue();
+                            return;
+                        }
+
+                        //Pause between bot answer checks
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    user.openPrivateChannel().complete().sendMessage("The user " + createArgs[0] + " does not belong to any bot!").queue();
                     return;
                 }
 
@@ -259,11 +284,11 @@ public class MeetingCommand implements CommandInterface {
                 channel.sendMessage(embed.build()).queue();
 
                 /**
-                 * Creating the Google Calender link to the event.
+                 * Creating the Google Calender link to the event for both users
                  */
                 String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
-                meetingManager.googleCalendarEvent(participantID, "Meeting with " + user.getName(), "N/a", messageValue, earliestMeetingTimes[0], earliestMeetingTimes[1]);
+                meetingManager.googleCalendarEvent(participantID, String.format("Meeting with %s [%s]", user.getName(), returnedMeetingID), "N/a", messageValue, earliestMeetingTimes[0], earliestMeetingTimes[1]);
                 
                 /**
                  * Informs the user if the creation of the link to the event was a sucess or a failure.
@@ -458,5 +483,9 @@ public class MeetingCommand implements CommandInterface {
                 channel.sendMessage(String.format("Unknown command: `%s` does not exist.", args[1])).queue();
                 break;
         }
+    }
+
+    public void setFlag(boolean flag) {
+        MeetingCommand.flag = flag;
     }
 }
