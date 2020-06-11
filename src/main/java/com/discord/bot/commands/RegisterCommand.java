@@ -65,7 +65,7 @@ public class RegisterCommand implements CommandInterface {
             "Welcome kindly sir.\n" + 
             "Your registration was successful.\n" +
             "Now you can log your commands, insert personal data to your account and create meetings\n" +
-            "which will be insert automatically in your Google Calender.\n" +
+            "which will be inserted automatically in your Google Calender.\n" +
             "Creating your Google-Calendar...\n").queue();
 
         /**

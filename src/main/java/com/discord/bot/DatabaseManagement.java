@@ -162,8 +162,8 @@ public class DatabaseManagement {
 
     public long[] findEarliestPossibleMeetingtimes(String userID, long starttime, long endtime, int duration) throws SQLException {
 
-        //Länge der Pause zwischen Meetings in Sekunden
-        final int BREAKTIME_IN_SECONDS = 300;
+        //Länge der Pause zwischen Meetings in Millisekunden
+        final int BREAKTIME_IN_SECONDS = 300000;
 
         //Variable die zurückgegeben wird
         long[] meetingtimes = new long[2];

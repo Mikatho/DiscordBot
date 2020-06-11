@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import java.util.Arrays;
 import java.util.Date;
 
 public class MeetingCommand implements CommandInterface {
@@ -198,9 +199,7 @@ public class MeetingCommand implements CommandInterface {
                  * Checks if the user is free in the requested period. Informs user if the requested period of the meeting is blocked.
                  */
                 try {
-                    earliestMeetingTimes = meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochEnd, duration);
-
-                    if (earliestMeetingTimes[0] == 0) {
+                    if (meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochEnd, duration)[0] == 0) {
                         channel.sendMessage("You do not have free time during this period.").queue();
                         return;
                     }
@@ -261,6 +260,21 @@ public class MeetingCommand implements CommandInterface {
                     }
 
                     user.openPrivateChannel().complete().sendMessage("The user " + createArgs[0] + " does not belong to any bot!").queue();
+                    return;
+                }
+
+                /**
+                 * Checks if the participant is free in the requested period. Informs user if the requested period of the meeting is blocked.
+                 */
+                try {
+                    earliestMeetingTimes = meetingManager.earliestPossibleMeeting(participantID, epochStart, epochEnd, duration);
+
+                    if (earliestMeetingTimes[0] == 0) {
+                        channel.sendMessage("The participant does not have free time during this period.").queue();
+                        return;
+                    }
+                } catch (SQLException e) {
+                    channel.sendMessage("Could not receive meeting data.").queue();
                     return;
                 }
 
