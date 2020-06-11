@@ -1,5 +1,6 @@
 package com.discord.bot;
 
+import com.discord.bot.data.BotMeetingMessageData;
 import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.EmbedBuilder;
 
@@ -16,20 +17,14 @@ public class MeetingManagement {
 
     private GoogleCalendarManagement calendarManager = GoogleCalendarManagement.getInstance();
 
-    private ConcurrentHashMap<String, String> botMessageHolder = new ConcurrentHashMap<>();
-
-    private ConcurrentHashMap<String, Object[]> botValueHolder = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, BotMeetingMessageData> messageDataHolder = new ConcurrentHashMap<>();
 
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
     }
 
-    public ConcurrentHashMap<String, String> getBotMessageHolder() {
-        return botMessageHolder;
-    }
-
-    public ConcurrentHashMap<String, Object[]> getBotValueHolder() {
-        return botValueHolder;
+    public ConcurrentHashMap<String, BotMeetingMessageData> getBotMessageHolder() {
+        return messageDataHolder;
     }
 
     public int insert(String hostID, String participantID, long starttime, long endtime, String message) {

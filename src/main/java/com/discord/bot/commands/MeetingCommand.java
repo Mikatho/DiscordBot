@@ -1,6 +1,7 @@
 package com.discord.bot.commands;
 
 import com.discord.bot.MeetingManagement;
+import com.discord.bot.data.BotMeetingMessageData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -111,7 +112,7 @@ public class MeetingCommand implements CommandInterface {
 
                 int duration;
 
-                String messageValue;
+                String meetingMessage;
 
                 /**
                  * If the command is just [!meeting create] without all required parameters.
@@ -143,6 +144,8 @@ public class MeetingCommand implements CommandInterface {
                 }
 
                 String participantID = createArgs[0].substring(3, 21);
+
+                String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
 
                 /**
                  * Creates the start and endtime out of the additional parameters.
@@ -210,9 +213,9 @@ public class MeetingCommand implements CommandInterface {
                  * Checks if message was entered.
                  */
                 if (createArgs.length == 6) {
-                    messageValue = "N/a";
+                    meetingMessage = "N/a";
                 } else {
-                    messageValue = createArgs[6];
+                    meetingMessage = createArgs[6];
                 }
 
                 /**
@@ -232,13 +235,13 @@ public class MeetingCommand implements CommandInterface {
                             + createArgs[5] + " "
                             + createArgs[0];
 
-                    meetingManager.getBotMessageHolder().put(uniqueID, msg.getContentRaw());
-
-                    meetingManager.getBotValueHolder().put(args[1], new Object[]{user.getId(), participantID, duration, epochEnd, messageValue, true});
+                    meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(msg.getContentRaw(), user.getId(), participantID, participantName, duration, epochEnd, meetingMessage, true));
 
                     channel.sendMessage(answerCommand).queue();
 
-                    //Defines how long the while loop will run
+                    /**
+                     * Defines how long the while loop will run
+                     */
                     long timeout = System.currentTimeMillis() + 2000;
 
                     while (System.currentTimeMillis() < timeout) {
@@ -264,14 +267,12 @@ public class MeetingCommand implements CommandInterface {
                 /**
                  * Informs the user if the meeting could not be created.
                  */
-                if ((returnedMeetingID = meetingManager.insert(user.getId(), participantID, earliestMeetingTimes[0], earliestMeetingTimes[1], messageValue)) == 0) {
+                if ((returnedMeetingID = meetingManager.insert(user.getId(), participantID, earliestMeetingTimes[0], earliestMeetingTimes[1], meetingMessage)) == 0) {
                     channel.sendMessage("Could not create the meeting.").queue();
                     return;
                 }
 
-                EmbedBuilder embed = meetingManager.buildEmbed(channel.getJDA().getSelfUser().getAvatarUrl(), returnedMeetingID, user.getAsMention(), createArgs[0], format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), messageValue);
-
-                String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
+                EmbedBuilder embed = meetingManager.buildEmbed(channel.getJDA().getSelfUser().getAvatarUrl(), returnedMeetingID, user.getAsMention(), createArgs[0], format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), meetingMessage);
 
                 /**
                  * If the user has assigned himself to meeting he created he wont be mentioned twice.
@@ -286,9 +287,9 @@ public class MeetingCommand implements CommandInterface {
                 /**
                  * Creating the Google Calender link to the event for both users
                  */
-                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", messageValue, earliestMeetingTimes[0], earliestMeetingTimes[1]);
+                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
-                meetingManager.googleCalendarEvent(participantID, String.format("Meeting with %s [%s]", user.getName(), returnedMeetingID), "N/a", messageValue, earliestMeetingTimes[0], earliestMeetingTimes[1]);
+                meetingManager.googleCalendarEvent(participantID, String.format("Meeting with %s [%s]", user.getName(), returnedMeetingID), "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
                 
                 /**
                  * Informs the user if the creation of the link to the event was a sucess or a failure.

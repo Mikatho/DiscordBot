@@ -7,7 +7,6 @@ package com.discord.bot.data;
  *
  * @author      L2G4
  * @version     %I%, %G%
- * @see         com.discord.bot.commands.MeetingCommand
  * @see         com.discord.bot.MeetingManagement
  * @since       1.0
  */

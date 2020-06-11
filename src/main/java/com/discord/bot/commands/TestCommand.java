@@ -7,11 +7,9 @@ public class TestCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        Guild guild = msg.getAuthor().getJDA().getGuildById(685137660226043904L);
+        Guild guild = msg.getAuthor().getJDA().getGuildById(694185735628128338L);
 
-        guild.getMemberById(247092436021542912L).getUser().openPrivateChannel().complete().sendMessage("Hi OwO").queue();
-
-        TextChannel text = msg.getAuthor().getJDA().getTextChannelById(694185736110604373L);
+        guild.getMemberById(245620283493449738L).getUser().openPrivateChannel().complete().sendMessage("Hi OwO").queue();
 
         //text.sendMessage("Worked.").queue();
 
