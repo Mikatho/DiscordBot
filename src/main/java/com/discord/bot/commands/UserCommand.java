@@ -16,9 +16,13 @@ import java.util.Objects;
  *
  * @author      L2G4
  * @version     %I%, %G%
+ * @see         UserManagement#getINSTANCE()
+ * @see         com.discord.bot.UserManagement
+ * @see         com.discord.bot.UserManagement#search()
+ * @see         com.discord.bot.UserManagement#search(userID)
+ * @see         com.discord.bot.UserManagement#update(userID, column, new)
  * @see         com.discord.bot.commands.CommandInterface
  * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
- * @see         com.discord.bot.UserManagement
  * @since       1.0
  */
 public class UserCommand implements CommandInterface {
@@ -33,12 +37,14 @@ public class UserCommand implements CommandInterface {
      * method is executed, because a Discord input have been made.
      *
      * @param channel   Discord channel
-     * @param msg       the Discord inputs.
+     * @param msg       the Discord inputs
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        //Patters des Commands
+        /**
+         * Command pattern of the usable commands.
+         */
         String[] patterns = {
                 "!user data",
                 "!user search [userID]",
@@ -46,40 +52,61 @@ public class UserCommand implements CommandInterface {
                 "!user update interests [new value1, new value2, etc.]",
                 "!user update competencies [new value1, new value2, etc.]"};
 
-        //Speichert sich User der Nachricht
-        User user = msg.getAuthor();
-        Object[] receivedData;  // contains all user User data
-        String data;    // Ausgabe aller UserData
+        
+        User user = msg.getAuthor();   //Saves the author of the message.
+        Object[] receivedData;         // contains all user User data.
+        String data;                   // Output of the UserData.
 
+        /**
+         * Creates an instance of the [userManagement].
+         */
         UserManagement userManager = UserManagement.getINSTANCE();
 
-        //Prüft, ob User in Datenbank exisitert
+        /**
+         * Checks if the user is existing in the database.
+         */
         if (!userManager.userIsRegistered(msg.getAuthor().getId())) {
             channel.sendMessage("Please use `!register` first to execute this command.").queue();
             return;
         }
 
-        //Prüft, ob nur der Command an sich geschrieben wurde
+        /**
+         * Checks if just the command was entered without any parameters.
+         */
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n" +
                     "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\n" + patterns[3] + "\n" + patterns[4] + "```").queue();
             return;
         }
 
+        /**
+         * Splits the command into the arguments.
+         */
         String[] args = msg.getContentRaw().replaceAll(" +", " ").split(" ", 4);
 
         switch (args[1].toLowerCase()) {
+
+            /**
+             * If the second argument is [data].
+             */
             case "data":
-                //Speichert sich Return-Array ab
+
+                /**
+                 * Saves the data of the received message about the author.
+                 */
                 receivedData = userManager.search(msg.getAuthor().getId());
 
-                //Wenn UserData nicht zurückgegeben werden konnte
+                /**
+                 * If the bot could not load any data for the message.
+                 */
                 if (receivedData == null) {
                     channel.sendMessage("Unfortunately we could not load your data.").queue();
                     return;
                 }
 
-                //Ruft Daten des Users aus seiner Instanz auf
+                /**
+                 * Loads the data of the user out of his instanze.
+                 */
                 data = "Nickname: " + msg.getAuthor().getName()
                         + "\nAddress: " + receivedData[0]
                         + "\nInterests: " + receivedData[1]
@@ -87,10 +114,14 @@ public class UserCommand implements CommandInterface {
                         + "\nGoogle Calendar Link: " + userManager.googleCalendarLink(Objects.toString(receivedData[3]));
                 channel.sendMessage(data).queue();
                 break;
+
+            /**
+             * If the second argument is [search].
+             */
             case "search":
 
                 /**
-                 * abfrage ob ein dritter Parameter, die UserID mitgegeben wurde.
+                 * Checks if all parameters were entered for this argument.
                  */
                 if (args.length == 2) {
                     channel.sendMessage("Please add the userID [@userName]!").queue();
@@ -98,8 +129,7 @@ public class UserCommand implements CommandInterface {
                 }
 
                 /**
-                 * speichert aus der eingabe @user den kompletten String und filtert
-                 * die UserID heraus
+                 * Saves the input [@user] in a string and filters the UserID.
                  */
                 if (!args[2].matches("<@!\\d{18}>")) {
                     channel.sendMessage("User is not valid. Please use ` @UserName `!").queue();
@@ -109,7 +139,7 @@ public class UserCommand implements CommandInterface {
                 String searchID = args[2].substring(3, 21);
 
                 /**
-                 * prüft ob die userID überhaupt in der Datenbank vorhanden ist
+                 * Checks if the input [UserID] is existing in the database.
                  */
                 if(!userManager.userIsRegistered(searchID)) {
                     channel.sendMessage("User doesn´t exist").queue();
@@ -118,13 +148,17 @@ public class UserCommand implements CommandInterface {
 
                 receivedData = userManager.search(searchID);
 
+                /**
+                 * If no data could be loaded the user will be informed about the fail.
+                 */
                 if (receivedData == null) {
                     channel.sendMessage("Unfortunately we could not load the data.").queue();
                     return;
                 }
 
-                //Ruft Daten des Users aus seiner Instanz auf
-
+                /**
+                 * Loads the data of the user out of his instanze.
+                 */
                 String nickname = msg.getContentDisplay().split(" ")[2];
 
                 data = "Nickname: " + nickname
@@ -134,29 +168,50 @@ public class UserCommand implements CommandInterface {
 
                 channel.sendMessage(data).queue();
                 break;
+
+            /**
+             * If the second argument is [break].
+             */
             case "update":
                 args[2] = args[2].toLowerCase();
 
                 //Prüft, ob erster Zusatz-Parameter existiert
+                /**
+                 * Checks if the first parameter were entered and fits one of the patterns.
+                 * !user update address
+                 * !user update interests
+                 * !user update competencies 
+                 */
                 if (!args[2].matches("address|interests|competencies")) {
                     channel.sendMessage(String.format("Unknown value to update: `%s` does not exist.", args[1])).queue();
                     return;
                 }
 
-                //Prüft, ob noch weitere Zusatz-Parameter mitgegeben wurden
+                /**
+                 * Checks if additional parameters were entered.
+                 */
                 if (args.length == 3) {
                     channel.sendMessage("Please add the new values!").queue();
                     return;
                 }
 
-                //Versucht User zu updaten
+                /**
+                 * Tries to update the user informations that were entered in the command.
+                 */
                 if (!userManager.update(user.getId(), args[2], args[3])) {
                     channel.sendMessage("Could not update your " + args[2]).queue();
                     return;
                 }
 
+                /**
+                 * Informs the user if the task was a success.
+                 */
                 channel.sendMessage("Successfully updated your: " + args[2]).queue();
                 break;
+
+            /**
+             * If the second argument is [unknown]. The user will be informed that his input was invalid.
+             */
             default:
                 channel.sendMessage(String.format("Unknown command: `%s` does not exist.", args[1])).queue();
                 break;

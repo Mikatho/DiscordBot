@@ -4,6 +4,22 @@ import com.discord.bot.UserManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
+/**
+ * The <code>UnregisterCommand</code> Class implements the <code>CommandInterface</code>
+ * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
+ * method. It controls syntax and interprets the commands to call the right methods in
+ * <code>UserManagement</code>.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.DatabaseManagement
+ * @see         UserManagement#getINSTANCE()
+ * @see         com.discord.bot.UserManagement#delete(String)
+ * @see         LoggingManagement#getINSTANCE()
+ * @see         com.discord.bot.commands.CommandInterface
+ * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since       1.0
+ */
 public class UnregisterCommand implements CommandInterface {
 
     /*

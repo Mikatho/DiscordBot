@@ -6,6 +6,23 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
+/**
+ * The <code>UnregisterCommand</code> Class implements the <code>CommandInterface</code>
+ * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
+ * method. It controls syntax and interprets the commands to call the right methods in
+ * <code>UserManagement</code>.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.DatabaseManagement
+ * @see         UserManagement#getINSTANCE()
+ * @see         com.discord.bot.UserManagement
+ * @see         com.discord.bot.UserManagement#register(userID)
+ * @see         LoggingManagement#getINSTANCE()
+ * @see         com.discord.bot.commands.CommandInterface
+ * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since       1.0
+ */
 public class RegisterCommand implements CommandInterface {
 
     /*
@@ -38,12 +55,18 @@ public class RegisterCommand implements CommandInterface {
             channel.sendMessage(user.getAsMention() + " could not be added to the Database!").queue();
             return;
         }
-
+        
         /**
          * If the register was sucessfull the user will be greeted with a welcoming
-         * message and will be advised, that the bot creates a Google ID for him.
+         * message and will be advised, that the bot creates a Google ID for him and that
+         * he is able to use the bot commands.
          */
-        channel.sendMessage("Welcome kindly sir.\nCreating your Google-Calendar...\n").queue();
+        channel.sendMessage(
+            "Welcome kindly sir.\n" + 
+            "Your registration was successful.\n" +
+            "Now you can log your commands, insert personal data to your account and create meetings\n" +
+            "which will be insert automatically in your Google Calender.\n" +
+            "Creating your Google-Calendar...\n").queue();
 
         /**
          * Creating the Google Calendars ID.
