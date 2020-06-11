@@ -224,7 +224,7 @@ public class MeetingCommand implements CommandInterface {
 
                     SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-                    String uniqueID = "exampleUniqueID";
+                    String uniqueID = Long.toString(System.currentTimeMillis());
 
                     String answerCommand = "!_meeting "
                             + uniqueID + " "
@@ -234,14 +234,14 @@ public class MeetingCommand implements CommandInterface {
                             + createArgs[5] + " "
                             + createArgs[0];
 
-                    meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(msg.getContentRaw(), user.getId(), participantID, participantName, duration, epochEnd, meetingMessage, true));
+                    meetingManager.getBotMessageHolder().put(uniqueID, new BotMeetingMessageData(msg.getContentRaw(), user.getId(), participantID, participantName, duration, epochEnd, meetingMessage, true));
 
                     channel.sendMessage(answerCommand).queue();
 
                     /**
                      * Defines how long the while loop will run
                      */
-                    long timeout = System.currentTimeMillis() + 2000;
+                    long timeout = System.currentTimeMillis() + 5000;
 
                     while (System.currentTimeMillis() < timeout) {
                         //If user belongs to a bot

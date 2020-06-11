@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MeetingManagement {
@@ -17,13 +18,13 @@ public class MeetingManagement {
 
     private GoogleCalendarManagement calendarManager = GoogleCalendarManagement.getInstance();
 
-    private ConcurrentHashMap<String, BotMeetingMessageData> messageDataHolder = new ConcurrentHashMap<>();
+    private HashMap<String, BotMeetingMessageData> messageDataHolder = new HashMap<>();
 
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
     }
 
-    public ConcurrentHashMap<String, BotMeetingMessageData> getBotMessageHolder() {
+    public HashMap<String, BotMeetingMessageData> getBotMessageHolder() {
         return messageDataHolder;
     }
 

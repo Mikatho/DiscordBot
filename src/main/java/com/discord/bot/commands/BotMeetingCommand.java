@@ -51,13 +51,6 @@ public class BotMeetingCommand implements CommandInterface {
             return;
         }
 
-        if (msg.getContentRaw().equals(meetingManager.getBotMessageHolder().get(args[1]).getMessage())) {
-            //Match and create meeting
-
-            meetingManager.getBotMessageHolder().remove(args[1]);
-            return;
-        }
-
         //Wenn es die erste Nachricht vom anderen Bot ist
         if (args.length == 7) {
 
@@ -109,15 +102,12 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            timeOfEndtime = format.format(earliestMeetingTimes[1]).split(" ")[1];
-
             commandAnswer = "!_meeting "
                     + args[1] + " "
-                    + isoFormat.format(earliestMeetingTimes[0]) + timezone + " "
-                    + timeOfEndtime;
+                    + isoFormat.format(earliestMeetingTimes[0]) + timezone + " ";
 
             //Gibt Bestätigung mit Daten an den Bot zurück
-            msg.getAuthor().openPrivateChannel().complete().sendMessage(commandAnswer).queue();
+            channel.sendMessage(commandAnswer).queue();
         } else {
 
             String noTime = "!_meeting " + args[1] + " noTime";
