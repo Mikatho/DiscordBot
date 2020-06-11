@@ -1,0 +1,23 @@
+
+2
+java:S3626¡"Remove this redundant jump.(ûÁİ…
+f
+java:S1192^"KDefine a constant instead of duplicating this literal "!_meeting " 6 times.(òçõÿÿÿÿÿ
+h
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 23 to the 15 allowed.(ø×¾¹
+>
+java:S1148U"#Use a logger to log this exception.(€ÉÔ…ıÿÿÿÿ
+F
+java:S1066"/Merge this if statement with the enclosing one.(„µ½¤
+c
+java:S1192^"HDefine a constant instead of duplicating this literal " noTime" 4 times.(òçõÿÿÿÿÿ
+R
+java:S1854x"<Remove this useless assignment to local variable "epochEnd".(×½˜
+N
+java:S1135¤"2Complete the task associated to this TODO comment.(äÃ¸¿úÿÿÿÿ
+?
+java:S1148…"#Use a logger to log this exception.(€ÉÔ…ıÿÿÿÿ
+J
+java:S1121Œ".Extract the assignment out of this expression.(Ô÷Ü­øÿÿÿÿ
+\
+java:S1854"ERemove this useless assignment to local variable "returnedMeetingID".(„µ½¤

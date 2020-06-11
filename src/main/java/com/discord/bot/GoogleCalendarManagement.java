@@ -14,6 +14,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
+import jdk.internal.joptsimple.util.RegexMatcher;
 
 
 import java.io.FileNotFoundException;
@@ -41,7 +42,6 @@ import java.util.logging.Logger;
 public class GoogleCalendarManagement {
 
     private static final Logger LOGGER = Logger.getLogger(GoogleCalendarManagement.class.getName());
-
 
     /**
      * Tag for debugging and logging
@@ -86,6 +86,7 @@ public class GoogleCalendarManagement {
 
     /**
      * private method for creating n new GoogleKalendar, only used by this class
+     *
      * @throws IOException when there is an error with the network connection
      * @throws GeneralSecurityException when there is a faulty token
      */
@@ -127,12 +128,23 @@ public class GoogleCalendarManagement {
      * @param eventName name of the event
      * @param eventLocation name of the event location
      * @param eventDescription name of the eventDescription
-     * @param epochStart start time in epoch format
-     * @param epochEnd end time in epoch format
+     * @param epochStart start time in epoch format (10-19 Digits)
+     * @param epochEnd end time in epoch format (10-19 Digits)
      * @throws IOException when the event can't be added to a users calendar
+     * @throws IllegalArgumentException when the given Parameters are used wrong.
      * @return a link to the newly created Event
      */
     public String createNewEvent(String userCalID, String eventName, String eventLocation, String eventDescription, long epochStart, long epochEnd) throws IOException {
+
+        //Test if the arguments are Valid:
+        String epochStartString = "" + epochStart;
+        String epochEndString = "" + epochEnd;
+        String epochMatcher = "^\\d{10,19}";
+        String googleCalendarIDMatcher = "^\\w{26}@*group.calendar.google.com*";
+
+        if(!epochStartString.matches(epochMatcher)) { throw  new IllegalArgumentException("The Epoch start has a wrong format" ); };
+        if(!epochEndString.matches(epochMatcher)) { throw  new IllegalArgumentException("The Epoch start has a wrong format"); };
+        if(!userCalID.matches(googleCalendarIDMatcher)) { throw  new IllegalArgumentException("Google Calendar id has the wrong format"); };
 
         Event event = new Event()
                 .setSummary(eventName)
@@ -195,7 +207,6 @@ public class GoogleCalendarManagement {
         return tempCalendar.getId();
     }
 
-
     /**
      * Returns a public link to a Calendar so the User can add it to their browser.
      *
@@ -203,7 +214,6 @@ public class GoogleCalendarManagement {
      * @return the link to the public google Calendar of that person.
      */
     public String getPublicCalendarLink(String userCalID) {
-
         return "https://calendar.google.com/calendar/r?cid=" + userCalID;
     }
 

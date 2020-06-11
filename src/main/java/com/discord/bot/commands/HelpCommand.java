@@ -55,7 +55,6 @@ public class HelpCommand implements CommandInterface {
                 + "\nmeeting commands: " + "```" + meetingPatterns[0] + "\n" + meetingPatterns[1] + "\n" + meetingPatterns[2] + "```"
                 ).queue();
 
-        System.out.println("yea");
     }
 
 

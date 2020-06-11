@@ -18,30 +18,18 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 public class HelpCommandTest {
 
+    /**
+     * kann nur code coverage testen da die methoden nix zurückgeben....
+     */
     @Test
     public void helpCommandCheck() {
-
-
         MessageChannel vMessageChannel = mock(MessageChannel.class);
         Message vMessage = mock(Message.class);
+        
 
-        User vUser = mock(User.class);
-        when(vMessage.getAuthor()).thenReturn(vUser);
-
-        RestAction<PrivateChannel> vPrivateChannel = mock(RestAction.class);
-        when(vUser.openPrivateChannel()).thenReturn(vPrivateChannel);
-
-        PrivateChannel vPrivateChannel1 = mock(PrivateChannel.class);
-        when(vPrivateChannel.complete()).thenReturn(vPrivateChannel1);
-
-        MessageAction vMessageAction = mock(MessageAction.class);
-        doNothing().when(vMessageAction).queue();
-
-        when(vPrivateChannel1.sendMessage("test")).thenReturn(vMessageAction);
-
-        HelpCommand helpCommand = new HelpCommand();
-        helpCommand.executeCommand(vMessageChannel, vMessage);
-
+        HelpCommand tHelpCommand = new HelpCommand();
+        tHelpCommand.executeCommand(vMessageChannel, vMessage);
     }
+
 
 }
