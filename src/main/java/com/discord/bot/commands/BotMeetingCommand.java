@@ -5,6 +5,8 @@ import com.discord.bot.data.BotMeetingMessageData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -13,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class BotMeetingCommand implements CommandInterface {
+
+    final static Logger logger = LogManager.getLogger(BotMeetingCommand.class.getName());
 
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
@@ -87,7 +91,7 @@ public class BotMeetingCommand implements CommandInterface {
                 Date dateEnd = isoFormat.parse(endtime);
                 epochPeriodEnd = dateEnd.getTime();
             } catch (ParseException e) {
-                e.printStackTrace();
+                logger.fatal("Unable to parse data.\n" + e);
                 return;
             }
 
@@ -96,6 +100,7 @@ public class BotMeetingCommand implements CommandInterface {
             try {
                 earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochPeriodEnd, duration);
             } catch (SQLException e) {
+                logger.fatal("Unable to call method.\n" + e);
                 channel.sendMessage("!_meeting " + args[1] + " noTime").queue();
                 return;
             }
@@ -149,7 +154,7 @@ public class BotMeetingCommand implements CommandInterface {
                 Date dateStart = isoFormat.parse(starttime);
                 epochStart = dateStart.getTime();
             } catch (ParseException e) {
-                e.printStackTrace();
+                logger.fatal("Unable to parse data.\n" + e);
                 return;
             }
 
@@ -194,6 +199,7 @@ public class BotMeetingCommand implements CommandInterface {
                     return;
                 }
             } catch (SQLException e) {
+                logger.fatal("SQLException.\n" + e);
                 channel.sendMessage(noTime).queue();
                 return;
             }

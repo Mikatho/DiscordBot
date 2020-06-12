@@ -3,6 +3,8 @@ package com.discord.bot;
 import com.discord.bot.data.BotMeetingMessageData;
 import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.EmbedBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.io.IOException;
@@ -11,6 +13,8 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MeetingManagement {
+
+    final static Logger logger = LogManager.getLogger(MeetingManagement.class.getName());
 
     private static final MeetingManagement INSTANCE = new MeetingManagement();
 
@@ -43,6 +47,7 @@ public class MeetingManagement {
         try {
             return dbManager.insertMeeting(tempMeeting);
         } catch (SQLException e) {
+            logger.fatal("Unable to insert a meeting[meeting_data].\n" + e);
             return 0;
         }
     }
@@ -53,6 +58,7 @@ public class MeetingManagement {
         try {
             return dbManager.deleteMeeting(meetingID);
         } catch (SQLException e) {
+            logger.fatal("Unable to delete meeting[meeting_data].\n" + e);
             return false;
         }
     }
@@ -64,6 +70,7 @@ public class MeetingManagement {
             dbManager.updateMeeting(meetingID, column, newValue, hostID);
             return true;
         } catch (SQLException e) {
+            logger.fatal("Unable to update a meeting[meeting_data].\n" + e);
             return false;
         }
     }
@@ -74,6 +81,7 @@ public class MeetingManagement {
         try {
             return DatabaseManagement.getINSTANCE().registeredCheck(userID);
         } catch (SQLException e) {
+            logger.fatal("Unable to register a user[user_data].\n" + e);
             return false;
         }
     }
@@ -84,6 +92,7 @@ public class MeetingManagement {
         try {
             return dbManager.authorizationCheck(meetingID, userID);
         } catch (SQLException e) {
+            logger.fatal("Unable to check authorization[meeting_data].\n" + e);
             return false;
         }
     }
@@ -100,6 +109,7 @@ public class MeetingManagement {
             String calendarID = (String) dbManager.returnDataUser(userID)[3];
             return calendarManager.createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
         } catch (SQLException | IOException e) {
+            logger.fatal("Unable to return a meeting[meeting_data].\n" + e);
             return null;
         }
     }
@@ -110,6 +120,7 @@ public class MeetingManagement {
         try {
             return dbManager.returnDataMeeting(meetingID);
         } catch (SQLException e) {
+            logger.fatal("Unable to search a user[user_data].\n" + e);
             return null;
         }
     }
@@ -122,6 +133,7 @@ public class MeetingManagement {
             long epochStart = (long) dbManager.returnDataMeeting(meetingID)[2];
             return calendarManager.deleteEvent(calendarID, epochStart);
         } catch (IOException | SQLException e) {
+            logger.fatal("Unable to delete a meeting[meeting_data].\n" + e);
             return false;
         }
     }

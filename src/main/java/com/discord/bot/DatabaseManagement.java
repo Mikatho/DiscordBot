@@ -3,6 +3,8 @@ package com.discord.bot;
 import com.discord.bot.data.MeetingData;
 import com.discord.bot.data.UserActivity;
 import com.discord.bot.data.UserData;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +32,8 @@ public class DatabaseManagement {
 
     private static final DatabaseManagement INSTANCE = new DatabaseManagement();
 
+    final static Logger logger = LogManager.getLogger(DatabaseManagement.class.getName());
+
     private Connection conn;
     private Statement stmt;
     private ResultSet rs;
@@ -43,7 +47,11 @@ public class DatabaseManagement {
         return INSTANCE;
     }
 
-    //Löscht Daten in Datenbank
+    /**
+     * Delete all entries in database.
+     *
+     * @exception   // TODO: 04.06.2020
+     */
     public void clear() throws SQLException {
 
         String foreignMeetingUser = "DELETE FROM meetings_of_user;";
@@ -57,6 +65,12 @@ public class DatabaseManagement {
         stmt.execute(activity);
     }
 
+    /**
+     * Check if the database.db still exist and connect to the database.
+     * If the file do not exist it will create a new file.
+     *
+     * @throws  // TODO: 04.06.2020
+     */
     public void connect() throws SQLException, IOException {
 
         conn = null;
@@ -75,8 +89,13 @@ public class DatabaseManagement {
         createTable("meeting_data", "meetingID integer PRIMARY KEY AUTOINCREMENT", "hostID text NOT NULL", "participantID text NOT NULL", "starttime INTEGER NOT NULL", "endtime INTEGER NOT NULL", "message text");
         createTable("activity_data", "activityID integer PRIMARY KEY AUTOINCREMENT", "starttime INTEGER NOT NULL", "endtime INTEGER");
         createTable("meetings_of_user", "meetingID integer NOT NULL", "userID text NOT NULL", "FOREIGN KEY (meetingID) REFERENCES meeting_data (meetingID)", "FOREIGN KEY (userID) REFERENCES user_data (userID)");
-}
+    }
 
+    /**
+     * Close the connection to the database.
+     *
+     * @exception   // TODO: 04.06.2020
+     */
     public void disconnect() throws SQLException {
 
         if (rs != null) {
@@ -90,7 +109,12 @@ public class DatabaseManagement {
         }
     }
 
-    //Erstellt Tabellen, indem man SQL-Text zum Erstellen der Spalten als String übergibt
+    /**
+     * Create tables by transfer SQL Code as String to create columns.
+     *
+     * @param   strings     SQL
+     * @exception   // TODO: 04.06.2020
+     */
     public void createTable(String... strings) throws SQLException {
 
         StringJoiner joiner = new StringJoiner(",");
@@ -106,7 +130,9 @@ public class DatabaseManagement {
 
     public void insertUser(UserData user) throws SQLException {
 
-        //SQL-Code zum Einfügen in die Datenbank
+        /**
+         * SQL: insert user in database.
+         */
         String sql = "INSERT INTO user_data (userID) VALUES (?)";
 
         //Versucht User in Datenbank einzufügen
@@ -117,7 +143,9 @@ public class DatabaseManagement {
 
     public int insertMeeting(MeetingData meeting) throws SQLException {
 
-        //SQL-Code zum Einfügen in die Datenbank
+        /**
+         * SQL: insert meeting in database.
+         */
         String sql = "INSERT INTO meeting_data (hostID, participantID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
 
         //Versucht Meeting in Datenbank einzufügen
@@ -145,7 +173,9 @@ public class DatabaseManagement {
 
     public boolean insertActivity (UserActivity activity) {
 
-        //SQL-Code zum Einfügen in die Datenbank
+        /**
+         * SQL: insert activity in database.
+         */
         String sql = "INSERT INTO activity_data (activityID, starttime) VALUES (?, ?)";
 
         //Versucht Activity in Datenbank einzufügen
@@ -155,7 +185,7 @@ public class DatabaseManagement {
             prepStmt.executeUpdate();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to insert a activity[activity_data].\n" + e);
             return false;
         }
     }
@@ -287,7 +317,16 @@ public class DatabaseManagement {
         return meetingtimes;
     }
 
-    //Funktion um ForeignKey-Daten zu erstellen
+    /**
+     * The method updated the ForeignKeys from the table User_Data.
+     *
+     * @param   columnID        todo
+     * @param   hostID          unique Discord userID from host
+     * @param   participantID   unique Discord userID from participant
+     * @exception // TODO: 04.06.2020
+     * @return  <code>true</code> wenn ;
+     * *                  <code>false</code> if data could not be added.
+     */
     private void insertForeignKey(Integer columnID, String hostID, String participantID) throws SQLException {
 
         String sql;
@@ -314,16 +353,30 @@ public class DatabaseManagement {
         prepStmt.executeUpdate();
     }
 
-    //Funktion um ForeignKey-Daten zu löschen
+    /**
+     *
+     * @param userID
+     * @return
+     */
     private void deleteForeignKey(String userID) throws SQLException {
 
+        /**
+         * SQL: delete ForeignKey in database.
+         */
         String sql = "DELETE FROM meetings_of_user WHERE userID = ?";
 
         PreparedStatement prepStmt = conn.prepareStatement(sql);
         prepStmt.setString(1, userID);
         prepStmt.executeUpdate();
     }
-    //Method-Overload, da meetingID = userID sein kann
+
+    /**
+     * Overload method. da meetingID = userID sein kann
+     *
+     * @param meetingID
+     * @return  <code>true</code> if ForeignKey deleted from database;
+     *                  <code>false</code> if todo.
+     */
     private void deleteForeignKey(int meetingID) throws SQLException {
 
         String sql = "DELETE FROM meetings_of_user WHERE meetingID = ?";
@@ -333,11 +386,21 @@ public class DatabaseManagement {
         prepStmt.executeUpdate();
     }
 
+    /**
+     * Delete the desired user.
+     *
+     * @param   userID  unique Discord userID
+     * @exception // TODO: 04.06.2020
+     * @return  <code>true</code> if user deleted from database;
+     * *                  <code>false</code> if user doesn´t exist.
+     */
     public boolean deleteUser(String userID) throws SQLException {
 
         deleteForeignKey(userID);
 
-        //SQL-Code zum Löschen aus der Datenbank
+        /**
+         * SQL: delete user in database.
+         */
         String sql = "DELETE FROM user_data WHERE userID = ?";
 
         //Versucht User aus Datenbank zu löschen
@@ -347,6 +410,14 @@ public class DatabaseManagement {
         return true;
     }
 
+    /**
+     * Delete a meeting. Therefore the method get the meetingID.
+     *
+     * @param   meetingID   unique generated meeting ID.
+     * @exception // TODO: 04.06.2020
+     * @return  <code>true</code> if meeting deleted from database;
+     *                  <code>false</code> if meeting doesn´t exist.
+     */
     public boolean deleteMeeting(int meetingID) throws SQLException {
 
         deleteForeignKey(meetingID);
@@ -361,9 +432,21 @@ public class DatabaseManagement {
         return true;
     }
 
+    /**
+     * Update the attribute [address], [interests] or [competencies] in userData(userID).
+     *
+     * @param   userID      unique Discord userID
+     * @param   column      todo
+     * @param   newValue    new entry for the database.db
+     * @exception   // TODO: 04.06.2020
+     * @return  <code>true</code> if database is succesfull updated;
+     *                  <code>false</code> could not update.
+     */
     public void updateUser(String userID, String column, String newValue) throws SQLException {
 
-        //SQL-Code zum Updaten der Werte
+        /**
+         * SQL: Update of user attributes.
+         */
         String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
 
         //Versucht Datenbank zu updaten
@@ -373,9 +456,21 @@ public class DatabaseManagement {
         prepStmt.executeUpdate();
     }
 
+    /**
+     * Update the meetingData with the new transferred values.
+     *
+     * @param meetingID     unique generated meeting ID.
+     * @param column        [@Participant] [starttime] [endtime] [message]
+     * @param newValue      new entry for the database.db
+     * @exception   // TODO: 04.06.2020
+     * @return  <code>true</code> If meeting update the meeting;
+     *                  <code>false</code> Meeting could not be updated.
+     */
     public void updateMeeting(int meetingID, String column, Object newValue, String hostID) throws SQLException {
 
-        //SQL-Code zum Updaten der Werte
+        /**
+         * SQL: Update of meeting attributes.
+         */
         String sqlUpdate = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
 
         PreparedStatement prepStmt;
@@ -400,9 +495,19 @@ public class DatabaseManagement {
         }
     }
 
-    //Funktion um UserData abzurufen
+    /**
+     * <code>ReturnData(String userID)</code> method gets the userData from Database.db and
+     * return them as an object[].
+     *
+     * @param   userID  unique Discord userID.
+     * @exception   // TODO: 04.06.2020
+     * @return  data    contains user data instance.
+     */
     public Object[] returnDataUser(String userID) throws SQLException {
 
+        /**
+         * SQL: get userData.
+         */
         String sql = "SELECT * FROM user_data WHERE userID = ?";
 
         Object[] data = new Object[4];
@@ -422,6 +527,9 @@ public class DatabaseManagement {
     //Funktion um MeetingData abzurufen
     public Object[] returnDataMeeting(int meetingID) throws SQLException {
 
+        /**
+         * SQL: get meetingData.
+         */
         String sql = "SELECT * FROM meeting_data WHERE meetingID = ?";
 
         Object[] data = new Object[5];
@@ -439,10 +547,19 @@ public class DatabaseManagement {
         return data;
     }
 
-    //Prüft, ob User in Datenbank registriert ist
+    /**
+     * Search the userID in <code>database.db</code> to check if the user is registered.
+     *
+     * @param       userID          unique Discord userID.
+     * @exception   SQLException    database access denied.
+     * @return  <code>true</code> if there is a user entry;
+     *                  <code>false</code> check for user failed(catch) / no user entry (return rs.getBoolean(0);).
+     */
     public boolean registeredCheck(String userID) throws SQLException {
 
-        //Sql-Code um zu gucken, ob User in Datenbank registriert ist
+        /**
+         * SQL Code: Check if there is an entry of userID in the database.
+         */
         String sql = "SELECT COUNT (*) FROM user_data WHERE userID = ?";
 
         PreparedStatement prepStmt = conn.prepareStatement(sql);
@@ -456,9 +573,19 @@ public class DatabaseManagement {
         return false;
     }
 
-    //Prüft, ob User für die Aktion berechtigt ist
+    /**
+     * Check if user is authorised.
+     *
+     * @param meetingID
+     * @param userID
+     * @return
+     * @throws SQLException
+     */
     public boolean authorizationCheck(int meetingID, String userID) throws SQLException{
 
+        /**
+         * SQL: Check authorization of user.
+         */
         String sql = "SELECT hostID FROM meeting_data WHERE meetingID = ?";
 
         PreparedStatement prepStmt = conn.prepareStatement(sql);
