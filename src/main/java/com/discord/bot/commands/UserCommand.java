@@ -175,7 +175,6 @@ public class UserCommand implements CommandInterface {
             case "update":
                 args[2] = args[2].toLowerCase();
 
-                //Prüft, ob erster Zusatz-Parameter existiert
                 /**
                  * Checks if the first parameter were entered and fits one of the patterns.
                  * !user update address

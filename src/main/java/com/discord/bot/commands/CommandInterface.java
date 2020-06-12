@@ -17,13 +17,17 @@ import net.dv8tion.jda.api.entities.MessageChannel;
  * @see         com.discord.bot.commands.ActivityCommand#executeCommand(MessageChannel, Message)
  * @see         com.discord.bot.commands.BotMeetingCommand#executeCommand(MessageChannel, Message)
  * @see         com.discord.bot.commands.ClearCommand#executeCommand(MessageChannel, Message)
- * @see         com.discord.bot.commands.ClearCommand#executeCommand(MessageChannel, Message)
  * @see         com.discord.bot.commands.HelpCommand#executeCommand(MessageChannel, Message)
  * @see         com.discord.bot.commands.LogCommand#executeCommand(MessageChannel, Message)
  * @see         com.discord.bot.commands.MeetingCommand#executeCommand(MessageChannel, Message)
  * @see         com.discord.bot.commands.RegisterCommand#executeCommand(MessageChannel, Message)
  * @see         com.discord.bot.commands.UnregisterCommand#executeCommand(MessageChannel, Message)
  * @see         com.discord.bot.commands.UserCommand#executeCommand(MessageChannel, Message)
+ * @see         com.discord.bot.commands.WaiterCommand#executeCommand(MessageChannel, Message)
+ * @see         com.discord.bot.commands.UserCommand#executeCommand(MessageChannel, Message)
+ * @see         com.discord.bot.commands.NotifyCommand#executeCommand(MessageChannel, Message)
+ * @see         com.discord.bot.commands.UserCommand#executeCommand(MessageChannel, Message)
+ * @see         com.discord.bot.commands.TestCommand#executeCommand(MessageChannel, Message)
  * @since       1.0
  */
 public interface CommandInterface {

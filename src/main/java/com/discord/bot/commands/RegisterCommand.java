@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 /**
- * The <code>UnregisterCommand</code> Class implements the <code>CommandInterface</code>
+ * The <code>RegisterCommand</code> Class implements the <code>CommandInterface</code>
  * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
  * method. It controls syntax and interprets the commands to call the right methods in
  * <code>UserManagement</code>.
@@ -41,8 +41,6 @@ public class RegisterCommand implements CommandInterface {
 
         /**
          * User who typed [!register] is temporary saved in
-         *  
-         * @param   user
          */
         User user = msg.getAuthor();
 
