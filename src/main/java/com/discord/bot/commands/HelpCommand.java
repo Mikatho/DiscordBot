@@ -48,10 +48,7 @@ public class HelpCommand implements CommandInterface {
         /**
          * Send a private message with all commands.
          */
-        User u = msg.getAuthor();
-        RestAction<PrivateChannel> pC = u.openPrivateChannel();
-        PrivateChannel p = pC.complete();
-        MessageAction a = p.sendMessage("Commands: "
+        msg.getAuthor().openPrivateChannel().complete().sendMessage("Commands: "
                 + "\nprivate chat:\n"
                 + "\nactivity commands: " + "```" + activityPatterns[0] + "\n" + activityPatterns[1] + "\n" + activityPatterns[2] + "```"
                 + "\nuser commands: " + "```" + userPatterns[0] + "\n" + userPatterns[1] + "\n" + userPatterns[2] + "\n"
@@ -60,7 +57,6 @@ public class HelpCommand implements CommandInterface {
                 + "\ndelete commands: " + "```" + deletePatterns[0] + "```"
                 + "\nlog commands: " + "```" + logPatterns[0] + "\n" + logPatterns[1] + "```"
                 + "\nmeeting commands: " + "```" + meetingPatterns[0] + "\n" + meetingPatterns[1] + "\n" + meetingPatterns[2] + "```"
-                );
-        a.queue();
+                ).queue();
     }
 }
