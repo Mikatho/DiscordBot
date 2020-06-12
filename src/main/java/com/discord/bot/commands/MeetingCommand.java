@@ -1,6 +1,5 @@
 package com.discord.bot.commands;
 
-import com.discord.bot.DatabaseManagement;
 import com.discord.bot.MeetingManagement;
 import com.discord.bot.data.BotMeetingMessageData;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -14,19 +13,20 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import java.util.Arrays;
 import java.util.Date;
 
 public class MeetingCommand implements CommandInterface {
 
-    private static boolean flag = false;
-
-    final static Logger logger = LogManager.getLogger(MeetingCommand.class.getName());
     /*
     !meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]
     !meeting delete [meetingID]
     !meeting update [meetingID] [value to change] [new value]
      */
+
+    private static boolean flag = false;
+
+    final static Logger logger = LogManager.getLogger(MeetingCommand.class.getName());
+
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
      * method is executed, because the Discord input [!meeting create | !meeting delete | !meeting update] 
@@ -83,7 +83,6 @@ public class MeetingCommand implements CommandInterface {
             return;
         }
 
-        //Prüft, ob nur der Command an sich geschrieben wurde
         /**
          * Checks if the typed command was the basic command [!meeting] without any specifications.
          * In case of YES the bot suggests the possible patterns in chat.
@@ -313,7 +312,7 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                EmbedBuilder embed = meetingManager.buildEmbed(channel.getJDA().getSelfUser().getAvatarUrl(), returnedMeetingID, user.getAsMention(), createArgs[0], format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), meetingMessage);
+                EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, user.getAsMention(), createArgs[0], format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), meetingMessage);
 
                 /**
                  * If the user has assigned himself to meeting he created he wont be mentioned twice.
@@ -502,7 +501,6 @@ public class MeetingCommand implements CommandInterface {
                     newValue = updateArgs[2];
                 }
 
-                //Versucht Meeting zu updaten
                 /**
                  * Tries to update the meeting in the database. If it was not sucessfull, the user will be informed.
                  */

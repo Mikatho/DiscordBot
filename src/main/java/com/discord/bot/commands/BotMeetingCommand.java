@@ -1,10 +1,10 @@
 package com.discord.bot.commands;
 
+import com.discord.bot.BotMain;
 import com.discord.bot.MeetingManagement;
 import com.discord.bot.data.BotMeetingMessageData;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,6 +26,8 @@ public class BotMeetingCommand implements CommandInterface {
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+        Guild guild = BotMain.getJda().getGuildById(694185735628128338L);
 
         String[] args = msg.getContentRaw().split(" ");
 
@@ -123,13 +125,6 @@ public class BotMeetingCommand implements CommandInterface {
                 }
             }
 
-            String noTime = "!_meeting " + args[1] + " noTime";
-
-            if (msg.getContentRaw().equals(noTime)) {
-                channel.sendMessage("I could not arrange a meeting with the other person.").queue();
-                return;
-            }
-
             String hostID = meetingManager.getBotMessageHolder().get(args[1]).getHostID();
             String participantID = meetingManager.getBotMessageHolder().get(args[1]).getParticipantID();
 
@@ -141,6 +136,24 @@ public class BotMeetingCommand implements CommandInterface {
                 ourUserID = hostID;
             } else {
                 ourUserID = participantID;
+            }
+
+            String noTime = "!_meeting " + args[1] + " noTime";
+
+            User ourUser;
+            PrivateChannel ourUserPM;
+
+            try {
+                ourUser = guild.getMemberById(ourUserID).getUser();
+                ourUserPM = ourUser.openPrivateChannel().complete();
+            } catch (NullPointerException e) {
+                channel.sendMessage(noTime).queue();
+                return;
+            }
+
+            if (msg.getContentRaw().equals(noTime)) {
+                ourUserPM.sendMessage("I could not arrange a meeting with the other person.").queue();
+                return;
             }
 
             message = meetingManager.getBotMessageHolder().get(args[1]).getMeetingMessage();
@@ -164,15 +177,15 @@ public class BotMeetingCommand implements CommandInterface {
 
                 if ((returnedMeetingID = meetingManager.insert(hostID, participantID, epochStart, epochStart + duration, "N/a")) == 0) {
 
-                    channel.sendMessage("Could not create the meeting.").queue();
+                    ourUserPM.sendMessage("Could not create the meeting.").queue();
                     return;
                 }
 
-                EmbedBuilder embed = meetingManager.buildEmbed(channel.getJDA().getSelfUser().getAvatarUrl(), returnedMeetingID, hostTag, participantTag, format.format(epochStart), format.format(epochStart + duration), message);
+                EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, hostTag, participantTag, format.format(epochStart), format.format(epochStart + duration), message);
 
-                channel.sendMessage("Successfully created the meeting!").queue();
+                ourUserPM.sendMessage("Successfully created the meeting!").queue();
 
-                channel.sendMessage(embed.build()).queue();
+                ourUserPM.sendMessage(embed.build()).queue();
 
                 /**
                  * Creating the Google Calender link to the event.
@@ -184,9 +197,9 @@ public class BotMeetingCommand implements CommandInterface {
                  * Informs the user if the creation of the link to the event was a sucess or a failure.
                  */
                 if (hostEventLink == null) {
-                    channel.sendMessage("Could not add meeting to your Google Calendar.").queue();
+                    ourUserPM.sendMessage("Could not add meeting to your Google Calendar.").queue();
                 } else {
-                    channel.sendMessage("Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
+                    ourUserPM.sendMessage("Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
                 }
 
                 meetingManager.getBotMessageHolder().remove(args[1]);
@@ -197,7 +210,7 @@ public class BotMeetingCommand implements CommandInterface {
                 if ((earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochPeriodEnd, duration))[0] == 0) {
 
                     channel.sendMessage(noTime).queue();
-                    channel.sendMessage("I could not arrange a meeting with the other person.").queue();
+                    ourUserPM.sendMessage("I could not arrange a meeting with the other person.").queue();
                     return;
                 }
             } catch (SQLException e) {
@@ -218,15 +231,15 @@ public class BotMeetingCommand implements CommandInterface {
 
                 if ((returnedMeetingID = meetingManager.insert(hostID, participantID, earliestMeetingTimes[0], earliestMeetingTimes[1], "N/a")) == 0) {
 
-                    channel.sendMessage("Could not create the meeting.").queue();
+                    ourUserPM.sendMessage("Could not create the meeting.").queue();
                     return;
                 }
 
-                EmbedBuilder embed = meetingManager.buildEmbed(channel.getJDA().getSelfUser().getAvatarUrl(), returnedMeetingID, hostTag, participantTag, format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), message);
+                EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, hostTag, participantTag, format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), message);
 
-                channel.sendMessage("Successfully created the meeting!").queue();
+                ourUserPM.sendMessage("Successfully created the meeting!").queue();
 
-                channel.sendMessage(embed.build()).queue();
+                ourUserPM.sendMessage(embed.build()).queue();
 
                 /**
                  * Creating the Google Calender link to the event.
@@ -238,9 +251,9 @@ public class BotMeetingCommand implements CommandInterface {
                  * Informs the user if the creation of the link to the event was a sucess or a failure.
                  */
                 if (hostEventLink == null) {
-                    channel.sendMessage("Could not add meeting to your Google Calendar.").queue();
+                    ourUserPM.sendMessage("Could not add meeting to your Google Calendar.").queue();
                 } else {
-                    channel.sendMessage("Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
+                    ourUserPM.sendMessage("Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
                 }
             }
         }

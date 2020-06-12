@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MeetingManagement {
@@ -139,11 +138,11 @@ public class MeetingManagement {
     }
 
     //Baut Embed für Meetings
-    public EmbedBuilder buildEmbed(String avatar, int meetingID, String host, String participant, String starttime, String endtime, String message) {
+    public EmbedBuilder buildEmbed(int meetingID, String host, String participant, String starttime, String endtime, String message) {
 
         return new EmbedBuilder()
                 .setColor(new Color(140, 158, 255))
-                .setAuthor("Meeting", null, avatar)
+                .setAuthor("Meeting", null, BotMain.getJda().getSelfUser().getAvatarUrl())
                 .addField("Meeting ID", Integer.toString(meetingID), false)
                 .addField("Host", host, true)
                 .addField("Participant", participant, true)

@@ -31,7 +31,7 @@ import java.sql.SQLException;
 public class BotMain {
 
     final static Logger logger = LogManager.getLogger(BotMain.class.getName());
-    private JDA jda;
+    private static JDA jda;
     private JDABuilder jdaBuilder;
 
     /**
@@ -121,5 +121,9 @@ public class BotMain {
                 logger.fatal("Unable to shutdown the Bot.\n" + e);
             }
         }).start();
+    }
+
+    public static JDA getJda() {
+        return jda;
     }
 }

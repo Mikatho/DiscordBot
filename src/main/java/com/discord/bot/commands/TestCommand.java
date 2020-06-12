@@ -1,17 +1,16 @@
 package com.discord.bot.commands;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import com.discord.bot.BotMain;
 import net.dv8tion.jda.api.entities.*;
 
 public class TestCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        Guild guild = msg.getAuthor().getJDA().getGuildById(694185735628128338L);
+        Guild guild = BotMain.getJda().getGuildById(123456789);
 
-        guild.getMemberById(245620283493449738L).getUser().openPrivateChannel().complete().sendMessage("Hi OwO").queue();
-
-        //text.sendMessage("Worked.").queue();
+        assert guild != null;
+        System.out.println(guild.getMembers());
 
         //channel.sendMessage(test).queue();
     }
