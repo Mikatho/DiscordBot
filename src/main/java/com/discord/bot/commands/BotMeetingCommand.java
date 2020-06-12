@@ -112,6 +112,17 @@ public class BotMeetingCommand implements CommandInterface {
             channel.sendMessage(commandAnswer).queue();
         } else {
 
+            String fullMessage = meetingManager.getBotMessageHolder().get(args[1]).getMessage();
+
+            boolean firstStep = meetingManager.getBotMessageHolder().get(args[1]).isFirstStep();
+
+            if (fullMessage.length() == 7 && firstStep) {
+
+                synchronized (new MeetingCommand()) {
+                    MeetingCommand.setFlag(true);
+                }
+            }
+
             String noTime = "!_meeting " + args[1] + " noTime";
 
             if (msg.getContentRaw().equals(noTime)) {
@@ -125,7 +136,7 @@ public class BotMeetingCommand implements CommandInterface {
             String hostTag = "<@!" + hostID + ">";
             String participantTag = "<@!" + participantID + ">";
 
-            if (meetingManager.getBotMessageHolder().get(args[1]).isFirstStep()) {
+            if (firstStep) {
 
                 ourUserID = hostID;
             } else {
@@ -149,7 +160,7 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            if (msg.getContentRaw().equals(meetingManager.getBotMessageHolder().get(args[1]).getMessage())) {
+            if (msg.getContentRaw().equals(fullMessage)) {
 
                 if ((returnedMeetingID = meetingManager.insert(hostID, participantID, epochStart, epochStart + duration, "N/a")) == 0) {
 

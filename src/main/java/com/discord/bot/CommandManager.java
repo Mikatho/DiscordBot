@@ -60,6 +60,8 @@ public class CommandManager {
         //Werden wieder gelöscht
         commands.put("test", new TestCommand());
         commands.put("clear", new ClearCommand());
+        commands.put("wait", new WaiterCommand());
+        commands.put("notify", new NotifyCommand());
 
         //Commands für private Nachrichten an den Bot
         commandsPM.put("activity", new ActivityCommand());

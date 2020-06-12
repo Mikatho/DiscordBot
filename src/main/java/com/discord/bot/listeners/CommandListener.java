@@ -40,15 +40,17 @@ public class CommandListener extends ListenerAdapter {
         /**
          * Check if the input is a command.
          */
+        new Thread (() -> {
             if (message.startsWith("!")) {
                 String[] args = message.split(" ");
 
                 /**
                  * Skips everything else if message comes from the bot itself
-                 */
+
                 if (event.getAuthor().getId().equals(channel.getJDA().getSelfUser().getId())) {
                     return;
                 }
+                 */
 
                 /**
                  * Call execute method in CommandManager.
@@ -64,5 +66,6 @@ public class CommandListener extends ListenerAdapter {
                     channel.sendMessage("This command is for private chat only.").queue();
                 }
             }
+        }).start();
     }
 }

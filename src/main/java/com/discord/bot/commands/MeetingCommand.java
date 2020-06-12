@@ -19,6 +19,7 @@ import java.util.Date;
 
 public class MeetingCommand implements CommandInterface {
 
+    private static boolean flag = false;
 
     final static Logger logger = LogManager.getLogger(MeetingCommand.class.getName());
     /*
@@ -34,8 +35,6 @@ public class MeetingCommand implements CommandInterface {
      * @param channel   Discord channel
      * @param msg       the Discord inputs.
      */
-
-    private static boolean flag = false;
 
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
@@ -238,7 +237,7 @@ public class MeetingCommand implements CommandInterface {
                     String answerCommand = "!_meeting "
                             + uniqueID + " "
                             + user.getAsMention() + " "
-                            + isoFormat.format(dateStart)+ " "
+                            + isoFormat.format(dateStart) + " "
                             + createArgs[4] + " "
                             + createArgs[5] + " "
                             + createArgs[0];
@@ -250,9 +249,10 @@ public class MeetingCommand implements CommandInterface {
                     /**
                      * Defines how long the while loop will run
                      */
-                    long timeout = System.currentTimeMillis() + 5000;
 
                     /*
+                    long timeout = System.currentTimeMillis() + 5000;
+
                     while (System.currentTimeMillis() < timeout) {
                         //If user belongs to a bot
                         if (flag) {
@@ -268,22 +268,24 @@ public class MeetingCommand implements CommandInterface {
                             logger.fatal("Unable to pause thread.\n" + e);
                         }
                     }
-
                      */
 
                     user.openPrivateChannel().complete().sendMessage("Trying to arrange a meeting...").queue();
 
+                    synchronized (this) {
 
-                    try {
-                        Thread.sleep(4000);
-                    } catch (InterruptedException e) {
-                        logger.fatal("Unable to pause thread.\n" + e);
-                    }
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            logger.fatal("Unable to pause thread.\n" + e);
+                        }
 
-                    if (!flag) {
-                        user.openPrivateChannel().complete().sendMessage("The user " + createArgs[0] + " does not belong to any bot!").queue();
+                        if (!flag) {
+                            user.openPrivateChannel().complete().sendMessage("The user " + createArgs[0] + " does not belong to any bot.").queue();
+                        }
+
+                        flag = false;
                     }
-                    return;
                 }
 
                 /**
@@ -529,8 +531,6 @@ public class MeetingCommand implements CommandInterface {
     }
 
     public static void setFlag(boolean flag) {
-
-        System.out.println("worked.");
 
         MeetingCommand.flag = flag;
     }
