@@ -18,13 +18,13 @@ public class MeetingManagement {
 
     private GoogleCalendarManagement calendarManager = GoogleCalendarManagement.getInstance();
 
-    private HashMap<String, BotMeetingMessageData> messageDataHolder = new HashMap<>();
+    private ConcurrentHashMap<String, BotMeetingMessageData> messageDataHolder = new ConcurrentHashMap<>();
 
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
     }
 
-    public HashMap<String, BotMeetingMessageData> getBotMessageHolder() {
+    public ConcurrentHashMap<String, BotMeetingMessageData> getBotMessageHolder() {
         return messageDataHolder;
     }
 

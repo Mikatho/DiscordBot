@@ -54,6 +54,12 @@ public class BotMeetingCommand implements CommandInterface {
         //Wenn es die erste Nachricht vom anderen Bot ist
         if (args.length == 7) {
 
+            ourUserID = args[6].substring(3, 21);
+
+            if (!meetingManager.userIsRegistered(ourUserID)) {
+                return;
+            }
+
             MeetingCommand command = new MeetingCommand();
 
             //Notifies MeetingCommand that user belongs to bot
@@ -62,8 +68,6 @@ public class BotMeetingCommand implements CommandInterface {
             foreignUserID = args[2].substring(3, 21);
 
             foreignUserName = msg.getContentDisplay().split(" ")[2].substring(1);
-
-            ourUserID = args[6].substring(3, 21);
 
             duration = Integer.parseInt(args[5]) * 60 * 1000;
 
@@ -230,8 +234,6 @@ public class BotMeetingCommand implements CommandInterface {
                 } else {
                     channel.sendMessage("Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
                 }
-
-                meetingManager.getBotMessageHolder().remove(args[1]);
             }
         }
     }
