@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
@@ -28,6 +30,7 @@ import java.sql.SQLException;
  */
 public class BotMain {
 
+    final static Logger logger = LogManager.getLogger(BotMain.class.getName());
     private JDA jda;
     private JDABuilder jdaBuilder;
 
@@ -42,7 +45,7 @@ public class BotMain {
         try {
             new BotMain();
         } catch (LoginException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to instantiate BotMain.\n" + e);
         }
     }
 
@@ -60,7 +63,7 @@ public class BotMain {
         try {
             DatabaseManagement.getINSTANCE().connect();
         } catch (SQLException | IOException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to connect to database.\n" + e);
         }
 
         jdaBuilder = JDABuilder.createDefault(BOT_TOKEN)
@@ -115,7 +118,7 @@ public class BotMain {
                     }
                 }
             } catch (IOException | SQLException e) {
-                e.printStackTrace();
+                logger.fatal("Unable to shutdown the Bot.\n" + e);
             }
         }).start();
     }

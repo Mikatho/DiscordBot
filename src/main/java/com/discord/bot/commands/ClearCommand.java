@@ -4,6 +4,8 @@ import com.discord.bot.DatabaseManagement;
 import com.discord.bot.LoggingManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 
@@ -26,6 +28,8 @@ import java.sql.SQLException;
  */
 public class ClearCommand implements CommandInterface {
 
+
+    final static Logger logger = LogManager.getLogger(ClearCommand.class.getName());
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
      * method is executed, because a Discord input with [!clear] command was made.
@@ -42,7 +46,7 @@ public class ClearCommand implements CommandInterface {
         try {
             DatabaseManagement.getINSTANCE().clear();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to get instance of database.\n" + e);
         }
         LoggingManagement.getINSTANCE().clear();
     }

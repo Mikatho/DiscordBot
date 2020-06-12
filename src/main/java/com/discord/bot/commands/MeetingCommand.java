@@ -1,11 +1,14 @@
 package com.discord.bot.commands;
 
+import com.discord.bot.DatabaseManagement;
 import com.discord.bot.MeetingManagement;
 import com.discord.bot.data.BotMeetingMessageData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -16,6 +19,8 @@ import java.util.Date;
 
 public class MeetingCommand implements CommandInterface {
 
+
+    final static Logger logger = LogManager.getLogger(MeetingCommand.class.getName());
     /*
     !meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]
     !meeting delete [meetingID]
@@ -169,10 +174,12 @@ public class MeetingCommand implements CommandInterface {
                     //The duration of the meeting in milliseconds.
                     duration = Integer.parseInt(createArgs[5]) * 60 * 1000;
                 } catch (ParseException e) {
+                    logger.fatal("Unable to parse the data.\n" + e);
                     //If the date was out of range of the existing dates or does not follow the input pattern.
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern or date does not exist.").queue();
                     return;
                 } catch (NumberFormatException e) {
+                    logger.fatal("Unable to parse the data.\n" + e);
                     //If no duration of the meeting was added to the command.
                     channel.sendMessage("Please add a duration of the meeting!\n Note: Duration has to be in minutes (only the number).").queue();
                     return;
@@ -196,7 +203,8 @@ public class MeetingCommand implements CommandInterface {
                 }
 
                 /**
-                 * Checks if the user is free in the requested period. Informs user if the requested period of the meeting is blocked.
+                 * Checks if the user is free in the requested period. Informs user if the requested period of the meeting
+                 * is blocked.
                  */
                 try {
                     if (meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochEnd, duration)[0] == 0) {
@@ -204,6 +212,7 @@ public class MeetingCommand implements CommandInterface {
                         return;
                     }
                 } catch (SQLException e) {
+                    logger.fatal("SQLException. Could not receive meeting data.\n" + e);
                     channel.sendMessage("Could not receive meeting data.").queue();
                     return;
                 }
@@ -255,7 +264,7 @@ public class MeetingCommand implements CommandInterface {
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            logger.fatal("Unable to pause thread.\n" + e);
                         }
                     }
 
@@ -264,7 +273,8 @@ public class MeetingCommand implements CommandInterface {
                 }
 
                 /**
-                 * Checks if the participant is free in the requested period. Informs user if the requested period of the meeting is blocked.
+                 * Checks if the participant is free in the requested period. Informs user if the requested
+                 * period of the meeting is blocked.
                  */
                 try {
                     earliestMeetingTimes = meetingManager.earliestPossibleMeeting(participantID, epochStart, epochEnd, duration);
@@ -274,6 +284,7 @@ public class MeetingCommand implements CommandInterface {
                         return;
                     }
                 } catch (SQLException e) {
+                    logger.fatal("Unable to get meetingData.\n" + e);
                     channel.sendMessage("Could not receive meeting data.").queue();
                     return;
                 }
@@ -335,6 +346,7 @@ public class MeetingCommand implements CommandInterface {
                 try {
                     meetingID = Integer.parseInt(args[2]);
                 } catch (NumberFormatException e) {
+                    logger.fatal("Unable to parse data.\n" + e);
                     channel.sendMessage("Your meetingID is not a valid number.").queue();
                     return;
                 }
@@ -419,6 +431,7 @@ public class MeetingCommand implements CommandInterface {
                 try {
                     meetingID = Integer.parseInt(updateArgs[0]);
                 } catch (NumberFormatException e) {
+                    logger.fatal("Unable to parse  data.\n" + e);
                     channel.sendMessage("Your meetingID is not a valid number.").queue();
                     return;
                 }
@@ -451,6 +464,7 @@ public class MeetingCommand implements CommandInterface {
                          */
                         newValue = time.getTime() / 1000;
                     } catch (ParseException e) {
+                        logger.fatal("Unable to to parse data.\n" + e);
                         channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                         return;
                     }

@@ -1,5 +1,8 @@
 package com.discord.bot;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 
 import java.io.BufferedWriter;
@@ -23,6 +26,7 @@ import java.util.StringJoiner;
  */
 public class LoggingManagement {
 
+    final static Logger logger = LogManager.getLogger(LoggingManagement.class.getName());
     private static final LoggingManagement INSTANCE = new LoggingManagement();  // creates INSTANCE of Class
 
     private static final int LOG_CAPACITY = 10;
@@ -52,7 +56,7 @@ public class LoggingManagement {
             writer.print("");
             writer.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to find or connect to commands.log.\n" + e);
         }
     }
 
@@ -118,7 +122,7 @@ public class LoggingManagement {
                 file.createNewFile();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to ceate new file.\n" + e);
         }
 
         /**
@@ -139,7 +143,7 @@ public class LoggingManagement {
             commandLog.clear();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.fatal("Unable to save logs.\n" + e);
         }
     }
 }
