@@ -238,7 +238,7 @@ public class MeetingCommand implements CommandInterface {
                     String answerCommand = "!_meeting "
                             + uniqueID + " "
                             + user.getAsMention() + " "
-                            + isoFormat.format(dateStart) + "+00:00 "
+                            + isoFormat.format(dateStart)+ " "
                             + createArgs[4] + " "
                             + createArgs[5] + " "
                             + createArgs[0];
@@ -252,6 +252,7 @@ public class MeetingCommand implements CommandInterface {
                      */
                     long timeout = System.currentTimeMillis() + 5000;
 
+                    /*
                     while (System.currentTimeMillis() < timeout) {
                         //If user belongs to a bot
                         if (flag) {
@@ -268,7 +269,20 @@ public class MeetingCommand implements CommandInterface {
                         }
                     }
 
-                    user.openPrivateChannel().complete().sendMessage("The user " + createArgs[0] + " does not belong to any bot!").queue();
+                     */
+
+                    user.openPrivateChannel().complete().sendMessage("Trying to arrange a meeting...").queue();
+
+
+                    try {
+                        Thread.sleep(4000);
+                    } catch (InterruptedException e) {
+                        logger.fatal("Unable to pause thread.\n" + e);
+                    }
+
+                    if (!flag) {
+                        user.openPrivateChannel().complete().sendMessage("The user " + createArgs[0] + " does not belong to any bot!").queue();
+                    }
                     return;
                 }
 
@@ -514,7 +528,10 @@ public class MeetingCommand implements CommandInterface {
         }
     }
 
-    public void setFlag(boolean flag) {
+    public static void setFlag(boolean flag) {
+
+        System.out.println("worked.");
+
         MeetingCommand.flag = flag;
     }
 }

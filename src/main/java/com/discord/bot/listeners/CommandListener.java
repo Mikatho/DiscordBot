@@ -40,7 +40,6 @@ public class CommandListener extends ListenerAdapter {
         /**
          * Check if the input is a command.
          */
-        new Thread(() -> {
             if (message.startsWith("!")) {
                 String[] args = message.split(" ");
 
@@ -65,6 +64,5 @@ public class CommandListener extends ListenerAdapter {
                     channel.sendMessage("This command is for private chat only.").queue();
                 }
             }
-        }).start();
     }
 }

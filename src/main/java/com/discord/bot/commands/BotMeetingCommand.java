@@ -41,7 +41,6 @@ public class BotMeetingCommand implements CommandInterface {
 
         String starttime;
         String endtime;
-        String timezone;
 
         int duration;
 
@@ -64,12 +63,10 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            MeetingCommand command = new MeetingCommand();
-
             //Notifies MeetingCommand that user belongs to bot
-            command.setFlag(true);
+            MeetingCommand.setFlag(true);
 
-            foreignUserID = args[2].substring(3, 21);
+            foreignUserID = args[2].substring(2, 20);
 
             foreignUserName = msg.getContentDisplay().split(" ")[2].substring(1);
 
@@ -77,11 +74,7 @@ public class BotMeetingCommand implements CommandInterface {
 
             starttime = args[3];
 
-            timezone = starttime.substring(19);
-
-            endtime = args[3].substring(0, 11) + args[4] + ":00" + timezone;
-
-            String timeOfEndtime;
+            endtime = args[3].substring(0, 11) + args[4] + ":00";
 
             //Versucht Zeiten in Epoch zu parsen
             try {
@@ -113,7 +106,7 @@ public class BotMeetingCommand implements CommandInterface {
 
             commandAnswer = "!_meeting "
                     + args[1] + " "
-                    + isoFormat.format(earliestMeetingTimes[0]) + timezone + " ";
+                    + isoFormat.format(earliestMeetingTimes[0]);
 
             //Gibt Bestätigung mit Daten an den Bot zurück
             channel.sendMessage(commandAnswer).queue();
@@ -146,8 +139,6 @@ public class BotMeetingCommand implements CommandInterface {
             epochPeriodEnd = meetingManager.getBotMessageHolder().get(args[1]).getEpochPeriodEnd();
 
             starttime = args[2];
-
-            timezone = starttime.substring(19);
 
             //Versucht Startzeit in Epoch zu parsen
             try {
@@ -208,7 +199,7 @@ public class BotMeetingCommand implements CommandInterface {
 
             commandAnswer = "!_meeting "
                     + args[1] + " "
-                    + isoFormat.format(earliestMeetingTimes[0]) + timezone;
+                    + isoFormat.format(earliestMeetingTimes[0]);
 
             channel.sendMessage(commandAnswer).queue();
 
