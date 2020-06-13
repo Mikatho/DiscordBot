@@ -284,6 +284,7 @@ public class MeetingCommand implements CommandInterface {
                         }
 
                         flag = false;
+                        return;
                     }
                 }
 

@@ -39,7 +39,7 @@ public class WaiterCommand implements CommandInterface {
         /**
          * Notifies user by channel message.
          */
-        channel.sendMessage("!notify").queue();
+        channel.sendMessage("!dude").queue();
 
         /**
          * Manages the threadactivities in the [MeetingCommand].
@@ -52,15 +52,15 @@ public class WaiterCommand implements CommandInterface {
                 e.printStackTrace();
             }
 
+            if (!flag) {
+                System.out.println("false");
+            }
+
             if (flag) {
-                System.out.println("worked");
-            } else {
-                System.out.println("Couldnt find user.");
+                System.out.println("true");
             }
 
             flag = false;
-
-            System.out.println(flag);
         }
     }
 

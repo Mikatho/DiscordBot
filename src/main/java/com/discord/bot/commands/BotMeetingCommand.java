@@ -118,7 +118,7 @@ public class BotMeetingCommand implements CommandInterface {
 
             boolean firstStep = meetingManager.getBotMessageHolder().get(args[1]).isFirstStep();
 
-            if (fullMessage.length() == 9 && firstStep) {
+            if ((fullMessage.length() >= 8) && firstStep) {
 
                 synchronized (new MeetingCommand()) {
                     MeetingCommand.setFlag(true);
@@ -140,13 +140,10 @@ public class BotMeetingCommand implements CommandInterface {
 
             String noTime = "!_meeting " + args[1] + " noTime";
 
-            User ourUser;
-            MessageChannel ourUserPM;
+            PrivateChannel ourUserPM;
 
             try {
-                ourUser = guild.getMemberById(ourUserID).getUser();
-                ourUserPM = channel;
-                //ourUserPM = ourUser.openPrivateChannel().complete();
+                ourUserPM = guild.getMemberById(ourUserID).getUser().openPrivateChannel().complete();
             } catch (NullPointerException e) {
                 channel.sendMessage(noTime).queue();
                 return;
