@@ -55,9 +55,9 @@ public class BotMeetingCommand implements CommandInterface {
 
         String commandAnswer;
 
-        String foreignUserID;
         String foreignUserName;
         String ourUserID;
+        String ourUserTag;
 
         String starttime;
         String endtime;
@@ -69,15 +69,19 @@ public class BotMeetingCommand implements CommandInterface {
 
         String message;
 
+        String noTime;
+
         //Skipt alles, wenn Nachricht nicht von einem Bot kommt oder angefragter User nicht in unserer Datenbank ist
         if (!msg.getAuthor().isBot()) {
             return;
         }
 
         //Wenn es die erste Nachricht vom anderen Bot ist
-        if (args.length == 7) {
+        if (args.length >= 7) {
 
-            ourUserID = args[6].substring(3, 21);
+            ourUserTag = args[6];
+
+            ourUserID = ourUserTag.substring(3, 21);
 
             if (!meetingManager.userIsRegistered(ourUserID)) {
                 return;
@@ -88,7 +92,7 @@ public class BotMeetingCommand implements CommandInterface {
              */
             MeetingCommand.setFlag(true);
 
-            foreignUserID = args[2].substring(2, 20);
+            String foreignUserID = args[2].substring(2, 20);
 
             foreignUserName = msg.getContentDisplay().split(" ")[2].substring(1);
 
@@ -97,6 +101,8 @@ public class BotMeetingCommand implements CommandInterface {
             starttime = args[3];
 
             endtime = args[3].substring(0, 11) + args[4] + ":00";
+
+            noTime = "!_meeting " + args[1] + " " + ourUserTag + " noTime";
 
             //Versucht Zeiten in Epoch zu parsen
             try {
@@ -114,18 +120,19 @@ public class BotMeetingCommand implements CommandInterface {
                 earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochPeriodEnd, duration);
             } catch (SQLException e) {
                 logger.fatal("Unable to call method.\n" + e);
-                channel.sendMessage("!_meeting " + args[1] + " noTime").queue();
+                channel.sendMessage(noTime).queue();
                 return;
             }
 
             if (earliestMeetingTimes[0] == 0) {
 
-                channel.sendMessage("!_meeting " + args[1] + " noTime").queue();
+                channel.sendMessage(noTime).queue();
                 return;
             }
 
             commandAnswer = "!_meeting "
                     + args[1] + " "
+                    + ourUserTag + " "
                     + isoFormat.format(earliestMeetingTimes[0]);
 
             meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(commandAnswer, foreignUserID, ourUserID, foreignUserName, duration, epochPeriodEnd, "N/a", false));
@@ -158,7 +165,9 @@ public class BotMeetingCommand implements CommandInterface {
                 ourUserID = participantID;
             }
 
-            String noTime = "!_meeting " + args[1] + " noTime";
+            ourUserTag = "<@!" + ourUserID + ">";
+
+            noTime = "!_meeting " + args[1] + " " + ourUserTag + " noTime";
 
             PrivateChannel ourUserPM;
 
@@ -169,7 +178,7 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            if (msg.getContentRaw().equals(noTime)) {
+            if (msg.getContentRaw().equals("!_meeting " + args[1] + ".* noTime")) {
                 ourUserPM.sendMessage("I could not arrange a meeting with the other person.").queue();
                 return;
             }
@@ -241,6 +250,7 @@ public class BotMeetingCommand implements CommandInterface {
 
             commandAnswer = "!_meeting "
                     + args[1] + " "
+                    + ourUserTag + " "
                     + isoFormat.format(earliestMeetingTimes[0]);
 
             channel.sendMessage(commandAnswer).queue();
