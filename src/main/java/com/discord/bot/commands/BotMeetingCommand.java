@@ -90,8 +90,6 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(msg.getContentRaw(), foreignUserID, ourUserID, foreignUserName, duration, epochPeriodEnd, "N/a", false));
-
             try {
                 earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochPeriodEnd, duration);
             } catch (SQLException e) {
@@ -110,6 +108,8 @@ public class BotMeetingCommand implements CommandInterface {
                     + args[1] + " "
                     + isoFormat.format(earliestMeetingTimes[0]);
 
+            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(commandAnswer, foreignUserID, ourUserID, foreignUserName, duration, epochPeriodEnd, "N/a", false));
+
             //Gibt Bestätigung mit Daten an den Bot zurück
             channel.sendMessage(commandAnswer).queue();
         } else {
@@ -118,7 +118,7 @@ public class BotMeetingCommand implements CommandInterface {
 
             boolean firstStep = meetingManager.getBotMessageHolder().get(args[1]).isFirstStep();
 
-            if (fullMessage.length() == 7 && firstStep) {
+            if (fullMessage.length() == 9 && firstStep) {
 
                 synchronized (new MeetingCommand()) {
                     MeetingCommand.setFlag(true);
@@ -141,11 +141,12 @@ public class BotMeetingCommand implements CommandInterface {
             String noTime = "!_meeting " + args[1] + " noTime";
 
             User ourUser;
-            PrivateChannel ourUserPM;
+            MessageChannel ourUserPM;
 
             try {
                 ourUser = guild.getMemberById(ourUserID).getUser();
-                ourUserPM = ourUser.openPrivateChannel().complete();
+                ourUserPM = channel;
+                //ourUserPM = ourUser.openPrivateChannel().complete();
             } catch (NullPointerException e) {
                 channel.sendMessage(noTime).queue();
                 return;
@@ -256,6 +257,7 @@ public class BotMeetingCommand implements CommandInterface {
                     ourUserPM.sendMessage("Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
                 }
             }
+            meetingManager.getBotMessageHolder().get(args[1]).setMessage(commandAnswer);
         }
     }
 }

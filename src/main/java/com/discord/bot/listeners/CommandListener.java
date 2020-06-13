@@ -46,11 +46,10 @@ public class CommandListener extends ListenerAdapter {
 
                 /**
                  * Skips everything else if message comes from the bot itself
-
+                 */
                 if (event.getAuthor().getId().equals(channel.getJDA().getSelfUser().getId())) {
                     return;
                 }
-                 */
 
                 /**
                  * Call execute method in CommandManager.

@@ -3,6 +3,8 @@ package com.discord.bot.commands;
 import com.discord.bot.MeetingManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -18,8 +20,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
  * @since       1.0
  */
 public class WaiterCommand implements CommandInterface {
-
-    final static Logger logger = LogManager.getLogger(WaiterCommand.class.getName());
 
     private static boolean flag = false;
 
@@ -49,7 +49,7 @@ public class WaiterCommand implements CommandInterface {
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                logger.fatal("Unable to pause thread.\n" + e);
+                e.printStackTrace();
             }
 
             if (flag) {
