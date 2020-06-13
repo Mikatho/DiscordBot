@@ -4,9 +4,9 @@ import com.discord.bot.listeners.CommandListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
+
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,6 +14,7 @@ import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.sql.SQLException;
 
 
@@ -37,8 +38,8 @@ public class BotMain {
     /**
      * Create instance of <code>BotMain()</code>
      *
-     * @param args
-     * @throws // TODO: 04.06.2020
+     * @param   args    Array. contains all variables from command call.
+     * @throws  LoginException  Basic login exception. If method is unable to instantiate.
      */
     public static void main(String[] args) {
 
@@ -54,7 +55,8 @@ public class BotMain {
      * It calls the method connect() in <code>DatabaseManagement</code> to build the database
      * and also holds the BotTokken. The method executes the Discord Bot.
      *
-     * @throws LoginException toDo
+     * @throws  SQLException    Unable to get the instance of database.
+     * @throws  IOException     Unable to access the database.
      */
     public BotMain() throws LoginException {
 
@@ -85,7 +87,8 @@ public class BotMain {
     /**
      * The <code>shutdown()</code> method closes all connections and shuts down the Bot.
      *
-     * @throws // TODO: 04.06.2020
+     * @throws  IOException     Basic login exception. Unable to interact with the BufferedReader.
+     * @throws  SQLException    No access to database.
      */
     public void shutdown() {
 

@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  * More information on this bug:
  * https://stackoverflow.com/questions/30634827/warning-unable-to-change-permissions-for-everybody
  *
- * @Author L2G4 SEG
+ * @Author L2G4
  */
 public class GoogleCalendarManagement {
 

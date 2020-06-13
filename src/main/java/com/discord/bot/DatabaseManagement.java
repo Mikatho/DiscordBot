@@ -30,7 +30,7 @@ import java.util.StringJoiner;
  */
 public class DatabaseManagement {
 
-    private static final DatabaseManagement INSTANCE = new DatabaseManagement();
+    private static final DatabaseManagement INSTANCE = new DatabaseManagement();    // create INSTANCE of Class
 
     final static Logger logger = LogManager.getLogger(DatabaseManagement.class.getName());
 
@@ -50,7 +50,7 @@ public class DatabaseManagement {
     /**
      * Delete all entries in database.
      *
-     * @exception   // TODO: 04.06.2020
+     * @exception   SQLException    todo
      */
     public void clear() throws SQLException {
 
@@ -496,11 +496,11 @@ public class DatabaseManagement {
     }
 
     /**
-     * <code>ReturnData(String userID)</code> method gets the userData from Database.db and
+     * <code>returnDataUser(String userID)</code> method gets the userData from Database.db and
      * return them as an object[].
      *
      * @param   userID  unique Discord userID.
-     * @exception   // TODO: 04.06.2020
+     * @exception   SQLException        Unable to access database.
      * @return  data    contains user data instance.
      */
     public Object[] returnDataUser(String userID) throws SQLException {
@@ -524,7 +524,14 @@ public class DatabaseManagement {
         return data;
     }
 
-    //Funktion um MeetingData abzurufen
+    /**
+     * <code>returnDataMeeting(String userID)</code> method gets the meetingData from Database.db and
+     * return them as an object[].
+     *
+     * @param meetingID unique meeting ID.
+     * @return  data    Object. Contains all meetingData.
+     * @throws  SQLException  Unable to access database.
+     */
     public Object[] returnDataMeeting(int meetingID) throws SQLException {
 
         /**

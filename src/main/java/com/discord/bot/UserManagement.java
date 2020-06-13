@@ -42,6 +42,7 @@ public class UserManagement {
      * and insert it in the database.
      *
      * @param   userID      unique ID to identify a user.
+     * @exception SQLException  todo
      * @return  <code>true</code> Successfully added to the database;
      *                  <code>false</code> Could not add to database.
      */
@@ -70,6 +71,7 @@ public class UserManagement {
      * This method is called from the <code>UserCommand</code> class.
      *
      * @param   userID      unique Discord ID.
+     * @exception SQLException  todo
      * @return  <code>true</code> Successfully deleted the user;
      *                  <code>false</code> user doesn´t exists.
      */
@@ -89,6 +91,7 @@ public class UserManagement {
      * @param userID    unique Discord ID.
      * @param column    [interests} / [competencies] / [address].
      * @param newValue  contains new attribute for the userData.
+     * @exception SQLException  todo
      * @return  <code>true</code> Successfully update the userData;
      *                  <code>false</code> could not be updated.
      */
@@ -109,7 +112,7 @@ public class UserManagement {
      *
      * @see com.discord.bot.commands.UserCommand#executeCommand(MessageChannel, Message)
      * @see com.discord.bot.DatabaseManagement#returnData(String)
-     *
+     * @exception SQLException  todo
      * @param   userID  unique Discord ID of search user.
      * @return  data    contains instance of user data.
      */

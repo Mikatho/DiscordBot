@@ -1,6 +1,7 @@
 package com.discord.bot.commands;
 
 import com.discord.bot.BotMain;
+import com.discord.bot.LoggingManagement;
 import com.discord.bot.MeetingManagement;
 import com.discord.bot.data.BotMeetingMessageData;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -14,10 +15,27 @@ import java.text.SimpleDateFormat;
 
 import java.util.Date;
 
+
+/**
+ *  Todo
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         LoggingManagement#getINSTANCE()
+ * @see         com.discord.bot.commands.CommandInterface
+ * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since       1.0
+ */
 public class BotMeetingCommand implements CommandInterface {
 
     final static Logger logger = LogManager.getLogger(BotMeetingCommand.class.getName());
 
+    /**
+     * TODO
+     *
+     * @param   channel   Discord channel.
+     * @param   msg       the Discord input.
+     */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
@@ -65,7 +83,9 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            //Notifies MeetingCommand that user belongs to bot
+            /**
+             * Notifies MeetingCommand that user belongs to bot
+             */
             MeetingCommand.setFlag(true);
 
             foreignUserID = args[2].substring(2, 20);

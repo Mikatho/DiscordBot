@@ -1,5 +1,6 @@
 package com.discord.bot.commands;
 
+import com.discord.bot.DatabaseManagement;
 import com.discord.bot.MeetingManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -20,6 +21,8 @@ import org.apache.logging.log4j.Logger;
  * @since       1.0
  */
 public class WaiterCommand implements CommandInterface {
+
+    final static Logger logger = LogManager.getLogger(WaiterCommand.class.getName());
 
     private static boolean flag = false;
 
@@ -49,7 +52,7 @@ public class WaiterCommand implements CommandInterface {
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.fatal("Unable to synchronized thread.\n" + e);
             }
 
             if (!flag) {

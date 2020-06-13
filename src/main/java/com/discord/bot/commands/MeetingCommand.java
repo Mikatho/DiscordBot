@@ -15,6 +15,19 @@ import java.text.SimpleDateFormat;
 
 import java.util.Date;
 
+/**
+ * The <code>MeetingCommand</code> Class implements the <code>CommandInterface</code>
+ * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
+ * method. It controls syntax and interprets the commands to call the right method in the
+ * <code>MeetingManagement</code> class.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.MeetingManagement
+ * @see         com.discord.bot.data.MeetingData
+ * @see         com.discord.bot.commands.CommandInterface
+ * @since       1.0
+ */
 public class MeetingCommand implements CommandInterface {
 
     /*
@@ -35,7 +48,6 @@ public class MeetingCommand implements CommandInterface {
      * @param channel   Discord channel
      * @param msg       the Discord inputs.
      */
-
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
@@ -161,24 +173,34 @@ public class MeetingCommand implements CommandInterface {
                  * Tries to format the times correctly and checks the existency of date and time.
                  */
                 try {
-                    //Parsed string into date.
+                    /**
+                     * Parsed string into date
+                     */
                     dateStart = format.parse(starttime);
-                    //Saves the epoch from the time.
+                    /**
+                     * Saves the epoch from the time.
+                     */
                     epochStart = dateStart.getTime();
 
                     dateEnd = format.parse(endtime);
                     epochEnd = dateEnd.getTime();
 
-                    //The duration of the meeting in milliseconds.
+                    /**
+                     * The duration of the meeting in milliseconds.
+                     */
                     duration = Integer.parseInt(createArgs[5]) * 60 * 1000;
                 } catch (ParseException e) {
                     logger.fatal("Unable to parse the data.\n" + e);
-                    //If the date was out of range of the existing dates or does not follow the input pattern.
+                    /**
+                     * If the date was out of range of the existing dates or does not follow the input pattern.
+                     */
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern or date does not exist.").queue();
                     return;
                 } catch (NumberFormatException e) {
                     logger.fatal("Unable to parse the data.\n" + e);
-                    //If no duration of the meeting was added to the command.
+                    /**
+                     * If no duration of the meeting was added to the command.
+                     */
                     channel.sendMessage("Please add a duration of the meeting!\n Note: Duration has to be in minutes (only the number).").queue();
                     return;
                 }

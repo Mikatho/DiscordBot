@@ -22,6 +22,7 @@ import java.util.StringJoiner;
  * @author      L2G4
  * @version     %I%, %G%
  * @see         com.discord.bot.LoggingManagement
+ * @see         com.discord.bot.CommandManager
  * @since       1.0
  */
 public class LoggingManagement {
@@ -47,7 +48,7 @@ public class LoggingManagement {
     /**
      * Delete data in Logfile by overwrite the entries with an empty string.
      *
-     * @exception   // TODO: 04.06.2020
+     * @exception  FileNotFoundException     file does not exist.
      */
     public void clear() {
 
@@ -63,7 +64,7 @@ public class LoggingManagement {
     /**
      * Add the input time of the commands to the entries.
      *
-     * @param command   todo
+     * @param command   Input of user.
      */
     public void addToLog(String command) {
 
@@ -105,9 +106,8 @@ public class LoggingManagement {
     /**
      * Save all logs in a file.
      *
-     * @exception
-     *
-     * @exception
+     * @exception   IOException unable to create file.
+     * @exception   IOException unable to manipulate the file.
      */
     public void saveToFile() {
 
@@ -138,7 +138,7 @@ public class LoggingManagement {
             }
 
             bw.close();
-            System.out.println("Successfully saved log to file.");
+            System.out.println("Successfully saved log to file.");  // Todo Rausnehmen da Sysout ?!?!?!????
 
             commandLog.clear();
 

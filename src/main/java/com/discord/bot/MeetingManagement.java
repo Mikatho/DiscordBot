@@ -11,6 +11,18 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+/**
+ * This Class is the adapter of the <code>DatabaseManaging</code> and <code>MeetingCommand</code>.
+ * It handles the interactions between them.
+ *
+ * @author      L2G4
+ * @version     %I%, %G%
+ * @see         com.discord.bot.MeetingManagement
+ * @see         com.discord.bot.DatabaseManagement
+ * @see         com.discord.bot.data.MeetingData
+ * @since       1.0
+ */
 public class MeetingManagement {
 
     final static Logger logger = LogManager.getLogger(MeetingManagement.class.getName());
@@ -23,23 +35,52 @@ public class MeetingManagement {
 
     private ConcurrentHashMap<String, BotMeetingMessageData> messageDataHolder = new ConcurrentHashMap<>();
 
+    /**
+     * The <code>#getINSTANCE()</code> method return the instance of the <code>MeetingManagement</code> object.
+     *
+     * @return  INSTANCE    instance of the MeetingManagement object
+     */
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
     }
 
+    /**
+     * TODO
+     *
+     * @return  messageDataHolder
+     */
     public ConcurrentHashMap<String, BotMeetingMessageData> getBotMessageHolder() {
         return messageDataHolder;
     }
 
+
+    /**
+     * The <code>#insert()</code> method creates a new instance of <code>MeetingData</code>
+     * and insert it in the database.
+     *
+     * @param hostID        userID[@user] of host.
+     * @param participantID userID[@user] of participate.
+     * @param starttime     meeting start.
+     * @param endtime       meeting end.
+     * @param message       meeting message.
+     * @exception SQLException  Database access error.
+     * @return  <code>true</code> Successfully insert the meeting;
+     *                 <code>false</code> unable to insert the meeting.
+     */
     public int insert(String hostID, String participantID, long starttime, long endtime, String message) {
 
         MeetingData tempMeeting;
 
-        //Erstellt neue Instanz mit Daten
+        /**
+         * instantiate MeetingData.
+         */
         if (message.equals("N/a")) {
             //Wenn keine Message mitgegeben wurde
             tempMeeting = new MeetingData(hostID, participantID, starttime, endtime);
         } else {
+            /**
+             * Overloaded MeetingData constructor[message]
+             */
             tempMeeting = new MeetingData(hostID, participantID, starttime, endtime, message);
         }
 
@@ -51,7 +92,15 @@ public class MeetingManagement {
         }
     }
 
-
+    /**
+     * Delete meeting in database.
+     * Call the <code>#deleteMeeting(int meetingID)</code> method in <code>DatabaseManagement</code>.
+     * This method is called from the <code>MeetingCommand</code> class.
+     *
+     * @param meetingID     unique generated meeting ID.
+     * @return  <code>true</code> Successfully deleted the meeting;
+     *                  <code>false</code> meeting doesn´t exists.
+     */
     public boolean delete(Integer meetingID) {
 
         try {
@@ -62,9 +111,22 @@ public class MeetingManagement {
         }
     }
 
+    /**
+     * This method updates the manipulated MeetingData in the database.
+     *
+     * @param meetingID     unique generated meeting ID.
+     * @param hostID        todo
+     * @param column        previous entry.
+     * @param newValue      new entry for the database.db
+     * @exception SQLException  Database access error. Unable to update meeting.
+     * @return  <code>true</code> Successfully update the MeetingData;
+     *                  <code>false</code> could not be updated.
+     */
     public boolean update(Integer meetingID, String hostID, String column, Object newValue) {
 
-        //Versucht Meeting in Datenbank zu updaten
+        /**
+         * Update meeting.
+         */
         try {
             dbManager.updateMeeting(meetingID, column, newValue, hostID);
             return true;
