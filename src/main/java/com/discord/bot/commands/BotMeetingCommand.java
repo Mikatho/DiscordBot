@@ -83,9 +83,9 @@ public class BotMeetingCommand implements CommandInterface {
 
             String[] userTags = args[6].split(" ");
 
-            for (String userTag : userTags) {
-                if (meetingManager.userIsRegistered(userTag.substring(3, 21))) {
-                    ourUserTag = userTag;
+            for (String item : userTags) {
+                if (meetingManager.userIsRegistered(item.substring(3, 21))) {
+                    ourUserTag = item;
                     ourUserID = ourUserTag.substring(3, 21);
                     break;
                 }
@@ -94,11 +94,6 @@ public class BotMeetingCommand implements CommandInterface {
             if (ourUserTag == null) {
                 return;
             }
-
-            /**
-             * Notifies MeetingCommand that user belongs to bot
-             */
-            MeetingCommand.setFlag(true);
 
             String foreignUserID = args[2].substring(2, 20);
 
@@ -150,6 +145,10 @@ public class BotMeetingCommand implements CommandInterface {
             //Gibt Bestätigung mit Daten an den Bot zurück
             channel.sendMessage(commandAnswer).queue();
         } else {
+
+            if (!meetingManager.getBotMessageHolder().containsKey(args[1])) {
+                return;
+            }
 
             String savedMessage = meetingManager.getBotMessageHolder().get(args[1]).getMessage();
 
