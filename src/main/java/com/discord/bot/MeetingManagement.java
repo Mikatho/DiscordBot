@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * This Class is the adapter of the <code>DatabaseManaging</code> and <code>MeetingCommand</code>.
  * It handles the interactions between them.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.MeetingManagement
- * @see         com.discord.bot.DatabaseManagement
- * @see         com.discord.bot.data.MeetingData
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.MeetingManagement
+ * @see com.discord.bot.DatabaseManagement
+ * @see com.discord.bot.data.MeetingData
+ * @since 1.0
  */
 public class MeetingManagement {
 
@@ -38,7 +38,7 @@ public class MeetingManagement {
     /**
      * The <code>#getINSTANCE()</code> method return the instance of the <code>MeetingManagement</code> object.
      *
-     * @return  INSTANCE    instance of the MeetingManagement object
+     * @return INSTANCE    instance of the MeetingManagement object
      */
     public static MeetingManagement getINSTANCE() {
         return INSTANCE;
@@ -47,7 +47,7 @@ public class MeetingManagement {
     /**
      * TODO
      *
-     * @return  messageDataHolder
+     * @return messageDataHolder
      */
     public ConcurrentHashMap<String, BotMeetingMessageData> getBotMessageHolder() {
         return messageDataHolder;
@@ -63,9 +63,9 @@ public class MeetingManagement {
      * @param starttime     meeting start.
      * @param endtime       meeting end.
      * @param message       meeting message.
-     * @exception SQLException  Database access error.
-     * @return  <code>true</code> Successfully insert the meeting;
-     *                 <code>false</code> unable to insert the meeting.
+     * @return <code>true</code> Successfully insert the meeting;
+     * <code>false</code> unable to insert the meeting.
+     * @throws SQLException Database access error.
      */
     public int insert(String hostID, String participantID, long starttime, long endtime, String message) {
 
@@ -97,9 +97,9 @@ public class MeetingManagement {
      * Call the <code>#deleteMeeting(int meetingID)</code> method in <code>DatabaseManagement</code>.
      * This method is called from the <code>MeetingCommand</code> class.
      *
-     * @param meetingID     unique generated meeting ID.
-     * @return  <code>true</code> Successfully deleted the meeting;
-     *                  <code>false</code> meeting doesn´t exists.
+     * @param meetingID unique generated meeting ID.
+     * @return <code>true</code> Successfully deleted the meeting;
+     * <code>false</code> meeting doesn´t exists.
      */
     public boolean delete(Integer meetingID) {
 
@@ -114,13 +114,13 @@ public class MeetingManagement {
     /**
      * This method updates the manipulated MeetingData in the database.
      *
-     * @param meetingID     unique generated meeting ID.
-     * @param hostID        todo
-     * @param column        previous entry.
-     * @param newValue      new entry for the database.db
-     * @exception SQLException  Database access error. Unable to update meeting.
-     * @return  <code>true</code> Successfully update the MeetingData;
-     *                  <code>false</code> could not be updated.
+     * @param meetingID unique generated meeting ID.
+     * @param hostID    todo
+     * @param column    previous entry.
+     * @param newValue  new entry for the database.db
+     * @return <code>true</code> Successfully update the MeetingData;
+     * <code>false</code> could not be updated.
+     * @throws SQLException Database access error. Unable to update meeting.
      */
     public boolean update(Integer meetingID, String hostID, String column, Object newValue) {
 
@@ -136,8 +136,7 @@ public class MeetingManagement {
         }
     }
 
-    //Prüft, ob User registriert ist
-    public boolean userIsRegistered (String userID) {
+    public boolean userIsRegistered(String userID) {
 
         try {
             return DatabaseManagement.getINSTANCE().registeredCheck(userID);
@@ -149,7 +148,6 @@ public class MeetingManagement {
 
     public boolean authorizationCheck(int meetingID, String userID) {
 
-        //Wenn User nicht die nötige Berechtigung hat
         try {
             return dbManager.authorizationCheck(meetingID, userID);
         } catch (SQLException e) {
@@ -163,7 +161,6 @@ public class MeetingManagement {
         return dbManager.findEarliestPossibleMeetingtimes(userID, starttime, endtime, duration);
     }
 
-    //Returnt Google Calendar Event
     public String googleCalendarEvent(String userID, String eventName, String eventLocation, String eventDescription, long starttime, long endtime) {
 
         try {
@@ -177,7 +174,6 @@ public class MeetingManagement {
 
     public Object[] search(int meetingID) {
 
-        //Versucht User in Datenbank zu finden und zurückzugeben
         try {
             return dbManager.returnDataMeeting(meetingID);
         } catch (SQLException e) {
@@ -186,7 +182,6 @@ public class MeetingManagement {
         }
     }
 
-    //Versucht Google Calender Event zu löschen
     public boolean deleteGoogleCalendarEvent(String userID, int meetingID) {
 
         try {
@@ -199,7 +194,6 @@ public class MeetingManagement {
         }
     }
 
-    //Baut Embed für Meetings
     public EmbedBuilder buildEmbed(int meetingID, String host, String participant, String starttime, String endtime, String message) {
 
         return new EmbedBuilder()

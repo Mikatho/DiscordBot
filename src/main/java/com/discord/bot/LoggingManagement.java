@@ -19,11 +19,11 @@ import java.util.StringJoiner;
 /**
  * toDo
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.LoggingManagement
- * @see         com.discord.bot.CommandManager
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.LoggingManagement
+ * @see com.discord.bot.CommandManager
+ * @since 1.0
  */
 public class LoggingManagement {
 
@@ -37,18 +37,17 @@ public class LoggingManagement {
     /**
      * This method return an instance of the <code>LoggingManagement</code> object.
      *
-     * @return  INSTANCE    instance of the LoggingManagement object
+     * @return INSTANCE    instance of the LoggingManagement object
      */
     public static LoggingManagement getINSTANCE() {
         return INSTANCE;
     }
 
 
-
     /**
      * Delete data in Logfile by overwrite the entries with an empty string.
      *
-     * @exception  FileNotFoundException     file does not exist.
+     * @throws FileNotFoundException file does not exist.
      */
     public void clear() {
 
@@ -64,7 +63,7 @@ public class LoggingManagement {
     /**
      * Add the input time of the commands to the entries.
      *
-     * @param command   Input of user.
+     * @param command Input of user.
      */
     public void addToLog(String command) {
 
@@ -80,7 +79,7 @@ public class LoggingManagement {
     /**
      * Log all commands to a Limit in a String.
      *
-     * @return  joiner  contains all entered commands.
+     * @return joiner  contains all entered commands.
      */
     public String logToConsole() {
 
@@ -106,8 +105,8 @@ public class LoggingManagement {
     /**
      * Save all logs in a file.
      *
-     * @exception   IOException unable to create file.
-     * @exception   IOException unable to manipulate the file.
+     * @throws IOException unable to create file.
+     * @throws IOException unable to manipulate the file.
      */
     public void saveToFile() {
 
@@ -138,7 +137,6 @@ public class LoggingManagement {
             }
 
             bw.close();
-            System.out.println("Successfully saved log to file.");  // Todo Rausnehmen da Sysout ?!?!?!????
 
             commandLog.clear();
 

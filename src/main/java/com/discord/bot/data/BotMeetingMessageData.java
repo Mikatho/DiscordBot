@@ -4,11 +4,11 @@ package com.discord.bot.data;
 /**
  * The <code>BotMeetingMessageData</code> class contains all parameters of a message from another bot to arrange the meeting.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.commands.MeetingCommand
- * @see         com.discord.bot.commands.BotMeetingCommand
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.commands.MeetingCommand
+ * @see com.discord.bot.commands.BotMeetingCommand
+ * @since 1.0
  */
 public class BotMeetingMessageData {
 

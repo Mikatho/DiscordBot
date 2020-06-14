@@ -8,24 +8,25 @@ import net.dv8tion.jda.api.entities.*;
  * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
  * method. It outputs all the registered members in the database.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.CommandManager
- * @see         com.discord.bot.BotMain#getJda()
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.CommandManager
+ * @see com.discord.bot.BotMain#getJda()
+ * @since 1.0
  */
 public class TestCommand implements CommandInterface {
 
     /*
     !test
     */
+
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
      * method is executed, because the Discord input [!test] was made.
      * The bot will reply in server chat.
-     * 
-     * @param   channel   Discord channel.
-     * @param   msg       the Discord input.
+     *
+     * @param channel Discord channel.
+     * @param msg     the Discord input.
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {

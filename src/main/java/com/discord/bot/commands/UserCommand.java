@@ -14,16 +14,13 @@ import java.util.Objects;
  * method. It controls syntax and interprets the command to call the right method in the
  * <code>UserManagement</code> class.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         UserManagement#getINSTANCE()
- * @see         com.discord.bot.UserManagement
- * @see         com.discord.bot.UserManagement#search()
- * @see         com.discord.bot.UserManagement#search(userID)
- * @see         com.discord.bot.UserManagement#update(userID, column, new)
- * @see         com.discord.bot.commands.CommandInterface
- * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see UserManagement#getINSTANCE()
+ * @see com.discord.bot.UserManagement
+ * @see com.discord.bot.commands.CommandInterface
+ * @see com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since 1.0
  */
 public class UserCommand implements CommandInterface {
 
@@ -32,12 +29,13 @@ public class UserCommand implements CommandInterface {
     !user search [userID]
     !user update [value to change] [new value]
      */
+
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
      * method is executed, because a Discord input have been made.
      *
-     * @param channel   Discord channel
-     * @param msg       the Discord inputs
+     * @param channel Discord channel
+     * @param msg     the Discord inputs
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
@@ -52,7 +50,7 @@ public class UserCommand implements CommandInterface {
                 "!user update interests [new value1, new value2, etc.]",
                 "!user update competencies [new value1, new value2, etc.]"};
 
-        
+
         User user = msg.getAuthor();   //Saves the author of the message.
         Object[] receivedData;         // contains all user User data.
         String data;                   // Output of the UserData.
@@ -141,7 +139,7 @@ public class UserCommand implements CommandInterface {
                 /**
                  * Checks if the input [UserID] is existing in the database.
                  */
-                if(!userManager.userIsRegistered(searchID)) {
+                if (!userManager.userIsRegistered(searchID)) {
                     channel.sendMessage("User doesn´t exist").queue();
                     return;
                 }

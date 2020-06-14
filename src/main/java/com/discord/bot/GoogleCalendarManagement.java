@@ -29,9 +29,9 @@ import java.util.logging.Logger;
 /**
  * This class is for creating and Managing public Google Calendars for all Users that work with our
  * Discord Bot.
- *
+ * <p>
  * If you change the system this class will be called on, delete the storedCredentials in the token folder.
- *
+ * <p>
  * This class will print out a error warning that can be ignored.
  * More information on this bug:
  * https://stackoverflow.com/questions/30634827/warning-unable-to-change-permissions-for-everybody
@@ -74,6 +74,7 @@ public class GoogleCalendarManagement {
      * to the Google API
      */
     private static GoogleCalendarManagement INSTANCE;
+
     static {
         try {
             INSTANCE = new GoogleCalendarManagement();
@@ -82,18 +83,21 @@ public class GoogleCalendarManagement {
         }
     }
 
-    public static GoogleCalendarManagement getInstance() { return INSTANCE; }
+    public static GoogleCalendarManagement getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * private method for creating n new GoogleKalendar, only used by this class
-     * @throws IOException when there is an error with the network connection
+     *
+     * @throws IOException              when there is an error with the network connection
      * @throws GeneralSecurityException when there is a faulty token
      */
     private GoogleCalendarManagement() throws IOException, GeneralSecurityException {
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         service = new Calendar.Builder(httpTransport, JSON_FACTORY, getCredentials(httpTransport))
                 .setApplicationName(APPLICATION_NAME).build();
-        LOGGER.log(Level.FINE,TAG + "Google Calendar successfully connected");
+        LOGGER.log(Level.FINE, TAG + "Google Calendar successfully connected");
     }
 
     /**
@@ -123,14 +127,14 @@ public class GoogleCalendarManagement {
     /**
      * This functions creates a new Calendar for a specific user.
      *
-     * @param userCalID the id of the User Calender
-     * @param eventName name of the event
-     * @param eventLocation name of the event location
+     * @param userCalID        the id of the User Calender
+     * @param eventName        name of the event
+     * @param eventLocation    name of the event location
      * @param eventDescription name of the eventDescription
-     * @param epochStart start time in epoch format
-     * @param epochEnd end time in epoch format
-     * @throws IOException when the event can't be added to a users calendar
+     * @param epochStart       start time in epoch format
+     * @param epochEnd         end time in epoch format
      * @return a link to the newly created Event
+     * @throws IOException when the event can't be added to a users calendar
      */
     public String createNewEvent(String userCalID, String eventName, String eventLocation, String eventDescription, long epochStart, long epochEnd) throws IOException {
 
@@ -152,9 +156,9 @@ public class GoogleCalendarManagement {
         event.setEnd(end);
 
         event = service.events().insert(userCalID, event).execute()
-        .setVisibility("public");
+                .setVisibility("public");
 
-        LOGGER.log(Level.FINE,TAG + "A new Event was created under: %s\n", event.getHtmlLink());
+        LOGGER.log(Level.FINE, TAG + "A new Event was created under: %s\n", event.getHtmlLink());
 
         return event.getHtmlLink();
     }
@@ -173,13 +177,13 @@ public class GoogleCalendarManagement {
 
         // Create a new calendar
         com.google.api.services.calendar.model.Calendar tempCalendar = new com.google.api.services.calendar.model.Calendar()
-        .setSummary(calendarName)
-        .setTimeZone(BOT_TIMEZONE);
+                .setSummary(calendarName)
+                .setTimeZone(BOT_TIMEZONE);
 
         tempCalendar = service.calendars().insert(tempCalendar).execute();
 
-        String logMessage = String.format("created a new Calendar with ID: %s",tempCalendar.getId());
-        LOGGER.log(Level.FINE,logMessage);
+        String logMessage = String.format("created a new Calendar with ID: %s", tempCalendar.getId());
+        LOGGER.log(Level.FINE, logMessage);
 
         // Create access rule with associated scope
         AclRule rule = new AclRule();
@@ -215,7 +219,7 @@ public class GoogleCalendarManagement {
      * @return true if the deletion was sucessfull
      * @throws IOException when the service worker doesn't find the calendar
      */
-    public boolean deleteEvent (String calendarID, long epochStart) throws IOException {
+    public boolean deleteEvent(String calendarID, long epochStart) throws IOException {
 
         DateTime desiredDate = new DateTime(epochStart);
         Events events = service.events().list(calendarID)
@@ -227,9 +231,9 @@ public class GoogleCalendarManagement {
         List<Event> items = events.getItems();
 
         if (items.isEmpty()) {
-            LOGGER.log(Level.FINE,TAG + "There was no event in the specified date and time");
+            LOGGER.log(Level.FINE, TAG + "There was no event in the specified date and time");
             return false;
-           } else {
+        } else {
             //Get the Time the event starts so we can compare it
             EventDateTime gEventTime = items.get(0).getStart();
             if (gEventTime.getDateTime().getValue() == epochStart) {
@@ -237,10 +241,10 @@ public class GoogleCalendarManagement {
                 String eventID = items.get(0).getId();
                 service.events().delete(calendarID, eventID).execute();
 
-                LOGGER.log(Level.FINE,TAG + "Sucessfully deleted a event");
+                LOGGER.log(Level.FINE, TAG + "Sucessfully deleted a event");
                 return true;
             } else {
-                LOGGER.log(Level.FINE,TAG + "Event Time != the time of the event to delete");
+                LOGGER.log(Level.FINE, TAG + "Event Time != the time of the event to delete");
                 return false;
             }
         }

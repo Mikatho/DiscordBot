@@ -14,13 +14,13 @@ import javax.annotation.Nonnull;
  * Filter the bot messages to send them to <code>CommandManager
  * #execute(String cmd, MessageChannel channel, Message msg)</code> method.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.BotMain#BotMain()
- * @see         com.discord.bot.CommandManager
- * @see         com.discord.bot.CommandManager#execute(String, MessageChannel, Message) 
- * @see         net.dv8tion.jda.api.hooks.ListenerAdapter
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.BotMain#BotMain()
+ * @see com.discord.bot.CommandManager
+ * @see com.discord.bot.CommandManager#execute(String, MessageChannel, Message)
+ * @see net.dv8tion.jda.api.hooks.ListenerAdapter
+ * @since 1.0
  */
 public class CommandListener extends ListenerAdapter {
 
@@ -29,7 +29,7 @@ public class CommandListener extends ListenerAdapter {
      * The <code>#onMessageReceived(@Nonnull MessageReceivedEvent event)</code>
      * method gets them and separate the BotCommand(starts with '!').
      *
-     * @param   event   Message channel. Includes public and private channel.
+     * @param event Message channel. Includes public and private channel.
      */
     @Override
     public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
@@ -40,7 +40,7 @@ public class CommandListener extends ListenerAdapter {
         /**
          * Check if the input is a command.
          */
-        new Thread (() -> {
+        new Thread(() -> {
             if (message.startsWith("!")) {
                 String[] args = message.split(" ");
 

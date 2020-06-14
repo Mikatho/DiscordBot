@@ -11,13 +11,13 @@ import java.sql.SQLException;
  * This Class is the adapter of the <code>DatabaseManaging</code> and <code>UserCommand</code>.
  * It handles the interactions between them.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.commands.UserCommand
- * @see         com.discord.bot.DatabaseManagement
- * @see         com.discord.bot.data.UserData
- * @see         com.discord.bot.CommandManager
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.commands.UserCommand
+ * @see com.discord.bot.DatabaseManagement
+ * @see com.discord.bot.data.UserData
+ * @see com.discord.bot.CommandManager
+ * @since 1.0
  */
 public class UserManagement {
 
@@ -31,7 +31,7 @@ public class UserManagement {
     /**
      * The getINSTANCE() method return the instance of the UserManagement object.
      *
-     * @return  INSTANCE    instance of the UserManagement object.
+     * @return INSTANCE    instance of the UserManagement object.
      */
     public static UserManagement getINSTANCE() {
         return INSTANCE;
@@ -41,10 +41,10 @@ public class UserManagement {
      * The register method creates with the userID a new instance of <code>UserData</code>
      * and insert it in the database.
      *
-     * @param   userID      unique ID to identify a user.
-     * @exception SQLException  todo
-     * @return  <code>true</code> Successfully added to the database;
-     *                  <code>false</code> Could not add to database.
+     * @param userID unique ID to identify a user.
+     * @return <code>true</code> Successfully added to the database;
+     * <code>false</code> Could not add to database.
+     * @throws SQLException todo
      */
     public boolean register(String userID) {
 
@@ -70,10 +70,10 @@ public class UserManagement {
      * Call the <code>#deleteUser(String userID)</code> method in <code>DatabaseManagement</code>.
      * This method is called from the <code>UserCommand</code> class.
      *
-     * @param   userID      unique Discord ID.
-     * @exception SQLException  todo
-     * @return  <code>true</code> Successfully deleted the user;
-     *                  <code>false</code> user doesn´t exists.
+     * @param userID unique Discord ID.
+     * @return <code>true</code> Successfully deleted the user;
+     * <code>false</code> user doesn´t exists.
+     * @throws SQLException todo
      */
     public boolean delete(String userID) {
 
@@ -88,12 +88,12 @@ public class UserManagement {
     /**
      * This method updates the manipulated userData in the database.
      *
-     * @param userID    unique Discord ID.
-     * @param column    [interests} / [competencies] / [address].
-     * @param newValue  contains new attribute for the userData.
-     * @exception SQLException  todo
-     * @return  <code>true</code> Successfully update the userData;
-     *                  <code>false</code> could not be updated.
+     * @param userID   unique Discord ID.
+     * @param column   [interests} / [competencies] / [address].
+     * @param newValue contains new attribute for the userData.
+     * @return <code>true</code> Successfully update the userData;
+     * <code>false</code> could not be updated.
+     * @throws SQLException todo
      */
     public boolean update(String userID, String column, String newValue) {
 
@@ -110,11 +110,9 @@ public class UserManagement {
      * Call <code>returnData(String userID)</code> in <code>DatabaseManagement()</code> to get data
      * of the userID.
      *
-     * @see com.discord.bot.commands.UserCommand#executeCommand(MessageChannel, Message)
-     * @see com.discord.bot.DatabaseManagement#returnData(String)
-     * @exception SQLException  todo
-     * @param   userID  unique Discord ID of search user.
-     * @return  data    contains instance of user data.
+     * @param userID unique Discord ID of search user.
+     * @return data    contains instance of user data.
+     * @throws SQLException todo
      */
     public Object[] search(String userID) {
 
@@ -126,17 +124,6 @@ public class UserManagement {
         }
     }
 
-    public boolean startActivity(String time) {
-
-        return true;
-    }
-
-    public boolean stopActivity(String time) {
-
-        return true;
-    }
-
-    //Prüft, ob User registriert ist
     public boolean userIsRegistered(String userID) {
 
         try {
@@ -159,6 +146,6 @@ public class UserManagement {
 
     public String googleCalendarLink(String calendarID) {
 
-            return GoogleCalendarManagement.getInstance().getPublicCalendarLink(calendarID);
+        return GoogleCalendarManagement.getInstance().getPublicCalendarLink(calendarID);
     }
 }

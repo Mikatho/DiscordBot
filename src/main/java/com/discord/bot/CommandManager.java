@@ -11,20 +11,20 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Instantiate the Command Pattern and execute the <code>CommandInterface</code>.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.UserManagement
- * @see         com.discord.bot.MeetingManagement
- * @see         UserManagement#getINSTANCE()
- * @see         MeetingManagement#getINSTANCE()
- * @see         com.discord.bot
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.UserManagement
+ * @see com.discord.bot.MeetingManagement
+ * @see UserManagement#getINSTANCE()
+ * @see MeetingManagement#getINSTANCE()
+ * @see com.discord.bot
+ * @since 1.0
  */
 public class CommandManager {
 
     private static final CommandManager INSTANCE = new CommandManager();
 
-    // all chat
+    // all chat types
     private ConcurrentHashMap<String, CommandInterface> commands;
     // private chat
     private ConcurrentHashMap<String, CommandInterface> commandsPM;
@@ -34,11 +34,9 @@ public class CommandManager {
      *
      * @see com.discord.bot.commands.RegisterCommand
      * @see com.discord.bot.commands.UnregisterCommand
-     * @see com.discord.bot.commands.ClearCommand
      * @see com.discord.bot.commands.HelpCommand
      * @see com.discord.bot.commands.LogCommand
      * @see com.discord.bot.commands.MeetingCommand
-     * @see com.discord.bot.commands.ActivityCommand
      * @see com.discord.bot.commands.UserCommand
      * @see com.discord.bot.commands.CommandInterface
      */
@@ -69,19 +67,12 @@ public class CommandManager {
         //Werden wieder gelöscht
         commands.put("test", new TestCommand());
         commands.put("clear", new ClearCommand());
-        commands.put("wait", new WaiterCommand());
-        commands.put("notify", new NotifyCommand());
-
-        /**
-         * Command for the usage of the interaction between bots in the private chat.
-         */
-        commandsPM.put("activity", new ActivityCommand());
     }
 
     /**
      * This method return the instance of the CommandManager object.
      *
-     * @return  INSTANCE    instance of the CommandManager object.
+     * @return INSTANCE    instance of the CommandManager object.
      */
     public static CommandManager getInstance() {
         return INSTANCE;
@@ -90,12 +81,12 @@ public class CommandManager {
     /**
      * Initialize the CommandInterface and send them the discord inputs.
      *
-     * @param cmd       first paramter of discord command
-     * @param channel   Discord channel
-     * @param msg       The Discord inputs
-     * @return          <code>0</code> If the command executes;
-     *                  <code>1</code> if the command doesn´t exist in HashMap.
-     *                  <code>2</code> if the command was written in wrong chat type.
+     * @param cmd     first paramter of discord command
+     * @param channel Discord channel
+     * @param msg     The Discord inputs
+     * @return <code>0</code> If the command executes;
+     * <code>1</code> if the command doesn´t exist in HashMap.
+     * <code>2</code> if the command was written in wrong chat type.
      */
     public int execute(String cmd, MessageChannel channel, Message msg) {
 

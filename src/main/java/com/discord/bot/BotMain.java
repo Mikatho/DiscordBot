@@ -21,13 +21,13 @@ import java.sql.SQLException;
 /**
  * The <code>BotMain</code> class contains the methods to initialize, start, and shutdown the Bot.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.BotMain
- * @see         com.discord.bot.listeners.CommandListener
- * @see         DatabaseManagement#getINSTANCE()
- * @see         com.discord.bot.DatabaseManagement
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.BotMain
+ * @see com.discord.bot.listeners.CommandListener
+ * @see DatabaseManagement#getINSTANCE()
+ * @see com.discord.bot.DatabaseManagement
+ * @since 1.0
  */
 public class BotMain {
 
@@ -38,8 +38,8 @@ public class BotMain {
     /**
      * Create instance of <code>BotMain()</code>
      *
-     * @param   args    Array. contains all variables from command call.
-     * @throws  LoginException  Basic login exception. If method is unable to instantiate.
+     * @param args Array. contains all variables from command call.
+     * @throws LoginException Basic login exception. If method is unable to instantiate.
      */
     public static void main(String[] args) {
 
@@ -55,8 +55,8 @@ public class BotMain {
      * It calls the method connect() in <code>DatabaseManagement</code> to build the database
      * and also holds the BotTokken. The method executes the Discord Bot.
      *
-     * @throws  SQLException    Unable to get the instance of database.
-     * @throws  IOException     Unable to access the database.
+     * @throws SQLException Unable to get the instance of database.
+     * @throws IOException  Unable to access the database.
      */
     public BotMain() throws LoginException {
 
@@ -74,7 +74,7 @@ public class BotMain {
                 .enableIntents(GatewayIntent.GUILD_MEMBERS);
 
         /**
-         * Initialize Command Listener.
+         * Initialize Listener.
          */
         jdaBuilder.addEventListeners(new CommandListener());
 
@@ -87,13 +87,13 @@ public class BotMain {
     /**
      * The <code>shutdown()</code> method closes all connections and shuts down the Bot.
      *
-     * @throws  IOException     Basic login exception. Unable to interact with the BufferedReader.
-     * @throws  SQLException    No access to database.
+     * @throws IOException  Basic login exception. Unable to interact with the BufferedReader.
+     * @throws SQLException No access to database.
      */
     public void shutdown() {
 
         new Thread(() -> {
-            String line = "";
+            String line;
 
             /**
              * Reader for the console inputs.

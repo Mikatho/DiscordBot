@@ -16,26 +16,27 @@ import java.sql.SQLException;
  * method. It controls syntax and interprets the commands to call the right methods in
  * <code>DatabaseManagement</code> and <code>LoggingManagement</code>.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.DatabaseManagement
- * @see         DatabaseManagement#getINSTANCE()
- * @see         com.discord.bot.LoggingManagement
- * @see         LoggingManagement#getINSTANCE()
- * @see         com.discord.bot.commands.CommandInterface
- * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.DatabaseManagement
+ * @see DatabaseManagement#getINSTANCE()
+ * @see com.discord.bot.LoggingManagement
+ * @see LoggingManagement#getINSTANCE()
+ * @see com.discord.bot.commands.CommandInterface
+ * @see com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since 1.0
  */
 public class ClearCommand implements CommandInterface {
 
 
     final static Logger logger = LogManager.getLogger(ClearCommand.class.getName());
+
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
      * method is executed, because a Discord input with [!clear] command was made.
      *
-     * @param   channel   Discord channel.
-     * @param   msg       the Discord input.
+     * @param channel Discord channel.
+     * @param msg     the Discord input.
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {

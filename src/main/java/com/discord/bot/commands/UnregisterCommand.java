@@ -10,27 +10,27 @@ import net.dv8tion.jda.api.entities.MessageChannel;
  * method. It controls syntax and interprets the commands to call the right methods in
  * <code>UserManagement</code>.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.DatabaseManagement
- * @see         UserManagement#getINSTANCE()
- * @see         com.discord.bot.UserManagement#delete(String)
- * @see         LoggingManagement#getINSTANCE()
- * @see         com.discord.bot.commands.CommandInterface
- * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.DatabaseManagement
+ * @see UserManagement#getINSTANCE()
+ * @see com.discord.bot.UserManagement#delete(String)
+ * @see com.discord.bot.commands.CommandInterface
+ * @see com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since 1.0
  */
 public class UnregisterCommand implements CommandInterface {
 
     /*
     !unregister
     */
+
     /**
      * This method is called whenever the user types !unregister to unregister himself
      * from the database.
-     * 
-     * @param   channel   Discord channel.
-     * @param   msg       the Discord input.
+     *
+     * @param channel Discord channel.
+     * @param msg     the Discord input.
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {

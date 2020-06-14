@@ -11,13 +11,13 @@ import net.dv8tion.jda.api.entities.MessageChannel;
  * method. It controls syntax and interprets the commands to call the right method in the
  * <code>LoggingManagement</code> class.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.commands.CommandInterface
- * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
- * @see         com.discord.bot.LoggingManagement
- * @see         LoggingManagement#getINSTANCE()
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.commands.CommandInterface
+ * @see com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @see com.discord.bot.LoggingManagement
+ * @see LoggingManagement#getINSTANCE()
+ * @since 1.0
  */
 public class LogCommand implements CommandInterface {
 
@@ -25,12 +25,13 @@ public class LogCommand implements CommandInterface {
     !log show
     !log save
      */
+
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
      * method is executed, because a Discord input with [!log] command was made.
      *
-     * @param channel   Discord channel
-     * @param msg       the Discord inputs.
+     * @param channel Discord channel
+     * @param msg     the Discord inputs.
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
@@ -43,8 +44,8 @@ public class LogCommand implements CommandInterface {
                 "!log save"};
 
         /**
-        * Check if the command is typed correctly.
-        */
+         * Check if the command is typed correctly.
+         */
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n"
                     + "```" + patterns[0] + "\n" + patterns[1] + "```").queue();
@@ -73,7 +74,7 @@ public class LogCommand implements CommandInterface {
             case "save":
                 /**
                  * LoggingManagement saves the log into [commands.log] data.
-                 * 
+                 *
                  * Replies with a success messages if the log is saved.
                  */
                 LoggingManagement.getINSTANCE().saveToFile();

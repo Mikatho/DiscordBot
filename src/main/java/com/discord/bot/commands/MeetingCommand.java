@@ -21,12 +21,12 @@ import java.util.Date;
  * method. It controls syntax and interprets the commands to call the right method in the
  * <code>MeetingManagement</code> class.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.MeetingManagement
- * @see         com.discord.bot.data.MeetingData
- * @see         com.discord.bot.commands.CommandInterface
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.MeetingManagement
+ * @see com.discord.bot.data.MeetingData
+ * @see com.discord.bot.commands.CommandInterface
+ * @since 1.0
  */
 public class MeetingCommand implements CommandInterface {
 
@@ -42,11 +42,11 @@ public class MeetingCommand implements CommandInterface {
 
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
-     * method is executed, because the Discord input [!meeting create | !meeting delete | !meeting update] 
+     * method is executed, because the Discord input [!meeting create | !meeting delete | !meeting update]
      * was made.
      *
-     * @param channel   Discord channel
-     * @param msg       the Discord inputs.
+     * @param channel Discord channel
+     * @param msg     the Discord inputs.
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
@@ -104,7 +104,7 @@ public class MeetingCommand implements CommandInterface {
                     + "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\nNote: Dateformat " + format.toPattern().toUpperCase() + "```").queue();
             return;
         }
-        
+
         /**
          * Splits the message in the parts of the command. Saves the command parts in the arguments.
          */
@@ -137,7 +137,7 @@ public class MeetingCommand implements CommandInterface {
                     channel.sendMessage(String.format("Use `%s` to create a meeting!", patterns[0])).queue();
                     return;
                 }
-                
+
                 /**
                  * Splits the arguments of the required parameter for [!meeting create].
                  */
@@ -257,6 +257,9 @@ public class MeetingCommand implements CommandInterface {
 
                     String dateStartISO = isoFormat.format(dateStart);
 
+                    /**
+                     * Message that the bot sends to the server
+                     */
                     String answerCommand = "!_meeting "
                             + uniqueID + " "
                             + user.getAsMention() + " "
@@ -265,38 +268,23 @@ public class MeetingCommand implements CommandInterface {
                             + createArgs[5] + " "
                             + createArgs[0];
 
+                    /**
+                     * Stores meeting data in HashMap
+                     */
                     meetingManager.getBotMessageHolder().put(uniqueID, new BotMeetingMessageData(msg.getContentRaw(), user.getId(), participantID, participantName, duration, dateStartISO, epochEnd, meetingMessage, true));
 
                     channel.sendMessage(answerCommand).queue();
 
-                    /**
-                     * Defines how long the while loop will run
-                     */
-
-                    /*
-                    long timeout = System.currentTimeMillis() + 5000;
-
-                    while (System.currentTimeMillis() < timeout) {
-                        //If user belongs to a bot
-                        if (flag) {
-                            flag = false;
-                            user.openPrivateChannel().complete().sendMessage("Trying to arrange a meeting...").queue();
-                            return;
-                        }
-
-                        //Pause between bot answer checks
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            logger.fatal("Unable to pause thread.\n" + e);
-                        }
-                    }
-                     */
-
                     user.openPrivateChannel().complete().sendMessage("Trying to arrange a meeting...").queue();
 
+                    /**
+                     * Synchronize with BotMeetingCommand to control flag state
+                     */
                     synchronized (this) {
 
+                        /**
+                         * Defines the length of the timeout
+                         */
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
@@ -355,7 +343,7 @@ public class MeetingCommand implements CommandInterface {
                 String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
                 meetingManager.googleCalendarEvent(participantID, String.format("Meeting with %s [%s]", user.getName(), returnedMeetingID), "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
-                
+
                 /**
                  * Informs the user if the creation of the link to the event was a sucess or a failure.
                  */
@@ -367,9 +355,9 @@ public class MeetingCommand implements CommandInterface {
                 break;
 
 
-                /**
-                * If second argument is [delete].
-                */
+            /**
+             * If second argument is [delete].
+             */
             case "delete":
 
                 /**
@@ -395,6 +383,7 @@ public class MeetingCommand implements CommandInterface {
                  * Checks if the user has the authorization to delete this meeting.
                  */
                 if (!meetingManager.authorizationCheck(meetingID, user.getId())) {
+
                     channel.sendMessage("You are not the host of the meeting! Therefore you are not allowed to delete it!").queue();
                     return;
                 }
@@ -403,6 +392,7 @@ public class MeetingCommand implements CommandInterface {
                  * Tries to delete the meeting out of the private Google Calender of the user.
                  */
                 if (!meetingManager.deleteGoogleCalendarEvent(user.getId(), meetingID)) {
+
                     channel.sendMessage("Could not delete the meeting out of your Google Calendar.").queue();
                     return;
                 }
@@ -413,6 +403,7 @@ public class MeetingCommand implements CommandInterface {
                 participantID = (String) meetingManager.search(meetingID)[1];
 
                 if (meetingManager.userIsRegistered(participantID)) {
+
                     meetingManager.deleteGoogleCalendarEvent(participantID, meetingID);
                 }
 
@@ -420,6 +411,7 @@ public class MeetingCommand implements CommandInterface {
                  * Tries to delete the meeting from the database.
                  */
                 if (!meetingManager.delete(meetingID)) {
+
                     channel.sendMessage("Could not delete the meeting.").queue();
                     return;
                 }
@@ -431,15 +423,16 @@ public class MeetingCommand implements CommandInterface {
                 break;
 
 
-                /**
-                * If second argument is [update].
-                */
+            /**
+             * If second argument is [update].
+             */
             case "update":
 
                 /**
                  * If the command is just [!meeting delete] without all required parameters.
                  */
                 if (args.length == 2) {
+
                     channel.sendMessage(String.format("Use `%s` to update a meeting!", patterns[2])).queue();
                     return;
                 }
@@ -453,6 +446,7 @@ public class MeetingCommand implements CommandInterface {
                  * If not all additional parameters were entered the user gets informed.
                  */
                 if (updateArgs.length != 3) {
+
                     channel.sendMessage(String.format("Please add the values like this:\n`%s`", patterns[2])).queue();
                     return;
                 }
@@ -480,6 +474,7 @@ public class MeetingCommand implements CommandInterface {
                  * Checks if the user has the authorization to update this meeting. 
                  */
                 if (!meetingManager.authorizationCheck(meetingID, user.getId())) {
+
                     channel.sendMessage("You are not the host of the meeting! Therefore you are not allowed to update it!").queue();
                     return;
                 }
@@ -488,6 +483,7 @@ public class MeetingCommand implements CommandInterface {
                  * Checks if the input is valid to update the meeting. If not the user will be informed.
                  */
                 if (!updateArgs[1].matches("participant|starttime|endtime|message")) {
+
                     channel.sendMessage(String.format("Unknown value to update: `%s` does not exist.", updateArgs[1])).queue();
                     return;
                 }
@@ -508,21 +504,21 @@ public class MeetingCommand implements CommandInterface {
                         channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                         return;
                     }
-                
-                /**
-                 * If the entry is a participant the input will be checked if it is in the correct format. If it is invalid the
-                 * user will be informed.
-                 */
+
+                    /**
+                     * If the entry is a participant the input will be checked if it is in the correct format. If it is invalid the
+                     * user will be informed.
+                     */
                 } else if (updateArgs[1].equals("participant")) {
 
                     if (!updateArgs[2].matches(userIdRegex)) {
+
                         channel.sendMessage("User is not valid. Please use ´ @UserName ´!").queue();
                         return;
                     }
 
                     newValue = updateArgs[2].substring(3, 21);
                 } else {
-
                     newValue = updateArgs[2];
                 }
 
@@ -530,6 +526,7 @@ public class MeetingCommand implements CommandInterface {
                  * Tries to update the meeting in the database. If it was not sucessfull, the user will be informed.
                  */
                 if (!meetingManager.update(meetingID, user.getId(), updateArgs[1], newValue)) {
+
                     channel.sendMessage("Could not update the Meeting.").queue();
                     return;
                 }
@@ -540,11 +537,11 @@ public class MeetingCommand implements CommandInterface {
                 channel.sendMessage("Successfully updated the Meeting.").queue();
                 break;
 
-                /**
-                * If second argument is unknown.
-                */
+            /**
+             * If second argument is unknown.
+             */
             default:
-                
+
                 /**
                  * Informs the user that is input is an unknown command.
                  */

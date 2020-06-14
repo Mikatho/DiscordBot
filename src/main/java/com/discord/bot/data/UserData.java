@@ -5,11 +5,11 @@ package com.discord.bot.data;
  * The class <code>UserData</code> is saved as an object for every registered user in the database.
  * It contains the user attributes.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.commands.UserCommand
- * @see         com.discord.bot.UserManagement
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.commands.UserCommand
+ * @see com.discord.bot.UserManagement
+ * @since 1.0
  */
 public class UserData {
 

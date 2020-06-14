@@ -12,29 +12,28 @@ import net.dv8tion.jda.api.entities.User;
  * method. It controls syntax and interprets the commands to call the right methods in
  * <code>UserManagement</code>.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.DatabaseManagement
- * @see         UserManagement#getINSTANCE()
- * @see         com.discord.bot.UserManagement
- * @see         com.discord.bot.UserManagement#register(userID)
- * @see         LoggingManagement#getINSTANCE()
- * @see         com.discord.bot.commands.CommandInterface
- * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.DatabaseManagement
+ * @see UserManagement#getINSTANCE()
+ * @see com.discord.bot.UserManagement
+ * @see com.discord.bot.commands.CommandInterface
+ * @see com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since 1.0
  */
 public class RegisterCommand implements CommandInterface {
 
     /*
     !register
     */
+
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
      * method is executed, because the Discord input [!register] was made.
      * The bot will reply in private chat.
-     * 
-     * @param   channel   Discord channel.
-     * @param   msg       the Discord input.
+     *
+     * @param channel Discord channel.
+     * @param msg     the Discord input.
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
@@ -53,18 +52,18 @@ public class RegisterCommand implements CommandInterface {
             channel.sendMessage(user.getAsMention() + " could not be added to the Database!").queue();
             return;
         }
-        
+
         /**
          * If the register was sucessfull the user will be greeted with a welcoming
          * message and will be advised, that the bot creates a Google ID for him and that
          * he is able to use the bot commands.
          */
         channel.sendMessage(
-            "Welcome kindly sir.\n" + 
-            "Your registration was successful.\n" +
-            "Now you can log your commands, insert personal data to your account and create meetings\n" +
-            "which will be inserted automatically in your Google Calender.\n" +
-            "Creating your Google-Calendar...\n").queue();
+                "Welcome kindly sir.\n" +
+                        "Your registration was successful.\n" +
+                        "Now you can log your commands, insert personal data to your account and create meetings\n" +
+                        "which will be inserted automatically in your Google Calender.\n" +
+                        "Creating your Google-Calendar...\n").queue();
 
         /**
          * Creating the Google Calendars ID.
@@ -82,7 +81,7 @@ public class RegisterCommand implements CommandInterface {
             /**
              * If the creating of the Google Calenders ID was sucessfull the database 
              * gets updated with Link of the Calender belonging to the user.
-             * 
+             *
              * User gets message with the Calender link.
              */
             userManager.update(user.getId(), "gCalendarLink", calendarID);

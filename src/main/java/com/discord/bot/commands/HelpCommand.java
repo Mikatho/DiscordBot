@@ -11,20 +11,19 @@ import net.dv8tion.jda.api.requests.restaction.MessageAction;
 /**
  * Contain all commands and the function to send them to a users private channel.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.CommandManager
- * @see         com.discord.bot.commands.CommandInterface
- * @see         com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.CommandManager
+ * @see com.discord.bot.commands.CommandInterface
+ * @see com.discord.bot.commands.CommandInterface#executeCommand(MessageChannel, Message)
+ * @since 1.0
  */
 public class HelpCommand implements CommandInterface {
 
     /**
      * String arrays with all command categories.
      */
-    String[] activityPatterns = {"!activity running", "!activity start", "!activity stop"};
-    String[] deletePatterns = {"!delete [userID]"};
+    String[] registerPatterns = {"!register", "!unregister"};
     String[] logPatterns = {"!log show", "!log save"};
     String[] meetingPatterns = {"!meeting create [starttime] [endtime] [message]",
             "!meeting delete [meetingID]",
@@ -39,8 +38,8 @@ public class HelpCommand implements CommandInterface {
      * method is executed, because the Discord input [!help] was made. It returns all command patterns to the
      * users private discord channel.
      *
-     * @param channel   Discord channel
-     * @param msg       the Discord inputs.
+     * @param channel Discord channel
+     * @param msg     the Discord inputs.
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
@@ -49,14 +48,13 @@ public class HelpCommand implements CommandInterface {
          * Send a private message with all commands.
          */
         msg.getAuthor().openPrivateChannel().complete().sendMessage("Commands: "
-                + "\nprivate chat:\n"
-                + "\nactivity commands: " + "```" + activityPatterns[0] + "\n" + activityPatterns[1] + "\n" + activityPatterns[2] + "```"
-                + "\nuser commands: " + "```" + userPatterns[0] + "\n" + userPatterns[1] + "\n" + userPatterns[2] + "\n"
+                + "\nPrivate Chat:\n"
+                + "\nRegister Commands: " + "```" + registerPatterns[0] + "\n" + registerPatterns[1] + "```"
+                + "\nPublic Chat:\n"
+                + "\nMeeting Commands: " + "```" + meetingPatterns[0] + "\n" + meetingPatterns[1] + "\n" + meetingPatterns[2] + "```"
+                + "\nUser Commands: " + "```" + userPatterns[0] + "\n" + userPatterns[1] + "\n" + userPatterns[2] + "\n"
                 + userPatterns[3] + "\n" + userPatterns[4] + "```"
-                + "\npublic chat:\n"
-                + "\ndelete commands: " + "```" + deletePatterns[0] + "```"
-                + "\nlog commands: " + "```" + logPatterns[0] + "\n" + logPatterns[1] + "```"
-                + "\nmeeting commands: " + "```" + meetingPatterns[0] + "\n" + meetingPatterns[1] + "\n" + meetingPatterns[2] + "```"
-                ).queue();
+                + "\nLog Commands: " + "```" + logPatterns[0] + "\n" + logPatterns[1] + "```"
+        ).queue();
     }
 }

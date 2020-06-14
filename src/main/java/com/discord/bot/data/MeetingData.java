@@ -5,10 +5,10 @@ package com.discord.bot.data;
  * The <code>MeetingData</code> class contains all attributes for a meeting.
  * Every arranged meeting is saved as an instance of this object in the database.
  *
- * @author      L2G4
- * @version     %I%, %G%
- * @see         com.discord.bot.MeetingManagement
- * @since       1.0
+ * @author L2G4
+ * @version %I%, %G%
+ * @see com.discord.bot.MeetingManagement
+ * @since 1.0
  */
 public class MeetingData {
 
