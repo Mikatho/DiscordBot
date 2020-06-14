@@ -21,7 +21,7 @@ public class HelpCommand implements CommandInterface {
      */
     String[] registerPatterns = {"!register", "!unregister"};
     String[] logPatterns = {"!log show", "!log save"};
-    String[] meetingPatterns = {"!meeting create [starttime] [endtime] [message]",
+    String[] meetingPatterns = {"!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]",
             "!meeting delete [meetingID]",
             "!meeting update [meetingID] [value to change] [new value]"};
     String[] userPatterns = {"!user data", "!user update address [new value]",

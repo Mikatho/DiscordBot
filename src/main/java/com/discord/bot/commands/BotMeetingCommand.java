@@ -115,7 +115,8 @@ public class BotMeetingCommand implements CommandInterface {
              * If our user has no free time during the period
              */
             try {
-                if ((earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochPeriodEnd, duration))[0] == 0) {
+                earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochPeriodEnd, duration);
+                if (earliestMeetingTimes[0] == 0) {
                     channel.sendMessage(noTime).queue();
                     return;
                 }

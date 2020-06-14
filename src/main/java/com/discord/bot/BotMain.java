@@ -8,8 +8,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 
 import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 
 /**
@@ -31,10 +31,28 @@ import java.sql.SQLException;
  * @since 1.0
  */
 public class BotMain {
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(BotMain.class.getName());
 
-    private static final Logger LOGGER = LogManager.getLogger(BotMain.class.getName());
+    private static final String BOT_TOKEN = "NzIwNzE1NjE0NjM2NzM2NTQz.XuKLVg.g5Bc89uLXA2-C9_-hbdim8Z87mo";
     private static JDA jda;
-    private JDABuilder jdaBuilder;
+    private static JDABuilder jdaBuilder;
+
+    static {
+        try {
+            jdaBuilder = JDABuilder.createDefault(BOT_TOKEN)
+                    .setStatus(OnlineStatus.ONLINE)
+                    .setActivity(Activity.listening("!help"))
+                    .setChunkingFilter(ChunkingFilter.ALL)
+                    .enableIntents(GatewayIntent.GUILD_MEMBERS);
+            // Initialize Listener.
+            jdaBuilder.addEventListeners(new CommandListener());
+
+            jda = jdaBuilder.build();
+            LOGGER.log(Level.FINE, "Bot online");
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, e.getMessage());
+        }
+    }
 
     /**
      * Create instance of <code>BotMain()</code>
@@ -42,11 +60,10 @@ public class BotMain {
      * @param args Array. contains all variables from command call.
      */
     public static void main(String[] args) {
-
         try {
             new BotMain();
         } catch (LoginException e) {
-            LOGGER.fatal(String.format("Unable to instantiate BotMain.%n%s", e));
+            LOGGER.log(Level.FINE, String.format("Unable to instantiate BotMain.%n%s", e));
         }
     }
 
@@ -59,25 +76,11 @@ public class BotMain {
      */
     public BotMain() throws LoginException {
 
-        final String BOT_TOKEN = "Njk0MTkxMzY3NzUxOTkxMzQ3.XqiLrg.mmC1Fvf6zRWdJN2dfsRMUu7WMhs";
-
         try {
             DatabaseManagement.getINSTANCE().connect();
         } catch (SQLException | IOException e) {
-            LOGGER.fatal(String.format("Unable to connect to database.%n%s", e));
+            LOGGER.log(Level.FINE, String.format("Unable to connect to database.%n%s", e));
         }
-
-        jdaBuilder = JDABuilder.createDefault(BOT_TOKEN)
-                .setStatus(OnlineStatus.ONLINE)
-                .setActivity(Activity.listening("!help"))
-                .setChunkingFilter(ChunkingFilter.ALL)
-                .enableIntents(GatewayIntent.GUILD_MEMBERS);
-
-        // Initialize Listener.
-        jdaBuilder.addEventListeners(new CommandListener());
-
-        jda = jdaBuilder.build();
-        System.out.println("Bot online.");
 
         shutdown();
     }
@@ -100,17 +103,17 @@ public class BotMain {
                             jdaBuilder.setStatus(OnlineStatus.OFFLINE);
                             jda.shutdownNow();
                             DatabaseManagement.getINSTANCE().disconnect();
-                            System.out.println("Bot offline.");
+                            LOGGER.log(Level.FINE,"Bot offline.");
                         }
                         reader.close();
                         return;
                     } else {
                         // If your input isn´t "shutdown".
-                        System.out.println("Use 'shutdown' to shutdown the Bot.");
+                        LOGGER.log(Level.FINE,"Use 'shutdown' to shutdown the Bot.");
                     }
                 }
             } catch (IOException | SQLException e) {
-                LOGGER.fatal(String.format("Unable to shutdown the bot.%n%s", e));
+                LOGGER.log(Level.FINE, String.format("Unable to shutdown the bot.%n%s", e));
             }
         }).start();
     }

@@ -103,7 +103,8 @@ public class LoggingManagement {
             // Create file if it doesn´t exist.
             File file = new File(fileName);
             if (!file.exists()) {
-                file.createNewFile();
+                String tempMsg = Boolean.toString(file.createNewFile());
+                LOGGER.info(tempMsg);
             }
         } catch (IOException e) {
             LOGGER.fatal(String.format("Unable to ceate new file.%n%s", e));

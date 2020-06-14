@@ -3,6 +3,9 @@ package com.discord.bot.commands;
 import com.discord.bot.BotMain;
 import net.dv8tion.jda.api.entities.*;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * The <code>TestCommand</code> Class implements the <code>CommandInterface</code>
  * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
@@ -15,6 +18,8 @@ import net.dv8tion.jda.api.entities.*;
  * @since 1.0
  */
 public class TestCommand implements CommandInterface {
+
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(TestCommand.class.getName());
 
     /*
     !test
@@ -40,9 +45,7 @@ public class TestCommand implements CommandInterface {
          * Prints out all registered members.
          */
         assert guild != null;
-        System.out.println(guild.getMembers());
+        LOGGER.log(Level.FINE, guild.getMembers().toString());
 
-
-        //channel.sendMessage(test).queue();
     }
 }
