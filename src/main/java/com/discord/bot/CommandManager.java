@@ -45,23 +45,17 @@ public class CommandManager {
         commands = new ConcurrentHashMap<>();
         commandsPM = new ConcurrentHashMap<>();
 
-        /**
-         * Commands for the usage of the private chat.
-         */
+        //Commands for the usage of the private chat.
         commandsPM.put("register", new RegisterCommand());
         commandsPM.put("unregister", new UnregisterCommand());
 
-        /**
-         * Commands for the usage of the public chat.
-         */
+        // Commands for the usage of the public chat.
         commands.put("help", new HelpCommand());
         commands.put("log", new LogCommand());
         commands.put("meeting", new MeetingCommand());
         commands.put("user", new UserCommand());
 
-        /**
-         * Bot-Bot-Commands
-         */
+        // Bot-Bot-Commands
         commands.put("_meeting", new BotMeetingCommand());
 
         //Werden wieder gelöscht
@@ -92,37 +86,28 @@ public class CommandManager {
 
         CommandInterface cmdInter;
 
-        /**
-         * Save commands in Log List, even unknown commands.
-         */
+        // Save commands in Log List, even unknown commands.
         LoggingManagement.getINSTANCE().addToLog(cmd);
 
-        /**
-         * In private user bot chat member is "null".
-         * Checks if command was written in private chat and is for private chat only.
+        /*
+          In private user bot chat member is "null".
+          Checks if command was written in private chat and is for private chat only.
          */
         if (msg.getMember() == null && commandsPM.containsKey(cmd.substring(1).toLowerCase())) {
             cmdInter = commandsPM.get(cmd.substring(1).toLowerCase());
         } else {
-            /**
-             * If command was written in public chat but is supposed to be written in private chat.
-             */
+            // If command was written in public chat but is supposed to be written in private chat.
             if (commandsPM.containsKey(cmd.substring(1).toLowerCase())) {
                 return 2;
             }
             cmdInter = commands.get(cmd.substring(1).toLowerCase());
         }
 
-        /**
-         * If command doesn´t exists in associated HashMap.
-         */
+        // If command doesn´t exists in associated HashMap.
         if (cmdInter == null) {
             return 1;
         }
 
-        /**
-         * executes command.
-         */
         cmdInter.executeCommand(channel, msg);
         return 0;
     }

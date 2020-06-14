@@ -2,8 +2,6 @@ package com.discord.bot;
 
 import com.discord.bot.data.MeetingData;
 import com.discord.bot.data.UserData;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,8 +45,6 @@ public class DatabaseManagement {
 
     /**
      * Delete all entries in database.
-     *
-     * @throws SQLException todo
      */
     public void clear() throws SQLException {
 
@@ -65,7 +61,8 @@ public class DatabaseManagement {
      * Check if the database.db still exist and connect to the database.
      * If the file do not exist it will create a new file.
      *
-     * @throws // TODO: 04.06.2020
+     * @throws SQLException when there is a problem with the database connection
+     * @throws IOException  when there is a problem with the access of the file
      */
     public void connect() throws SQLException, IOException {
 
@@ -88,7 +85,7 @@ public class DatabaseManagement {
     /**
      * Close the connection to the database.
      *
-     * @throws // TODO: 04.06.2020
+     @throws SQLException when there is a problem with the database connection
      */
     public void disconnect() throws SQLException {
 
@@ -107,7 +104,7 @@ public class DatabaseManagement {
      * Create tables by transfer SQL Code as String to create columns.
      *
      * @param strings SQL
-     * @throws // TODO: 04.06.2020
+     @throws SQLException when there is a problem with the database connection
      */
     public void createTable(String... strings) throws SQLException {
 
@@ -121,11 +118,15 @@ public class DatabaseManagement {
         stmt.execute(sql);
     }
 
+    /**
+     * Inserts user into database
+     *
+     * @param user  user to insert
+     * @throws SQLException when there is a problem with the database connection
+     */
     public void insertUser(UserData user) throws SQLException {
 
-        /**
-         * SQL: insert user in database.
-         */
+        // SQL: insert user in database.
         String sql = "INSERT INTO user_data (userID) VALUES (?)";
 
         PreparedStatement prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -133,6 +134,13 @@ public class DatabaseManagement {
         prepStmt.executeUpdate();
     }
 
+    /**
+     * Inserts meeting into database
+     *
+     * @param meeting   meeting to insert
+     * @return meetingID
+     * @throws SQLException when there is a problem with the database connection
+     */
     public int insertMeeting(MeetingData meeting) throws SQLException {
 
         /**
@@ -150,9 +158,7 @@ public class DatabaseManagement {
 
         rs = stmt.getGeneratedKeys();
 
-        /**
-         * Saves ID of inserted meeting
-         */
+        // Stores ID of inserted meeting
         if (rs.next()) {
             int meetingID = rs.getInt(1);
 
@@ -162,11 +168,19 @@ public class DatabaseManagement {
         return 0;
     }
 
+    /**
+     * Searchs for earliest possible meeting times
+     *
+     * @param userID    user to search
+     * @param starttime start of meeting
+     * @param endtime   end of meeting
+     * @param duration  duration of meeting
+     * @return meetingtimes
+     * @throws SQLException when there is a problem with the database connection
+     */
     public long[] findEarliestPossibleMeetingtimes(String userID, long starttime, long endtime, int duration) throws SQLException {
 
-        /**
-         * Length of pause between meetings
-         */
+        // Length of pause between meetings
         final int BREAKTIME_IN_SECONDS = 300000;
 
         long[] meetingtimes = new long[2];
@@ -174,13 +188,10 @@ public class DatabaseManagement {
         ArrayList<Long> starttimeList = new ArrayList<>();
         ArrayList<Long> endtimeList = new ArrayList<>();
 
-        /**
-         * Searchs and sorts all meeting times of the period
-         */
+        // Searchs and sorts all meeting times of the period
         String meetings = "SELECT starttime, endtime FROM meeting_data WHERE (? IN (hostID, participantID)) AND ((starttime BETWEEN ? AND ?) OR (endtime BETWEEN ? AND ?)) ORDER BY starttime ASC";
-        /**
-         * Checks if a meeting is running during the period
-         */
+
+        // Checks if a meeting is running during the period
         String runningMeeting = "SELECT meetingID FROM meeting_data WHERE (? IN (hostID, participantID)) AND (starttime < ? AND endtime > ?)";
 
         PreparedStatement prepStmt;
@@ -198,9 +209,7 @@ public class DatabaseManagement {
             endtimeList.add(rs.getLong("endtime"));
         }
 
-        /**
-         * If there is no meeting in the period
-         */
+        // If there is no meeting in the period
         if (starttimeList.isEmpty() && endtimeList.isEmpty()) {
 
             prepStmt = conn.prepareStatement(runningMeeting);
@@ -209,9 +218,7 @@ public class DatabaseManagement {
             prepStmt.setLong(3, endtime + BREAKTIME_IN_SECONDS);
             rs = prepStmt.executeQuery();
 
-            /**
-             * Checks if a meeting is running during the period
-             */
+            // Checks if a meeting is running during the period
             if (!rs.next()) {
                 meetingtimes[0] = starttime;
                 meetingtimes[1] = meetingtimes[0] + duration;
@@ -220,9 +227,7 @@ public class DatabaseManagement {
             return meetingtimes;
         }
 
-        /**
-         * If there is exactly one meeting during the period
-         */
+        // If there is exactly one meeting during the period
         if (starttimeList.size() == 1) {
 
             if (endtimeList.get(0) < starttime) {
@@ -245,14 +250,10 @@ public class DatabaseManagement {
             return meetingtimes;
         }
 
-        /**
-         * Checks if there is enough time in between the meetings
-         */
+        // Checks if there is enough time in between the meetings
         for (int i = 1; i < starttimeList.size(); i++) {
 
-            /**
-             * Checks if there is time for a pause
-             */
+            // Checks if there is time for a pause
             if ((starttimeList.get(i) - endtimeList.get(i - 1)) >= (duration + 2 * BREAKTIME_IN_SECONDS)) {
 
                 meetingtimes[0] = endtimeList.get(i - 1) + BREAKTIME_IN_SECONDS;
@@ -260,9 +261,7 @@ public class DatabaseManagement {
                 return meetingtimes;
             }
 
-            /**
-             * Checks edge cases
-             */
+            // Checks edge cases
             if (endtimeList.get(i - 1) < starttime) {
 
                 if ((starttimeList.get(i) - starttime) >= duration) {
@@ -290,9 +289,7 @@ public class DatabaseManagement {
             }
         }
 
-        /**
-         * If no period for a meeting is found
-         */
+        // If no period for a meeting is found
         if ((endtime - endtimeList.get(endtimeList.size() - 1)) >= (duration + BREAKTIME_IN_SECONDS)) {
 
             meetingtimes[0] = endtimeList.get(endtimeList.size() - 1) + BREAKTIME_IN_SECONDS;
@@ -308,12 +305,11 @@ public class DatabaseManagement {
     /**
      * The method updated the ForeignKeys from the table User_Data.
      *
-     * @param columnID      todo
+     * @param columnID      column of data
      * @param hostID        unique Discord userID from host
      * @param participantID unique Discord userID from participant
-     * @return <code>true</code> wenn ;
-     * *                  <code>false</code> if data could not be added.
-     * @throws // TODO: 04.06.2020
+     *
+     * @throws SQLException when there is a problem with the database connection
      */
     private void insertForeignKey(Integer columnID, String hostID, String participantID) throws SQLException {
 
@@ -340,8 +336,9 @@ public class DatabaseManagement {
     }
 
     /**
-     * @param userID
-     * @return
+     * Deletes foreign key
+     *
+     * @param userID user to delete
      */
     private void deleteForeignKey(String userID) throws SQLException {
 
@@ -356,11 +353,9 @@ public class DatabaseManagement {
     }
 
     /**
-     * Overload method. da meetingID = userID sein kann
+     * Overload method because meetingID can equal userID
      *
-     * @param meetingID
-     * @return <code>true</code> if ForeignKey deleted from database;
-     * <code>false</code> if todo.
+     * @param meetingID meeting to delete
      */
     private void deleteForeignKey(int meetingID) throws SQLException {
 
@@ -377,15 +372,13 @@ public class DatabaseManagement {
      * @param userID unique Discord userID
      * @return <code>true</code> if user deleted from database;
      * *                  <code>false</code> if user doesn´t exist.
-     * @throws // TODO: 04.06.2020
+     * @throws SQLException when there is a problem with the database connection
      */
     public boolean deleteUser(String userID) throws SQLException {
 
         deleteForeignKey(userID);
 
-        /**
-         * SQL: delete user in database.
-         */
+        // SQL: delete user in database.
         String sql = "DELETE FROM user_data WHERE userID = ?";
 
         PreparedStatement prepStmt = conn.prepareStatement(sql);
@@ -400,7 +393,7 @@ public class DatabaseManagement {
      * @param meetingID unique generated meeting ID.
      * @return <code>true</code> if meeting deleted from database;
      * <code>false</code> if meeting doesn´t exist.
-     * @throws // TODO: 04.06.2020
+     * @throws SQLException when there is a problem with the database connection
      */
     public boolean deleteMeeting(int meetingID) throws SQLException {
 
@@ -418,11 +411,9 @@ public class DatabaseManagement {
      * Update the attribute [address], [interests] or [competencies] in userData(userID).
      *
      * @param userID   unique Discord userID
-     * @param column   todo
+     * @param column   column to be updated
      * @param newValue new entry for the database.db
-     * @return <code>true</code> if database is succesfull updated;
-     * <code>false</code> could not update.
-     * @throws // TODO: 04.06.2020
+     * @throws SQLException when there is a problem with the database connection
      */
     public void updateUser(String userID, String column, String newValue) throws SQLException {
 
@@ -443,9 +434,7 @@ public class DatabaseManagement {
      * @param meetingID unique generated meeting ID.
      * @param column    [@Participant] [starttime] [endtime] [message]
      * @param newValue  new entry for the database.db
-     * @return <code>true</code> If meeting update the meeting;
-     * <code>false</code> Meeting could not be updated.
-     * @throws // TODO: 04.06.2020
+     * @throws SQLException when there is a problem with the database connection
      */
     public void updateMeeting(int meetingID, String column, Object newValue, String hostID) throws SQLException {
 
@@ -461,9 +450,7 @@ public class DatabaseManagement {
         prepStmt.setInt(2, meetingID);
         prepStmt.executeUpdate();
 
-        /**
-         * SQL: Update of foreign key
-         */
+        // SQL: Update of foreign key
         if (column.equals("participant")) {
 
             String sqlUpdateForeign = "UPDATE meetings_of_user SET userID = ? WHERE meetingID = ? AND userID != ?";
@@ -486,9 +473,7 @@ public class DatabaseManagement {
      */
     public Object[] returnDataUser(String userID) throws SQLException {
 
-        /**
-         * SQL: get userData.
-         */
+        // SQL: get userData.
         String sql = "SELECT * FROM user_data WHERE userID = ?";
 
         Object[] data = new Object[4];
@@ -515,9 +500,7 @@ public class DatabaseManagement {
      */
     public Object[] returnDataMeeting(int meetingID) throws SQLException {
 
-        /**
-         * SQL: get meetingData.
-         */
+        // SQL: get meetingData.
         String sql = "SELECT * FROM meeting_data WHERE meetingID = ?";
 
         Object[] data = new Object[5];
@@ -545,9 +528,7 @@ public class DatabaseManagement {
      */
     public boolean registeredCheck(String userID) throws SQLException {
 
-        /**
-         * SQL Code: Check if there is an entry of userID in the database.
-         */
+        // SQL Code:Check if there is an entry of userID in the database.
         String sql = "SELECT COUNT (*) FROM user_data WHERE userID = ?";
 
         PreparedStatement prepStmt = conn.prepareStatement(sql);
@@ -563,10 +544,10 @@ public class DatabaseManagement {
     /**
      * Check if user is authorised.
      *
-     * @param meetingID
-     * @param userID
-     * @return
-     * @throws SQLException
+     * @param meetingID meeting to check
+     * @param userID    user to check
+     * @return if user is authorized
+     * @throws SQLException when there is a problem with the database connection
      */
     public boolean authorizationCheck(int meetingID, String userID) throws SQLException {
 

@@ -2,10 +2,6 @@ package com.discord.bot.commands;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 
 /**
@@ -44,17 +40,15 @@ public class HelpCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        /**
-         * Send a private message with all commands.
-         */
-        msg.getAuthor().openPrivateChannel().complete().sendMessage("Commands: "
-                + "\nPrivate Chat:\n"
-                + "\nRegister Commands: " + "```" + registerPatterns[0] + "\n" + registerPatterns[1] + "```"
-                + "\nPublic Chat:\n"
-                + "\nMeeting Commands: " + "```" + meetingPatterns[0] + "\n" + meetingPatterns[1] + "\n" + meetingPatterns[2] + "```"
-                + "\nUser Commands: " + "```" + userPatterns[0] + "\n" + userPatterns[1] + "\n" + userPatterns[2] + "\n"
+        // Sends a private message with all commands.
+        msg.getAuthor().openPrivateChannel().complete().sendMessage(
+                "\n**Private Chat:**"
+                + "\n*Register Commands:*" + "```" + registerPatterns[0] + "\n" + registerPatterns[1] + "```"
+                + "\n**All Chat-Types:**"
+                + "\n*Meeting Commands:*" + "```" + meetingPatterns[0] + "\n" + meetingPatterns[1] + "\n" + meetingPatterns[2] + "```"
+                + "\n*User Commands:*" + "```" + userPatterns[0] + "\n" + userPatterns[1] + "\n" + userPatterns[2] + "\n"
                 + userPatterns[3] + "\n" + userPatterns[4] + "```"
-                + "\nLog Commands: " + "```" + logPatterns[0] + "\n" + logPatterns[1] + "```"
+                + "\n*Log Commands:*" + "```" + logPatterns[0] + "\n" + logPatterns[1] + "```"
         ).queue();
     }
 }

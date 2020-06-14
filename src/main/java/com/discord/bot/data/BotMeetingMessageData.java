@@ -83,7 +83,7 @@ public class BotMeetingMessageData {
         return meetingMessage;
     }
 
-    public final boolean isFirstStep() {
+    public final boolean getFirstStep() {
         return firstStep;
     }
 }

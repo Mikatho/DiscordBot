@@ -2,6 +2,7 @@ package com.discord.bot.commands;
 
 import com.discord.bot.MeetingManagement;
 import com.discord.bot.data.BotMeetingMessageData;
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -14,6 +15,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * The <code>MeetingCommand</code> Class implements the <code>CommandInterface</code>
@@ -38,7 +40,7 @@ public class MeetingCommand implements CommandInterface {
 
     private static boolean flag = false;
 
-    final static Logger logger = LogManager.getLogger(MeetingCommand.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger(MeetingCommand.class.getName());
 
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
@@ -51,51 +53,39 @@ public class MeetingCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        /**
-         * Command pattern in string array of meeting commands.
-         */
+        // Command pattern in string array of meeting commands.
         String[] patterns = {
                 "!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]",
                 "!meeting delete [meetingID]",
                 "!meeting update [meetingID] [value to change] [new value]"};
 
-        /**
-         * Regex for the UserID
-         */
+        // Regex for the UserID
         String userIdRegex = "<@!\\d{18}>";
 
-        /**
-         * Saves the author of the message.
-         */
         User user = msg.getAuthor();
 
         int returnedMeetingID;
 
         long[] earliestMeetingTimes;
 
-        /**
-         * Date objects of the input.
-         */
         Date dateStart;
         Date dateEnd;
 
         MeetingManagement meetingManager = MeetingManagement.getINSTANCE();
 
-        /**
-         * Establishes the standart of the format of the input-date.
+        /*
+         * Establishes the standard of the format of the input-date.
          * Makes sure that the input is an existing date.
          */
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         format.setLenient(false);
 
-        /**
-         * Checks if you author is a registered user and exists in the database.
-         */
+        // Checks if the author is a registered user and exists in the database.
         if (!meetingManager.userIsRegistered(msg.getAuthor().getId())) {
             return;
         }
 
-        /**
+        /*
          * Checks if the typed command was the basic command [!meeting] without any specifications.
          * In case of YES the bot suggests the possible patterns in chat.
          */
@@ -105,21 +95,15 @@ public class MeetingCommand implements CommandInterface {
             return;
         }
 
-        /**
-         * Splits the message in the parts of the command. Saves the command parts in the arguments.
-         */
+        // Splits the message in the parts of the command. Saves the command parts in the arguments.
         String[] args = msg.getContentRaw().replaceAll(" +", " ").split(" ", 3);
 
         int meetingID;
 
-        /**
-         * Checks the first parameter in the arguments array of the command call.
-         */
+        // Checks the first parameter in the arguments array of the command call.
         switch (args[1].toLowerCase()) {
 
-            /**
-             * If second argument is [create].
-             */
+            // If second argument is [create].
             case "create":
 
                 long epochStart;
@@ -130,30 +114,21 @@ public class MeetingCommand implements CommandInterface {
 
                 String meetingMessage;
 
-                /**
-                 * If the command is just [!meeting create] without all required parameters.
-                 */
+                // If the command is just [!meeting create] without all required parameters.
                 if (args.length == 2) {
                     channel.sendMessage(String.format("Use `%s` to create a meeting!", patterns[0])).queue();
                     return;
                 }
 
-                /**
-                 * Splits the arguments of the required parameter for [!meeting create].
-                 */
                 String[] createArgs = args[2].split(" ", 7);
 
-                /**
-                 * If not all required parameters were entered the user gets a discription of the command pattern.
-                 */
+                // If not all required parameters were entered the user gets a discription of the command pattern.
                 if (createArgs.length != 6 && createArgs.length != 7) {
-                    channel.sendMessage(String.format("Please add the values like this:\n`%s`", patterns[0])).queue();
+                    channel.sendMessage(String.format("Please add the values like this:%n`%s`", patterns[0])).queue();
                     return;
                 }
 
-                /**
-                 * Checks if the participants were entered in the correct format.
-                 */
+                // Checks if the participants were entered in the correct format.
                 if (!createArgs[0].matches(userIdRegex)) {
                     channel.sendMessage("User is not valid. Please use ´ @UserName ´!").queue();
                     return;
@@ -163,66 +138,42 @@ public class MeetingCommand implements CommandInterface {
 
                 String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
 
-                /**
-                 * Creates the start and endtime out of the additional parameters.
-                 */
                 String starttime = createArgs[1] + " " + createArgs[2];
                 String endtime = createArgs[3] + " " + createArgs[4];
 
-                /**
-                 * Tries to format the times correctly and checks the existency of date and time.
-                 */
+                // Tries to format the times correctly and checks the existence of date and time.
                 try {
-                    /**
-                     * Parsed string into date
-                     */
                     dateStart = format.parse(starttime);
-                    /**
-                     * Saves the epoch from the time.
-                     */
                     epochStart = dateStart.getTime();
 
                     dateEnd = format.parse(endtime);
                     epochEnd = dateEnd.getTime();
 
-                    /**
-                     * The duration of the meeting in milliseconds.
-                     */
                     duration = Integer.parseInt(createArgs[5]) * 60 * 1000;
                 } catch (ParseException e) {
-                    logger.fatal("Unable to parse the data.\n" + e);
-                    /**
-                     * If the date was out of range of the existing dates or does not follow the input pattern.
-                     */
+                    LOGGER.fatal(String.format("Unable to parse the data.%n%s", e));
                     channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern or date does not exist.").queue();
                     return;
                 } catch (NumberFormatException e) {
-                    logger.fatal("Unable to parse the data.\n" + e);
-                    /**
-                     * If no duration of the meeting was added to the command.
-                     */
+                    LOGGER.fatal(String.format("Unable to parse the data.%n%s", e));
                     channel.sendMessage("Please add a duration of the meeting!\n Note: Duration has to be in minutes (only the number).").queue();
                     return;
                 }
 
-                /**
-                 * Checks if the endtime is after the starttime. Informs user if the input is invalid.
-                 */
-                if (!(epochStart < epochEnd)) {
+                // Checks if the endtime is after the starttime. Informs user if the input is invalid.
+                if (epochStart >= epochEnd) {
 
                     channel.sendMessage("The endtime has to be later than the starttime. ").queue();
                     return;
                 }
 
-                /**
-                 * Checks if duration of the meeting is longer than the requested period. Informs user if the unput is invalid.
-                 */
+                // Checks if duration of the meeting is longer than the requested period. Informs user if the unput is invalid.
                 if (duration > (epochEnd - epochStart)) {
                     channel.sendMessage("The duration of the meeting cannot be longer than the requested period.").queue();
                     return;
                 }
 
-                /**
+                /*
                  * Checks if the user is free in the requested period. Informs user if the requested period of the meeting
                  * is blocked.
                  */
@@ -232,23 +183,19 @@ public class MeetingCommand implements CommandInterface {
                         return;
                     }
                 } catch (SQLException e) {
-                    logger.fatal("SQLException. Could not receive meeting data.\n" + e);
+                    LOGGER.fatal(String.format("SQLException. Could not receive meeting data.%n%s", e));
                     channel.sendMessage("Could not receive meeting data.").queue();
                     return;
                 }
 
-                /**
-                 * Checks if message was entered.
-                 */
+                // Checks if the user typed an additional message
                 if (createArgs.length == 6) {
                     meetingMessage = "N/a";
                 } else {
                     meetingMessage = createArgs[6];
                 }
 
-                /**
-                 * Checks if the request of a new meeting came from a registered user.
-                 */
+                // Checks if the request of a new meeting came from a registered user.
                 if (!meetingManager.userIsRegistered(participantID)) {
 
                     SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -257,9 +204,7 @@ public class MeetingCommand implements CommandInterface {
 
                     String dateStartISO = isoFormat.format(dateStart);
 
-                    /**
-                     * Message that the bot sends to the server
-                     */
+                    // Message that the bot sends to the server
                     String answerCommand = "!_meeting "
                             + uniqueID + " "
                             + user.getAsMention() + " "
@@ -268,27 +213,21 @@ public class MeetingCommand implements CommandInterface {
                             + createArgs[5] + " "
                             + createArgs[0];
 
-                    /**
-                     * Stores meeting data in HashMap
-                     */
+                    // Stores meeting data in HashMap
                     meetingManager.getBotMessageHolder().put(uniqueID, new BotMeetingMessageData(msg.getContentRaw(), user.getId(), participantID, participantName, duration, dateStartISO, epochEnd, meetingMessage, true));
 
                     channel.sendMessage(answerCommand).queue();
 
                     user.openPrivateChannel().complete().sendMessage("Trying to arrange a meeting...").queue();
 
-                    /**
-                     * Synchronize with BotMeetingCommand to control flag state
-                     */
+                    // Synchronize with BotMeetingCommand to control flag state
                     synchronized (this) {
 
-                        /**
-                         * Defines the length of the timeout
-                         */
+                        // Defines the length of the timeout
                         try {
-                            Thread.sleep(2000);
+                            Thread.sleep(3000);
                         } catch (InterruptedException e) {
-                            logger.fatal("Unable to pause thread.\n" + e);
+                            LOGGER.fatal(String.format("Unable to pause thread.%n%s", e));
                         }
 
                         if (!flag) {
@@ -300,7 +239,7 @@ public class MeetingCommand implements CommandInterface {
                     }
                 }
 
-                /**
+                /*
                  * Checks if the participant is free in the requested period. Informs user if the requested
                  * period of the meeting is blocked.
                  */
@@ -312,14 +251,11 @@ public class MeetingCommand implements CommandInterface {
                         return;
                     }
                 } catch (SQLException e) {
-                    logger.fatal("Unable to get meetingData.\n" + e);
+                    LOGGER.fatal(String.format("Unable to get meetingData.%n%s", e));
                     channel.sendMessage("Could not receive meeting data.").queue();
                     return;
                 }
 
-                /**
-                 * Informs the user if the meeting could not be created.
-                 */
                 if ((returnedMeetingID = meetingManager.insert(user.getId(), participantID, earliestMeetingTimes[0], earliestMeetingTimes[1], meetingMessage)) == 0) {
                     channel.sendMessage("Could not create the meeting.").queue();
                     return;
@@ -327,9 +263,7 @@ public class MeetingCommand implements CommandInterface {
 
                 EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, user.getAsMention(), createArgs[0], format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), meetingMessage);
 
-                /**
-                 * If the user has assigned himself to meeting he created he wont be mentioned twice.
-                 */
+                // If the user has assigned himself to meeting he created he wont be mentioned twice.
                 if (user.getName().equals(participantName)) {
                     channel.sendMessage(String.format("%s Successfully created the meeting!", user.getAsMention())).queue();
                 } else {
@@ -337,16 +271,12 @@ public class MeetingCommand implements CommandInterface {
                 }
                 channel.sendMessage(embed.build()).queue();
 
-                /**
-                 * Creating the Google Calender link to the event for both users
-                 */
+                // Creating the Google Calender link to the event for both users
                 String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
                 meetingManager.googleCalendarEvent(participantID, String.format("Meeting with %s [%s]", user.getName(), returnedMeetingID), "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
-                /**
-                 * Informs the user if the creation of the link to the event was a sucess or a failure.
-                 */
+                // Informs the user if the creation of the link to the event was successful
                 if (hostEventLink == null) {
                     channel.sendMessage("Could not add meeting to your Google Calendar.").queue();
                 } else {
@@ -355,51 +285,40 @@ public class MeetingCommand implements CommandInterface {
                 break;
 
 
-            /**
-             * If second argument is [delete].
-             */
+            // If second argument is [delete].
             case "delete":
 
-                /**
-                 * If the command is just [!meeting delete] without all required parameters.
-                 */
+                // If the command is just [!meeting delete] without all required parameters.
                 if (args.length == 2) {
                     channel.sendMessage(String.format("Use `%s` to delete a meeting!", patterns[1])).queue();
                     return;
                 }
 
-                /**
-                 * Tries to convert the MeetingID into a number. If it failes the user will be informed, that is input was invalid.
-                 */
                 try {
                     meetingID = Integer.parseInt(args[2]);
                 } catch (NumberFormatException e) {
-                    logger.fatal("Unable to parse data.\n" + e);
+                    LOGGER.fatal(String.format("Unable to parse data.%n%s", e));
                     channel.sendMessage("Your meetingID is not a valid number.").queue();
                     return;
                 }
 
-                /**
-                 * Checks if the user has the authorization to delete this meeting.
-                 */
                 if (!meetingManager.authorizationCheck(meetingID, user.getId())) {
 
                     channel.sendMessage("You are not the host of the meeting! Therefore you are not allowed to delete it!").queue();
                     return;
                 }
 
-                /**
-                 * Tries to delete the meeting out of the private Google Calender of the user.
-                 */
                 if (!meetingManager.deleteGoogleCalendarEvent(user.getId(), meetingID)) {
 
                     channel.sendMessage("Could not delete the meeting out of your Google Calendar.").queue();
                     return;
                 }
 
-                /**
-                 * Search for the MeetingID and checks if the user is a participant the meeting he wants to delete.
-                 */
+                if (meetingManager.search(meetingID).length == 0) {
+
+                    channel.sendMessage("Could not search for the meeting.").queue();
+                    return;
+                }
                 participantID = (String) meetingManager.search(meetingID)[1];
 
                 if (meetingManager.userIsRegistered(participantID)) {
@@ -407,105 +326,77 @@ public class MeetingCommand implements CommandInterface {
                     meetingManager.deleteGoogleCalendarEvent(participantID, meetingID);
                 }
 
-                /**
-                 * Tries to delete the meeting from the database.
-                 */
                 if (!meetingManager.delete(meetingID)) {
 
                     channel.sendMessage("Could not delete the meeting.").queue();
                     return;
                 }
 
-                /**
-                 * If the meeting was sucessfully deleted the user gets informed.
-                 */
                 channel.sendMessage("Successfully deleted the meeting.").queue();
                 break;
 
 
-            /**
-             * If second argument is [update].
-             */
+            // If second argument is [update].
             case "update":
 
-                /**
-                 * If the command is just [!meeting delete] without all required parameters.
-                 */
+                // If the command is just [!meeting delete] without all required parameters.
                 if (args.length == 2) {
 
                     channel.sendMessage(String.format("Use `%s` to update a meeting!", patterns[2])).queue();
                     return;
                 }
 
-                /**
-                 * Splits the arguments of the required parameter for [!meeting update].
-                 */
                 String[] updateArgs = args[2].split(" ", 3);
 
-                /**
-                 * If not all additional parameters were entered the user gets informed.
-                 */
+                // If not all additional parameters were entered the user gets informed.
                 if (updateArgs.length != 3) {
 
-                    channel.sendMessage(String.format("Please add the values like this:\n`%s`", patterns[2])).queue();
+                    channel.sendMessage(String.format("Please add the values like this:%n`%s`", patterns[2])).queue();
                     return;
                 }
 
-                /**
-                 * Variable to save the new value.
-                 */
                 Object newValue;
 
                 updateArgs[1] = updateArgs[1].toLowerCase();
 
-                /**
-                 * Tries to convert the MeetingID into a number. If it was not sucessfull the user will be informed that his input
+                /*
+                 * Tries to convert the MeetingID into a number. If it was not successful the user will be informed that his input
                  * was not valid.
                  */
                 try {
                     meetingID = Integer.parseInt(updateArgs[0]);
                 } catch (NumberFormatException e) {
-                    logger.fatal("Unable to parse  data.\n" + e);
+                    LOGGER.fatal(String.format("Unable to parse  data.%n%s", e));
                     channel.sendMessage("Your meetingID is not a valid number.").queue();
                     return;
                 }
 
-                /**
-                 * Checks if the user has the authorization to update this meeting. 
-                 */
                 if (!meetingManager.authorizationCheck(meetingID, user.getId())) {
 
                     channel.sendMessage("You are not the host of the meeting! Therefore you are not allowed to update it!").queue();
                     return;
                 }
 
-                /**
-                 * Checks if the input is valid to update the meeting. If not the user will be informed.
-                 */
                 if (!updateArgs[1].matches("participant|starttime|endtime|message")) {
 
                     channel.sendMessage(String.format("Unknown value to update: `%s` does not exist.", updateArgs[1])).queue();
                     return;
                 }
 
-                /**
-                 * If the entry is a date the input will be checked if it is in the correct format and if the date exists.
-                 */
                 if (updateArgs[1].contains("time")) {
 
                     try {
                         Date time = format.parse(updateArgs[2]);
-                        /**
-                         * Epoch is getting saved in variable (not in milliseconds) for the transmission.
-                         */
+
+                        // Epoch is getting saved in variable (not in milliseconds) for the transmission.
                         newValue = time.getTime() / 1000;
                     } catch (ParseException e) {
-                        logger.fatal("Unable to to parse data.\n" + e);
+                        LOGGER.fatal(String.format("Unable to to parse data.%n%s", e));
                         channel.sendMessage("Date is not valid according to `" + format.toPattern().toUpperCase() + "` pattern.").queue();
                         return;
                     }
 
-                    /**
+                    /*
                      * If the entry is a participant the input will be checked if it is in the correct format. If it is invalid the
                      * user will be informed.
                      */
@@ -522,29 +413,18 @@ public class MeetingCommand implements CommandInterface {
                     newValue = updateArgs[2];
                 }
 
-                /**
-                 * Tries to update the meeting in the database. If it was not sucessfull, the user will be informed.
-                 */
                 if (!meetingManager.update(meetingID, user.getId(), updateArgs[1], newValue)) {
 
                     channel.sendMessage("Could not update the Meeting.").queue();
                     return;
                 }
 
-                /**
-                 * Informs the user that his request to update the meeting was sucessfull.
-                 */
                 channel.sendMessage("Successfully updated the Meeting.").queue();
                 break;
 
-            /**
-             * If second argument is unknown.
-             */
+            // If second argument is unknown.
             default:
 
-                /**
-                 * Informs the user that is input is an unknown command.
-                 */
                 channel.sendMessage(String.format("Unknown command: `%s` does not exist.", args[1])).queue();
                 break;
         }

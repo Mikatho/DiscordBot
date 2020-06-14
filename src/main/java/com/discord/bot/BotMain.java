@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +32,7 @@ import java.sql.SQLException;
  */
 public class BotMain {
 
-    final static Logger logger = LogManager.getLogger(BotMain.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger(BotMain.class.getName());
     private static JDA jda;
     private JDABuilder jdaBuilder;
 
@@ -39,14 +40,13 @@ public class BotMain {
      * Create instance of <code>BotMain()</code>
      *
      * @param args Array. contains all variables from command call.
-     * @throws LoginException Basic login exception. If method is unable to instantiate.
      */
     public static void main(String[] args) {
 
         try {
             new BotMain();
         } catch (LoginException e) {
-            logger.fatal("Unable to instantiate BotMain.\n" + e);
+            LOGGER.fatal(String.format("Unable to instantiate BotMain.%n%s", e));
         }
     }
 
@@ -55,8 +55,7 @@ public class BotMain {
      * It calls the method connect() in <code>DatabaseManagement</code> to build the database
      * and also holds the BotTokken. The method executes the Discord Bot.
      *
-     * @throws SQLException Unable to get the instance of database.
-     * @throws IOException  Unable to access the database.
+     * @throws LoginException Unable to get the instance of database.
      */
     public BotMain() throws LoginException {
 
@@ -65,17 +64,16 @@ public class BotMain {
         try {
             DatabaseManagement.getINSTANCE().connect();
         } catch (SQLException | IOException e) {
-            logger.fatal("Unable to connect to database.\n" + e);
+            LOGGER.fatal(String.format("Unable to connect to database.%n%s", e));
         }
 
         jdaBuilder = JDABuilder.createDefault(BOT_TOKEN)
                 .setStatus(OnlineStatus.ONLINE)
+                .setActivity(Activity.listening("!help"))
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .enableIntents(GatewayIntent.GUILD_MEMBERS);
 
-        /**
-         * Initialize Listener.
-         */
+        // Initialize Listener.
         jdaBuilder.addEventListeners(new CommandListener());
 
         jda = jdaBuilder.build();
@@ -84,27 +82,20 @@ public class BotMain {
         shutdown();
     }
 
-    /**
+    /*
      * The <code>shutdown()</code> method closes all connections and shuts down the Bot.
-     *
-     * @throws IOException  Basic login exception. Unable to interact with the BufferedReader.
-     * @throws SQLException No access to database.
      */
     public void shutdown() {
 
         new Thread(() -> {
             String line;
 
-            /**
-             * Reader for the console inputs.
-             */
+            // Reader for the console inputs.
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             try {
                 while ((line = reader.readLine()) != null) {
                     if (line.equals("shutdown")) {
-                        /**
-                         * Check, if Bot is initialized.
-                         */
+                        // Check, if Bot is initialized.
                         if (jda != null) {
                             jdaBuilder.setStatus(OnlineStatus.OFFLINE);
                             jda.shutdownNow();
@@ -114,14 +105,12 @@ public class BotMain {
                         reader.close();
                         return;
                     } else {
-                        /**
-                         * If your input isn´t "shutdown".
-                         */
+                        // If your input isn´t "shutdown".
                         System.out.println("Use 'shutdown' to shutdown the Bot.");
                     }
                 }
             } catch (IOException | SQLException e) {
-                logger.fatal("Unable to shutdown the Bot.\n" + e);
+                LOGGER.fatal(String.format("Unable to shutdown the bot.%n%s", e));
             }
         }).start();
     }

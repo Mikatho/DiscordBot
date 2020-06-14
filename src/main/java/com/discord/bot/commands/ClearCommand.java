@@ -29,7 +29,7 @@ import java.sql.SQLException;
 public class ClearCommand implements CommandInterface {
 
 
-    final static Logger logger = LogManager.getLogger(ClearCommand.class.getName());
+    private static final Logger logger = LogManager.getLogger(ClearCommand.class.getName());
 
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
@@ -41,13 +41,11 @@ public class ClearCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        /**
-         * Delete entries in database and log-file.
-         */
+        // Delete entries in database and log-file.
         try {
             DatabaseManagement.getINSTANCE().clear();
         } catch (SQLException e) {
-            logger.fatal("Unable to get instance of database.\n" + e);
+            logger.fatal(String.format("Unable to get instance of database.%n%s", e));
         }
         LoggingManagement.getINSTANCE().clear();
     }

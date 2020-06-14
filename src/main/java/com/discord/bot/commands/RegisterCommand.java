@@ -38,48 +38,40 @@ public class RegisterCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        /**
-         * User who typed [!register] is temporary saved in
-         */
+        // User who typed [!register] is temporary saved in
         User user = msg.getAuthor();
 
         UserManagement userManager = UserManagement.getINSTANCE();
 
-        /**
-         * Checks if the user who tried to register is registrable.
-         */
+        // Checks if the user who tried to register is registered.
         if (!userManager.register(user.getId())) {
             channel.sendMessage(user.getAsMention() + " could not be added to the Database!").queue();
             return;
         }
 
-        /**
-         * If the register was sucessfull the user will be greeted with a welcoming
+        /*
+         * If the register was successful the user will be greeted with a welcoming
          * message and will be advised, that the bot creates a Google ID for him and that
          * he is able to use the bot commands.
          */
-        channel.sendMessage(
-                "Welcome kindly sir.\n" +
-                        "Your registration was successful.\n" +
-                        "Now you can log your commands, insert personal data to your account and create meetings\n" +
-                        "which will be inserted automatically in your Google Calender.\n" +
-                        "Creating your Google-Calendar...\n").queue();
+        channel.sendMessage("Welcome kindly sir.\n"
+                        + "Your registration was successful.\n"
+                        + "Use `!help` to receive a list of all available commands.\n"
+                        + "Creating your Google-Calendar...\n").queue();
 
-        /**
-         * Creating the Google Calendars ID.
-         */
+        // Creating the Google Calendars ID.
         String calendarID = userManager.googleCalendarID(user.getName());
 
-        /**
-         * If the creating of the Google Calenders ID was not sucessfull, the user will
+        /*
+         * If the creating of the Google Calenders ID was not successful, the user will
          * be advised that the process failed.
          */
         if (calendarID == null) {
             channel.sendMessage("Unfortunately we could not create a Google Calendar for you.").queue();
         } else {
 
-            /**
-             * If the creating of the Google Calenders ID was sucessfull the database 
+            /*
+             * If the creating of the Google Calenders ID was successful the database
              * gets updated with Link of the Calender belonging to the user.
              *
              * User gets message with the Calender link.

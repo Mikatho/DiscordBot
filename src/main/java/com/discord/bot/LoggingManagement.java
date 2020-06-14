@@ -17,8 +17,6 @@ import java.util.StringJoiner;
 
 
 /**
- * toDo
- *
  * @author L2G4
  * @version %I%, %G%
  * @see com.discord.bot.LoggingManagement
@@ -27,7 +25,7 @@ import java.util.StringJoiner;
  */
 public class LoggingManagement {
 
-    final static Logger logger = LogManager.getLogger(LoggingManagement.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger(LoggingManagement.class.getName());
     private static final LoggingManagement INSTANCE = new LoggingManagement();  // creates INSTANCE of Class
 
     private static final int LOG_CAPACITY = 10;
@@ -46,8 +44,6 @@ public class LoggingManagement {
 
     /**
      * Delete data in Logfile by overwrite the entries with an empty string.
-     *
-     * @throws FileNotFoundException file does not exist.
      */
     public void clear() {
 
@@ -56,7 +52,7 @@ public class LoggingManagement {
             writer.print("");
             writer.close();
         } catch (FileNotFoundException e) {
-            logger.fatal("Unable to find or connect to commands.log.\n" + e);
+            LOGGER.fatal(String.format("Unable to find or connect to commands.log.%n%s", e));
         }
     }
 
@@ -67,9 +63,7 @@ public class LoggingManagement {
      */
     public void addToLog(String command) {
 
-        /**
-         * Add the input time to the command.
-         */
+        // Add the input time to the command.
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         LocalDateTime localTime = LocalDateTime.now();
 
@@ -85,9 +79,7 @@ public class LoggingManagement {
 
         StringJoiner joiner = new StringJoiner("\n");
 
-        /**
-         * Set a max, that only a few commands are shown.
-         */
+        // Set a max, that only a few commands are shown.
         if (commandLog.size() <= LOG_CAPACITY) {
             for (String item : commandLog) {
                 joiner.add(item);
@@ -102,46 +94,34 @@ public class LoggingManagement {
         return joiner.toString();
     }
 
-    /**
-     * Save all logs in a file.
-     *
-     * @throws IOException unable to create file.
-     * @throws IOException unable to manipulate the file.
-     */
+    // Save all logs in a file.
     public void saveToFile() {
 
         String fileName = "commands.log";
 
         try {
-            /**
-             * Create file if it doesn´t exist.
-             */
+            // Create file if it doesn´t exist.
             File file = new File(fileName);
             if (!file.exists()) {
                 file.createNewFile();
             }
         } catch (IOException e) {
-            logger.fatal("Unable to ceate new file.\n" + e);
+            LOGGER.fatal(String.format("Unable to ceate new file.%n%s", e));
         }
 
-        /**
-         * Save all commands in a file and clear the list.
-         */
-        try {
-            FileWriter fw = new FileWriter(fileName, true);
-            BufferedWriter bw = new BufferedWriter(fw);
+        // Save all commands in a file and clear the list.
+        try (FileWriter fw = new FileWriter(fileName, true);
+             BufferedWriter bw = new BufferedWriter(fw)) {
 
             for (String item : commandLog) {
                 bw.write(item);
                 bw.newLine();
             }
 
-            bw.close();
-
             commandLog.clear();
 
         } catch (IOException e) {
-            logger.fatal("Unable to save logs.\n" + e);
+            LOGGER.fatal(String.format("Unable to save logs.%n%s", e));
         }
     }
 }

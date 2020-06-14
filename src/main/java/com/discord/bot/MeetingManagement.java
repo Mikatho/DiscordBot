@@ -10,6 +10,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -25,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MeetingManagement {
 
-    final static Logger logger = LogManager.getLogger(MeetingManagement.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger(MeetingManagement.class.getName());
 
     private static final MeetingManagement INSTANCE = new MeetingManagement();
 
@@ -45,11 +46,9 @@ public class MeetingManagement {
     }
 
     /**
-     * TODO
-     *
      * @return messageDataHolder
      */
-    public ConcurrentHashMap<String, BotMeetingMessageData> getBotMessageHolder() {
+    public ConcurrentMap<String, BotMeetingMessageData> getBotMessageHolder() {
         return messageDataHolder;
     }
 
@@ -65,29 +64,23 @@ public class MeetingManagement {
      * @param message       meeting message.
      * @return <code>true</code> Successfully insert the meeting;
      * <code>false</code> unable to insert the meeting.
-     * @throws SQLException Database access error.
      */
     public int insert(String hostID, String participantID, long starttime, long endtime, String message) {
 
         MeetingData tempMeeting;
 
-        /**
-         * instantiate MeetingData.
-         */
+        // Instantiate MeetingData.
         if (message.equals("N/a")) {
-            //Wenn keine Message mitgegeben wurde
             tempMeeting = new MeetingData(hostID, participantID, starttime, endtime);
         } else {
-            /**
-             * Overloaded MeetingData constructor[message]
-             */
+            // Overloaded MeetingData constructor[message]
             tempMeeting = new MeetingData(hostID, participantID, starttime, endtime, message);
         }
 
         try {
             return dbManager.insertMeeting(tempMeeting);
         } catch (SQLException e) {
-            logger.fatal("Unable to insert a meeting[meeting_data].\n" + e);
+            LOGGER.fatal(String.format("Unable to insert a meeting[meeting_data].%n%s", e));
             return 0;
         }
     }
@@ -106,7 +99,7 @@ public class MeetingManagement {
         try {
             return dbManager.deleteMeeting(meetingID);
         } catch (SQLException e) {
-            logger.fatal("Unable to delete meeting[meeting_data].\n" + e);
+            LOGGER.fatal(String.format("Unable to delete meeting[meeting_data].%n%s", e));
             return false;
         }
     }
@@ -115,23 +108,19 @@ public class MeetingManagement {
      * This method updates the manipulated MeetingData in the database.
      *
      * @param meetingID unique generated meeting ID.
-     * @param hostID    todo
      * @param column    previous entry.
      * @param newValue  new entry for the database.db
      * @return <code>true</code> Successfully update the MeetingData;
      * <code>false</code> could not be updated.
-     * @throws SQLException Database access error. Unable to update meeting.
      */
     public boolean update(Integer meetingID, String hostID, String column, Object newValue) {
 
-        /**
-         * Update meeting.
-         */
+        // Update meeting.
         try {
             dbManager.updateMeeting(meetingID, column, newValue, hostID);
             return true;
         } catch (SQLException e) {
-            logger.fatal("Unable to update a meeting[meeting_data].\n" + e);
+            LOGGER.fatal(String.format("Unable to update a meeting[meeting_data].%n%s", e));
             return false;
         }
     }
@@ -141,7 +130,7 @@ public class MeetingManagement {
         try {
             return DatabaseManagement.getINSTANCE().registeredCheck(userID);
         } catch (SQLException e) {
-            logger.fatal("Unable to register a user[user_data].\n" + e);
+            LOGGER.fatal(String.format("Unable to register a user[user_data].%n%s", e));
             return false;
         }
     }
@@ -151,7 +140,7 @@ public class MeetingManagement {
         try {
             return dbManager.authorizationCheck(meetingID, userID);
         } catch (SQLException e) {
-            logger.fatal("Unable to check authorization[meeting_data].\n" + e);
+            LOGGER.fatal(String.format("Unable to check authorization[meeting_data].%n%s", e));
             return false;
         }
     }
@@ -167,7 +156,7 @@ public class MeetingManagement {
             String calendarID = (String) dbManager.returnDataUser(userID)[3];
             return calendarManager.createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
         } catch (SQLException | IOException e) {
-            logger.fatal("Unable to return a meeting[meeting_data].\n" + e);
+            LOGGER.fatal(String.format("Unable to return a meeting[meeting_data].%n%s", e));
             return null;
         }
     }
@@ -177,8 +166,8 @@ public class MeetingManagement {
         try {
             return dbManager.returnDataMeeting(meetingID);
         } catch (SQLException e) {
-            logger.fatal("Unable to search a user[user_data].\n" + e);
-            return null;
+            LOGGER.fatal(String.format("Unable to search a user[user_data].%n%s", e));
+            return new Object[0];
         }
     }
 
@@ -189,7 +178,7 @@ public class MeetingManagement {
             long epochStart = (long) dbManager.returnDataMeeting(meetingID)[2];
             return calendarManager.deleteEvent(calendarID, epochStart);
         } catch (IOException | SQLException e) {
-            logger.fatal("Unable to delete a meeting[meeting_data].\n" + e);
+            LOGGER.fatal(String.format("Unable to delete a meeting[meeting_data].%n%s", e));
             return false;
         }
     }

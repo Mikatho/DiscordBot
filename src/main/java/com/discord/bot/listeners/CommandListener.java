@@ -37,21 +37,17 @@ public class CommandListener extends ListenerAdapter {
         MessageChannel channel = event.getChannel();
         String message = event.getMessage().getContentRaw();
 
-        /**
-         * Check if the input is a command.
-         */
+        // Check if the input is a command.
         new Thread(() -> {
             if (message.startsWith("!")) {
                 String[] args = message.split(" ");
 
-                /**
-                 * Skips everything else if message comes from the bot itself
-                 */
+                // Skips everything else if message comes from the bot itself
                 if (event.getAuthor().getId().equals(channel.getJDA().getSelfUser().getId())) {
                     return;
                 }
 
-                /**
+                /*
                  * Call execute method in CommandManager.
                  * returnedValue = 0 --> execute was successfull
                  * returnedValue = 1 --> command doesn't exist at all

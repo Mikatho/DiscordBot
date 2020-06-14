@@ -36,43 +36,31 @@ public class LogCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        /**
-         * Command pattern of the usable commands.
-         */
+        // Command pattern of the usable commands.
         String[] patterns = {
                 "!log show",
                 "!log save"};
 
-        /**
-         * Check if the command is typed correctly.
-         */
+        // Check if the command is typed correctly.
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n"
                     + "```" + patterns[0] + "\n" + patterns[1] + "```").queue();
             return;
         }
 
-        /**
-         * Splits the command into the arguments.
-         */
+        // Splits the command into the arguments.
         String[] args = msg.getContentRaw().replaceAll(" +", " ").split(" ");
 
-        /**
-         * Check the second parameter of the command.
-         */
+        // Check the second parameter of the command.
         switch (args[1].toLowerCase()) {
-            /**
-             * If the second argument is [show].
-             */
+            // If the second argument is [show].
             case "show":
                 channel.sendMessage(LoggingManagement.getINSTANCE().logToConsole()).queue();
                 break;
 
-            /**
-             * If the second argument is [save].
-             */
+            // If the second argument is [save].
             case "save":
-                /**
+                /*
                  * LoggingManagement saves the log into [commands.log] data.
                  *
                  * Replies with a success messages if the log is saved.
@@ -81,9 +69,7 @@ public class LogCommand implements CommandInterface {
                 channel.sendMessage("Successfully saved the log.").queue();
                 break;
 
-            /**
-             * If the second argument is [unknown].
-             */
+            // If the second argument is [unknown].
             default:
                 channel.sendMessage(String.format("Unknown command: `%s` does not exist.", args[1])).queue();
         }

@@ -40,9 +40,7 @@ public class UserCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
-        /**
-         * Command pattern of the usable commands.
-         */
+        // Command pattern of the usable commands.
         String[] patterns = {
                 "!user data",
                 "!user search [userID]",
@@ -50,61 +48,51 @@ public class UserCommand implements CommandInterface {
                 "!user update interests [new value1, new value2, etc.]",
                 "!user update competencies [new value1, new value2, etc.]"};
 
+        //Saves the author of the message.
+        User user = msg.getAuthor();
+        // Contains all user User data.
+        Object[] receivedData;
+        // Output of the UserData.
+        String data;
 
-        User user = msg.getAuthor();   //Saves the author of the message.
-        Object[] receivedData;         // contains all user User data.
-        String data;                   // Output of the UserData.
-
-        /**
-         * Creates an instance of the [userManagement].
-         */
+        // Creates an instance of the [userManagement].
         UserManagement userManager = UserManagement.getINSTANCE();
 
-        /**
-         * Checks if the user is existing in the database.
-         */
+        // Checks if the user is existing in the database.
         if (!userManager.userIsRegistered(msg.getAuthor().getId())) {
             channel.sendMessage("Please use `!register` first to execute this command.").queue();
             return;
         }
 
-        /**
-         * Checks if just the command was entered without any parameters.
-         */
+        // Checks if just the command was entered without any parameters.
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n" +
                     "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\n" + patterns[3] + "\n" + patterns[4] + "```").queue();
             return;
         }
 
-        /**
-         * Splits the command into the arguments.
-         */
+        // Splits the command into the arguments.
         String[] args = msg.getContentRaw().replaceAll(" +", " ").split(" ", 4);
 
         switch (args[1].toLowerCase()) {
 
-            /**
-             * If the second argument is [data].
-             */
+            // If the second argument is [data].
             case "data":
 
-                /**
-                 * Saves the data of the received message about the author.
-                 */
+                // Saves the data of the received message about the author.
+                if (userManager.search(msg.getAuthor().getId()).length == 0) {
+                    channel.sendMessage("Could not search for the user.").queue();
+                    return;
+                }
                 receivedData = userManager.search(msg.getAuthor().getId());
 
-                /**
-                 * If the bot could not load any data for the message.
-                 */
+                // If the bot could not load any data for the message.
                 if (receivedData == null) {
                     channel.sendMessage("Unfortunately we could not load your data.").queue();
                     return;
                 }
 
-                /**
-                 * Loads the data of the user out of his instanze.
-                 */
+                // Loads the data of the user out of his instance
                 data = "Nickname: " + msg.getAuthor().getName()
                         + "\nAddress: " + receivedData[0]
                         + "\nInterests: " + receivedData[1]
@@ -113,22 +101,16 @@ public class UserCommand implements CommandInterface {
                 channel.sendMessage(data).queue();
                 break;
 
-            /**
-             * If the second argument is [search].
-             */
+            // If the second argument is [search].
             case "search":
 
-                /**
-                 * Checks if all parameters were entered for this argument.
-                 */
+                // Checks if all parameters were entered for this argument.
                 if (args.length == 2) {
                     channel.sendMessage("Please add the userID [@userName]!").queue();
                     return;
                 }
 
-                /**
-                 * Saves the input [@user] in a string and filters the UserID.
-                 */
+                // Saves the input [@user] in a string and filters the UserID.
                 if (!args[2].matches("<@!\\d{18}>")) {
                     channel.sendMessage("User is not valid. Please use ` @UserName `!").queue();
                     return;
@@ -136,27 +118,25 @@ public class UserCommand implements CommandInterface {
 
                 String searchID = args[2].substring(3, 21);
 
-                /**
-                 * Checks if the input [UserID] is existing in the database.
-                 */
+                // Checks if the input [UserID] is existing in the database.
                 if (!userManager.userIsRegistered(searchID)) {
                     channel.sendMessage("User doesn´t exist").queue();
                     return;
                 }
 
+                if (userManager.search(msg.getAuthor().getId()).length == 0) {
+                    channel.sendMessage("Could not search for the user.").queue();
+                    return;
+                }
                 receivedData = userManager.search(searchID);
 
-                /**
-                 * If no data could be loaded the user will be informed about the fail.
-                 */
+                // If no data could be loaded the user will be informed about the fail.
                 if (receivedData == null) {
                     channel.sendMessage("Unfortunately we could not load the data.").queue();
                     return;
                 }
 
-                /**
-                 * Loads the data of the user out of his instanze.
-                 */
+                // Loads the data of the user out of his instance.
                 String nickname = msg.getContentDisplay().split(" ")[2];
 
                 data = "Nickname: " + nickname
@@ -167,13 +147,11 @@ public class UserCommand implements CommandInterface {
                 channel.sendMessage(data).queue();
                 break;
 
-            /**
-             * If the second argument is [break].
-             */
+            // If the second argument is [break].
             case "update":
                 args[2] = args[2].toLowerCase();
 
-                /**
+                /*
                  * Checks if the first parameter were entered and fits one of the patterns.
                  * !user update address
                  * !user update interests
@@ -184,31 +162,23 @@ public class UserCommand implements CommandInterface {
                     return;
                 }
 
-                /**
-                 * Checks if additional parameters were entered.
-                 */
+                // Checks if additional parameters were entered.
                 if (args.length == 3) {
                     channel.sendMessage("Please add the new values!").queue();
                     return;
                 }
 
-                /**
-                 * Tries to update the user informations that were entered in the command.
-                 */
+                // Tries to update the user information that were entered in the command.
                 if (!userManager.update(user.getId(), args[2], args[3])) {
                     channel.sendMessage("Could not update your " + args[2]).queue();
                     return;
                 }
 
-                /**
-                 * Informs the user if the task was a success.
-                 */
+                // Informs the user if the task was a success.
                 channel.sendMessage("Successfully updated your: " + args[2]).queue();
                 break;
 
-            /**
-             * If the second argument is [unknown]. The user will be informed that his input was invalid.
-             */
+            // If the second argument is [unknown]. The user will be informed that his input was invalid.
             default:
                 channel.sendMessage(String.format("Unknown command: `%s` does not exist.", args[1])).queue();
                 break;
