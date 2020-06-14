@@ -165,7 +165,9 @@ public class BotMeetingCommand implements CommandInterface {
             String hostTag = "<@!" + hostID + ">";
             String participantTag = "<@!" + participantID + ">";
 
-            if (meetingManager.getBotMessageHolder().get(args[1]).isFirstStep()) {
+            boolean firstStep = meetingManager.getBotMessageHolder().get(args[1]).isFirstStep();
+
+            if (firstStep) {
                 ourUserID = hostID;
             } else {
                 ourUserID = participantID;
@@ -218,7 +220,13 @@ public class BotMeetingCommand implements CommandInterface {
 
                 EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, hostTag, participantTag, format.format(epochStart), format.format(epochStart + duration), message);
 
-                ourUserPM.sendMessage("Successfully created the meeting!\n" + embed.build()).queue();
+                if (firstStep) {
+                    ourUserPM.sendMessage("Successfully created the meeting!").queue();
+                } else {
+                    ourUserPM.sendMessage("Someone arranged a meeting with you.").queue();
+                }
+
+                ourUserPM.sendMessage(embed.build()).queue();
 
                 /**
                  * Creating the Google Calender link to the event.
@@ -252,18 +260,16 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            startDateISO = isoFormat.format(earliestMeetingTimes[0]);
-
-            meetingManager.getBotMessageHolder().get(args[1]).setStartDateISO(startDateISO);
+            String newStartDate = isoFormat.format(earliestMeetingTimes[0]);
 
             commandAnswer = "!_meeting "
                     + args[1] + " "
                     + ourUserTag + " "
-                    + startDateISO;
+                    + newStartDate;
 
             channel.sendMessage(commandAnswer).queue();
 
-            if (commandAnswer.matches(savedMessage + ".*" + startDateISO)) {
+            if (msg.getContentRaw().matches("!_meeting " + args[1] + ".*" + newStartDate)) {
 
                 if ((returnedMeetingID = meetingManager.insert(hostID, participantID, earliestMeetingTimes[0], earliestMeetingTimes[1], "N/a")) == 0) {
 
@@ -273,7 +279,13 @@ public class BotMeetingCommand implements CommandInterface {
 
                 EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, hostTag, participantTag, format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), message);
 
-                ourUserPM.sendMessage("Successfully created the meeting!\n" + embed.build()).queue();
+                if (firstStep) {
+                    ourUserPM.sendMessage("Successfully created the meeting!").queue();
+                } else {
+                    ourUserPM.sendMessage("Someone arranged a meeting with you.").queue();
+                }
+
+                ourUserPM.sendMessage(embed.build()).queue();
 
                 /**
                  * Creating the Google Calender link to the event.
@@ -290,7 +302,8 @@ public class BotMeetingCommand implements CommandInterface {
                     ourUserPM.sendMessage("Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
                 }
             }
-            meetingManager.getBotMessageHolder().get(args[1]).setMessage(commandAnswer);
+            meetingManager.getBotMessageHolder().get(args[1]).setMessage("!_meeting " + args[1]);
+            meetingManager.getBotMessageHolder().get(args[1]).setStartDateISO(newStartDate);
         }
     }
 }
