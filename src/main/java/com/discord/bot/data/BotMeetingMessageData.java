@@ -18,7 +18,9 @@ public class BotMeetingMessageData {
 
     private String participantID;
 
-    private String foreignUserName;
+    private String foreignUserTag;
+
+    private String startDateISO;
 
     private int duration;
 
@@ -28,13 +30,14 @@ public class BotMeetingMessageData {
 
     private boolean firstStep;
 
-    public BotMeetingMessageData(String message, String hostID, String participantID, String foreignUserName, int duration, long epochEnd, String meetingMessage, boolean firstStep) {
+    public BotMeetingMessageData(String message, String hostID, String participantID, String foreignUserTag, int duration, String startDateISO, long epochEnd, String meetingMessage, boolean firstStep) {
 
         this.message = message;
         this.hostID = hostID;
         this.participantID = participantID;
-        this.foreignUserName = foreignUserName;
+        this.foreignUserTag = foreignUserTag;
         this.duration = duration;
+        this.startDateISO = startDateISO;
         this.epochPeriodEnd = epochEnd;
         this.meetingMessage = meetingMessage;
         this.firstStep = firstStep;
@@ -56,12 +59,20 @@ public class BotMeetingMessageData {
         return participantID;
     }
 
-    public final String getForeignUserName() {
-        return foreignUserName;
+    public final String getForeignUserTag() {
+        return foreignUserTag;
     }
 
     public final int getDuration() {
         return duration;
+    }
+
+    public void setStartDateISO(String startDateISO) {
+        this.startDateISO = startDateISO;
+    }
+
+    public final String getStartDateISO() {
+        return startDateISO;
     }
 
     public final long getEpochPeriodEnd() {

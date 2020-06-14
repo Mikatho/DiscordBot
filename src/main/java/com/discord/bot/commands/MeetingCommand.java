@@ -255,15 +255,17 @@ public class MeetingCommand implements CommandInterface {
 
                     String uniqueID = Long.toString(System.currentTimeMillis());
 
+                    String dateStartISO = isoFormat.format(dateStart);
+
                     String answerCommand = "!_meeting "
                             + uniqueID + " "
                             + user.getAsMention() + " "
-                            + isoFormat.format(dateStart) + " "
+                            + dateStartISO + " "
                             + createArgs[4] + " "
                             + createArgs[5] + " "
                             + createArgs[0];
 
-                    meetingManager.getBotMessageHolder().put(uniqueID, new BotMeetingMessageData(msg.getContentRaw(), user.getId(), participantID, participantName, duration, epochEnd, meetingMessage, true));
+                    meetingManager.getBotMessageHolder().put(uniqueID, new BotMeetingMessageData(msg.getContentRaw(), user.getId(), participantID, participantName, duration, dateStartISO, epochEnd, meetingMessage, true));
 
                     channel.sendMessage(answerCommand).queue();
 

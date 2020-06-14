@@ -55,12 +55,14 @@ public class BotMeetingCommand implements CommandInterface {
 
         String commandAnswer;
 
-        String foreignUserName;
+        String foreignUserTag;
         String ourUserID = null;
         String ourUserTag = null;
 
         String starttime;
         String endtime;
+
+        String startDateISO;
 
         int duration;
 
@@ -100,13 +102,13 @@ public class BotMeetingCommand implements CommandInterface {
 
             String foreignUserID = args[2].substring(2, 20);
 
-            foreignUserName = msg.getContentDisplay().split(" ")[2].substring(1);
+            foreignUserTag = msg.getContentDisplay().split(" ")[2];
 
             duration = Integer.parseInt(args[5]) * 60 * 1000;
 
             starttime = args[3];
 
-            endtime = args[3].substring(0, 11) + args[4] + ":00";
+            endtime = starttime.substring(0, 11) + args[4] + ":00";
 
             noTime = "!_meeting " + args[1] + " " + ourUserTag + " noTime";
 
@@ -136,22 +138,22 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
+            startDateISO = isoFormat.format(earliestMeetingTimes[0]);
+
             commandAnswer = "!_meeting "
                     + args[1] + " "
                     + ourUserTag + " "
-                    + isoFormat.format(earliestMeetingTimes[0]);
+                    + startDateISO;
 
-            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(commandAnswer, foreignUserID, ourUserID, foreignUserName, duration, epochPeriodEnd, "N/a", false));
+            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData("!_meeting " + args[1], foreignUserID, ourUserID, foreignUserTag, duration, startDateISO, epochPeriodEnd, "N/a", false));
 
             //Gibt Bestätigung mit Daten an den Bot zurück
             channel.sendMessage(commandAnswer).queue();
         } else {
 
-            String fullMessage = meetingManager.getBotMessageHolder().get(args[1]).getMessage();
+            String savedMessage = meetingManager.getBotMessageHolder().get(args[1]).getMessage();
 
-            boolean firstStep = meetingManager.getBotMessageHolder().get(args[1]).isFirstStep();
-
-            if ((fullMessage.length() >= 8) && firstStep) {
+            if ((savedMessage.length() >= 8)) {
 
                 synchronized (new MeetingCommand()) {
                     MeetingCommand.setFlag(true);
@@ -164,8 +166,7 @@ public class BotMeetingCommand implements CommandInterface {
             String hostTag = "<@!" + hostID + ">";
             String participantTag = "<@!" + participantID + ">";
 
-            if (firstStep) {
-
+            if (meetingManager.getBotMessageHolder().get(args[1]).isFirstStep()) {
                 ourUserID = hostID;
             } else {
                 ourUserID = participantID;
@@ -193,9 +194,11 @@ public class BotMeetingCommand implements CommandInterface {
 
             duration = meetingManager.getBotMessageHolder().get(args[1]).getDuration();
 
+            startDateISO = meetingManager.getBotMessageHolder().get(args[1]).getStartDateISO();
+
             epochPeriodEnd = meetingManager.getBotMessageHolder().get(args[1]).getEpochPeriodEnd();
 
-            starttime = args[2];
+            starttime = args[3];
 
             //Versucht Startzeit in Epoch zu parsen
             try {
@@ -206,7 +209,7 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            if (msg.getContentRaw().equals(fullMessage)) {
+            if (msg.getContentRaw().matches(savedMessage + ".*" + startDateISO)) {
 
                 if ((returnedMeetingID = meetingManager.insert(hostID, participantID, epochStart, epochStart + duration, "N/a")) == 0) {
 
@@ -216,15 +219,13 @@ public class BotMeetingCommand implements CommandInterface {
 
                 EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, hostTag, participantTag, format.format(epochStart), format.format(epochStart + duration), message);
 
-                ourUserPM.sendMessage("Successfully created the meeting!").queue();
-
-                ourUserPM.sendMessage(embed.build()).queue();
+                ourUserPM.sendMessage("Successfully created the meeting!\n" + embed.build()).queue();
 
                 /**
                  * Creating the Google Calender link to the event.
                  */
-                foreignUserName = meetingManager.getBotMessageHolder().get(args[1]).getForeignUserName();
-                String hostEventLink = meetingManager.googleCalendarEvent(ourUserID, "Meeting with " + foreignUserName, "N/a", message, epochStart, epochStart + duration);
+                foreignUserTag = meetingManager.getBotMessageHolder().get(args[1]).getForeignUserTag();
+                String hostEventLink = meetingManager.googleCalendarEvent(ourUserID, "Meeting with " + foreignUserTag.substring(1), "N/a", message, epochStart, epochStart + duration);
 
                 /**
                  * Informs the user if the creation of the link to the event was a sucess or a failure.
@@ -252,16 +253,18 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            meetingManager.getBotMessageHolder().get(args[1]).setMessage(msg.getContentRaw());
+            startDateISO = isoFormat.format(earliestMeetingTimes[0]);
+
+            meetingManager.getBotMessageHolder().get(args[1]).setStartDateISO(startDateISO);
 
             commandAnswer = "!_meeting "
                     + args[1] + " "
                     + ourUserTag + " "
-                    + isoFormat.format(earliestMeetingTimes[0]);
+                    + startDateISO;
 
             channel.sendMessage(commandAnswer).queue();
 
-            if (commandAnswer.equals(msg.getContentRaw())) {
+            if (commandAnswer.matches(savedMessage + ".*" + startDateISO)) {
 
                 if ((returnedMeetingID = meetingManager.insert(hostID, participantID, earliestMeetingTimes[0], earliestMeetingTimes[1], "N/a")) == 0) {
 
@@ -271,15 +274,13 @@ public class BotMeetingCommand implements CommandInterface {
 
                 EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, hostTag, participantTag, format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), message);
 
-                ourUserPM.sendMessage("Successfully created the meeting!").queue();
-
-                ourUserPM.sendMessage(embed.build()).queue();
+                ourUserPM.sendMessage("Successfully created the meeting!\n" + embed.build()).queue();
 
                 /**
                  * Creating the Google Calender link to the event.
                  */
-                foreignUserName = meetingManager.getBotMessageHolder().get(args[1]).getForeignUserName();
-                String hostEventLink = meetingManager.googleCalendarEvent(ourUserID, "Meeting with " + foreignUserName, "N/a", message, earliestMeetingTimes[0], earliestMeetingTimes[1]);
+                foreignUserTag = meetingManager.getBotMessageHolder().get(args[1]).getForeignUserTag();
+                String hostEventLink = meetingManager.googleCalendarEvent(ourUserID, "Meeting with " + foreignUserTag.substring(1), "N/a", message, earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
                 /**
                  * Informs the user if the creation of the link to the event was a sucess or a failure.
