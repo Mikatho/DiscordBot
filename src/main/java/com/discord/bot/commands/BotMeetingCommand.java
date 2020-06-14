@@ -47,7 +47,7 @@ public class BotMeetingCommand implements CommandInterface {
 
         Guild guild = BotMain.getJda().getGuildById(694185735628128338L);
 
-        String[] args = msg.getContentRaw().split(" ");
+        String[] args = msg.getContentRaw().split(" ", 7);
 
         int returnedMeetingID;
 
@@ -56,8 +56,8 @@ public class BotMeetingCommand implements CommandInterface {
         String commandAnswer;
 
         String foreignUserName;
-        String ourUserID;
-        String ourUserTag;
+        String ourUserID = null;
+        String ourUserTag = null;
 
         String starttime;
         String endtime;
@@ -77,13 +77,19 @@ public class BotMeetingCommand implements CommandInterface {
         }
 
         //Wenn es die erste Nachricht vom anderen Bot ist
-        if (args.length >= 7) {
+        if (args.length == 7) {
 
-            ourUserTag = args[6];
+            String[] userTags = args[6].split(" ");
 
-            ourUserID = ourUserTag.substring(3, 21);
+            for (String userTag : userTags) {
+                if (meetingManager.userIsRegistered(userTag.substring(3, 21))) {
+                    ourUserTag = userTag;
+                    ourUserID = ourUserTag.substring(3, 21);
+                    break;
+                }
+            }
 
-            if (!meetingManager.userIsRegistered(ourUserID)) {
+            if (ourUserTag == null) {
                 return;
             }
 
