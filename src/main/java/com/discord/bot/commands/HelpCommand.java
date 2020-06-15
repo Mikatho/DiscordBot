@@ -50,5 +50,6 @@ public class HelpCommand implements CommandInterface {
                 + userPatterns[3] + "\n" + userPatterns[4] + "```"
                 + "\n*Log Commands:*" + "```" + logPatterns[0] + "\n" + logPatterns[1] + "```"
         ).queue();
+        msg.addReaction("U+1F4AC").queue();
     }
 }

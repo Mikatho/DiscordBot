@@ -14,7 +14,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
-import java.util.HashMap;
 
 
 /**
@@ -111,9 +110,7 @@ public class BotMeetingCommand implements CommandInterface {
                 return;
             }
 
-            /**
-             * If our user has no free time during the period
-             */
+            // If our user has no free time during the period
             try {
                 earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochPeriodEnd, duration);
                 if (earliestMeetingTimes[0] == 0) {
@@ -183,6 +180,7 @@ public class BotMeetingCommand implements CommandInterface {
             // If user of other bot has no free time
             if (msg.getContentRaw().equals(COMMAND + args[1] + ".* noTime")) {
                 ourUserPM.sendMessage("I could not arrange a meeting with the other person.").queue();
+                msg.addReaction("U+1F625").queue();
                 return;
             }
 
@@ -206,6 +204,8 @@ public class BotMeetingCommand implements CommandInterface {
             if (msg.getContentRaw().matches(savedMessage + ".*" + startDateISO)) {
 
                 meetingArrangement(data, epochStart, ourUserPM, format);
+
+                msg.addReaction("U+2714").queue();
 
                 // Removes meeting data from HashMap
                 meetingManager.getBotMessageHolder().remove(args[1]);
@@ -240,6 +240,8 @@ public class BotMeetingCommand implements CommandInterface {
             if (msg.getContentRaw().matches("!_meeting " + args[1] + ".*" + newStartDate)) {
 
                 meetingArrangement(data, earliestMeetingTimes[0], ourUserPM, format);
+
+                msg.addReaction("U+2714").queue();
 
                 // Removes meeting data from HashMap
                 meetingManager.getBotMessageHolder().remove(args[1]);

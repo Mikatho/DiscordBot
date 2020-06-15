@@ -43,6 +43,13 @@ public class RegisterCommand implements CommandInterface {
 
         UserManagement userManager = UserManagement.getINSTANCE();
 
+        // Checks if the author is a registered user and exists in the database.
+        if (userManager.userIsRegistered(msg.getAuthor().getId())) {
+            channel.sendMessage("You are already registered!").queue();
+            msg.addReaction("U+2753").queue();
+            return;
+        }
+
         // Checks if the user who tried to register is registered.
         if (!userManager.register(user.getId())) {
             channel.sendMessage(user.getAsMention() + " could not be added to the Database!").queue();
@@ -55,9 +62,9 @@ public class RegisterCommand implements CommandInterface {
          * he is able to use the bot commands.
          */
         channel.sendMessage("Welcome kindly sir.\n"
-                        + "Your registration was successful.\n"
                         + "Use `!help` to receive a list of all available commands.\n"
                         + "Creating your Google-Calendar...\n").queue();
+        msg.addReaction("U+1F44A").queue();
 
         // Creating the Google Calendars ID.
         String calendarID = userManager.googleCalendarID(user.getName());

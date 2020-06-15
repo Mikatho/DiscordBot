@@ -1,6 +1,7 @@
 package com.discord.bot.commands;
 
 import com.discord.bot.LoggingManagement;
+import com.discord.bot.UserManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -41,10 +42,18 @@ public class LogCommand implements CommandInterface {
                 "!log show",
                 "!log save"};
 
+        // Checks if the author is a registered user and exists in the database.
+        if (!UserManagement.getINSTANCE().userIsRegistered(msg.getAuthor().getId())) {
+            msg.getAuthor().openPrivateChannel().complete().sendMessage("Please use `!register` first to execute this command.").queue();
+            msg.addReaction("U+274C").queue();
+            return;
+        }
+
         // Check if the command is typed correctly.
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage("Use one of the following patterns:\n"
                     + "```" + patterns[0] + "\n" + patterns[1] + "```").queue();
+            msg.addReaction("U+1F4AF").queue();
             return;
         }
 
@@ -56,6 +65,7 @@ public class LogCommand implements CommandInterface {
             // If the second argument is [show].
             case "show":
                 channel.sendMessage(LoggingManagement.getINSTANCE().logToConsole()).queue();
+                msg.addReaction("U+1F9FE").queue();
                 break;
 
             // If the second argument is [save].
@@ -67,11 +77,13 @@ public class LogCommand implements CommandInterface {
                  */
                 LoggingManagement.getINSTANCE().saveToFile();
                 channel.sendMessage("Successfully saved the log.").queue();
+                msg.addReaction("U+1F4A9").queue();
                 break;
 
             // If the second argument is [unknown].
             default:
                 channel.sendMessage(String.format("Unknown command: `%s` does not exist.", args[1])).queue();
+                msg.addReaction("U+2753").queue();
         }
     }
 }

@@ -35,13 +35,23 @@ public class UnregisterCommand implements CommandInterface {
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
 
+        UserManagement userManager = UserManagement.getINSTANCE();
+
+        // Checks if the author is a registered user and exists in the database.
+        if (!userManager.userIsRegistered(msg.getAuthor().getId())) {
+            channel.sendMessage("You are not even registered.\nPlease use `!register` first to execute this command.").queue();
+            msg.addReaction("U+274C").queue();
+            return;
+        }
+
         // Checks if the user is erasable. If not, replies with feedback message.
-        if (!UserManagement.getINSTANCE().delete(msg.getAuthor().getId())) {
+        if (!userManager.delete(msg.getAuthor().getId())) {
             channel.sendMessage("Unfortunately we could not unregister you.").queue();
             return;
         }
 
         // If the unregister was successfull, replies with feedback message.
-        channel.sendMessage("The unregister was successfull!").queue();
+        channel.sendMessage("The unregister was successful!").queue();
+        msg.addReaction("U+1F44B").queue();
     }
 }

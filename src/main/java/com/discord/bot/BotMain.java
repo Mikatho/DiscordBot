@@ -33,7 +33,7 @@ import java.util.logging.Level;
 public class BotMain {
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(BotMain.class.getName());
 
-    private static final String BOT_TOKEN = "NzIwNzE1NjE0NjM2NzM2NTQz.XuKLVg.g5Bc89uLXA2-C9_-hbdim8Z87mo";
+    private static final String BOT_TOKEN = "Njk0MTkxMzY3NzUxOTkxMzQ3.XqiLrg.mmC1Fvf6zRWdJN2dfsRMUu7WMhs";
     private static JDA jda;
     private static JDABuilder jdaBuilder;
 
@@ -49,7 +49,7 @@ public class BotMain {
 
             jda = jdaBuilder.build();
             LOGGER.log(Level.FINE, "Bot online");
-        } catch (Exception e) {
+        } catch (LoginException e) {
             LOGGER.log(Level.FINE, e.getMessage());
         }
     }
@@ -60,21 +60,16 @@ public class BotMain {
      * @param args Array. contains all variables from command call.
      */
     public static void main(String[] args) {
-        try {
-            new BotMain();
-        } catch (LoginException e) {
-            LOGGER.log(Level.FINE, String.format("Unable to instantiate BotMain.%n%s", e));
-        }
+
+        new BotMain();
     }
 
     /**
      * The <code>BotMain()</code> method makes a declaration of the jdaBuilder and JDA.
      * It calls the method connect() in <code>DatabaseManagement</code> to build the database
      * and also holds the BotTokken. The method executes the Discord Bot.
-     *
-     * @throws LoginException Unable to get the instance of database.
      */
-    public BotMain() throws LoginException {
+    public BotMain() {
 
         try {
             DatabaseManagement.getINSTANCE().connect();
