@@ -1,7 +1,6 @@
 package com.discord.bot.data;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,13 +37,13 @@ public class MeetingDataTest {
         testMeeting.setStarttime(456);
         testMeeting.setEndtime(789);
         testMeeting.setMeetingID(1);
-        testMeeting.setUserID("22");
+        testMeeting.setHostID("22");
 
         Assert.assertEquals(testMeeting.getParticipantID(),"test");
         Assert.assertEquals(testMeeting.getStarttime(),456);
         Assert.assertEquals(testMeeting.getEndtime(),789);
         Assert.assertEquals(testMeeting.getMeetingID(),1);
-        Assert.assertEquals(testMeeting.getUserID(),"22");
+        Assert.assertEquals(testMeeting.getHostID(),"22");
 
         /* Overloaded constructor */
 

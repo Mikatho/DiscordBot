@@ -105,13 +105,13 @@ public class UserManagement {
      * @param userID unique Discord ID of search user.
      * @return data    contains instance of user data.
      */
-    public Object[] search(String userID) {
+    public UserData search(String userID) {
 
         try {
-            return dbManager.returnDataUser(userID);
+            return dbManager.returnUser(userID);
         } catch (SQLException e) {
             LOGGER.fatal(String.format("Unable to return userData[user_data].%n%s", e));
-            return new Object[0];
+            return null;
         }
     }
 

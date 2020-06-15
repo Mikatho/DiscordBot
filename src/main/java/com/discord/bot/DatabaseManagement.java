@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 
@@ -33,6 +34,7 @@ public class DatabaseManagement {
     private Connection conn;
     private Statement stmt;
     private ResultSet rs;
+    private PreparedStatement prepStmt;
 
     /**
      * This method return an instance of the DatabaseManagement object.
@@ -77,7 +79,7 @@ public class DatabaseManagement {
         conn = DriverManager.getConnection(url);
 
         stmt = conn.createStatement();
-        createTable("user_data", "userID text PRIMARY KEY", "address text", "interests text", "competencies text", "gCalendarLink text", "activities INTEGER");
+        createTable("user_data", "userID text PRIMARY KEY", "address text", "interests text", "competencies text", "gCalendarLink text");
         createTable("meeting_data", "meetingID integer PRIMARY KEY AUTOINCREMENT", "hostID text NOT NULL", "participantID text NOT NULL", "starttime INTEGER NOT NULL", "endtime INTEGER NOT NULL", "message text");
         createTable("meetings_of_user", "meetingID integer NOT NULL", "userID text NOT NULL", "FOREIGN KEY (meetingID) REFERENCES meeting_data (meetingID)", "FOREIGN KEY (userID) REFERENCES user_data (userID)");
     }
@@ -88,6 +90,10 @@ public class DatabaseManagement {
      @throws SQLException when there is a problem with the database connection
      */
     public void disconnect() throws SQLException {
+
+        if (prepStmt != null) {
+            prepStmt.close();
+        }
 
         if (rs != null) {
             rs.close();
@@ -129,7 +135,7 @@ public class DatabaseManagement {
         // SQL: insert user in database.
         String sql = "INSERT INTO user_data (userID) VALUES (?)";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        prepStmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         prepStmt.setString(1, user.getUserID());
         prepStmt.executeUpdate();
     }
@@ -143,13 +149,11 @@ public class DatabaseManagement {
      */
     public int insertMeeting(MeetingData meeting) throws SQLException {
 
-        /**
-         * SQL: insert meeting in database.
-         */
+        // SQL: insert meeting in database.
         String sql = "INSERT INTO meeting_data (hostID, participantID, startTime, endTime, message) VALUES (?, ?, ?, ?, ?)";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
-        prepStmt.setString(1, meeting.getUserID());
+        prepStmt = conn.prepareStatement(sql);
+        prepStmt.setString(1, meeting.getHostID());
         prepStmt.setString(2, meeting.getParticipantID());
         prepStmt.setLong(3, meeting.getStarttime());
         prepStmt.setLong(4, meeting.getEndtime());
@@ -162,7 +166,7 @@ public class DatabaseManagement {
         if (rs.next()) {
             int meetingID = rs.getInt(1);
 
-            insertForeignKey(meetingID, meeting.getUserID(), meeting.getParticipantID());
+            insertForeignKey(meetingID, meeting.getHostID(), meeting.getParticipantID());
             return meetingID;
         }
         return 0;
@@ -193,8 +197,6 @@ public class DatabaseManagement {
 
         // Checks if a meeting is running during the period
         String runningMeeting = "SELECT meetingID FROM meeting_data WHERE (? IN (hostID, participantID)) AND (starttime < ? AND endtime > ?)";
-
-        PreparedStatement prepStmt;
 
         prepStmt = conn.prepareStatement(meetings);
         prepStmt.setString(1, userID);
@@ -323,7 +325,7 @@ public class DatabaseManagement {
             sql = "INSERT INTO meetings_of_user (meetingID, userID) VALUES (?, ?), (?, ?)";
         }
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setInt(1, columnID);
         prepStmt.setString(2, hostID);
 
@@ -342,12 +344,10 @@ public class DatabaseManagement {
      */
     private void deleteForeignKey(String userID) throws SQLException {
 
-        /**
-         * SQL: delete ForeignKey in database.
-         */
+        // SQL: delete ForeignKey in database.
         String sql = "DELETE FROM meetings_of_user WHERE userID = ?";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setString(1, userID);
         prepStmt.executeUpdate();
     }
@@ -361,7 +361,7 @@ public class DatabaseManagement {
 
         String sql = "DELETE FROM meetings_of_user WHERE meetingID = ?";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setInt(1, meetingID);
         prepStmt.executeUpdate();
     }
@@ -381,7 +381,7 @@ public class DatabaseManagement {
         // SQL: delete user in database.
         String sql = "DELETE FROM user_data WHERE userID = ?";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setString(1, userID);
         prepStmt.executeUpdate();
         return true;
@@ -401,7 +401,7 @@ public class DatabaseManagement {
 
         String sql = "DELETE FROM meeting_data WHERE meetingID = ?";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setInt(1, meetingID);
         prepStmt.executeUpdate();
         return true;
@@ -417,12 +417,10 @@ public class DatabaseManagement {
      */
     public void updateUser(String userID, String column, String newValue) throws SQLException {
 
-        /**
-         * SQL: Update of user attributes.
-         */
+        // SQL: Update of user attributes.
         String sql = "UPDATE user_data SET " + column + " = ? WHERE userID = ?";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setString(1, newValue);
         prepStmt.setString(2, userID);
         prepStmt.executeUpdate();
@@ -438,12 +436,8 @@ public class DatabaseManagement {
      */
     public void updateMeeting(int meetingID, String column, Object newValue, String hostID) throws SQLException {
 
-        /**
-         * SQL: Update of meeting attributes.
-         */
+        // SQL: Update of meeting attributes.
         String sqlUpdate = "UPDATE meeting_data SET " + column + " = ? WHERE meetingID = ?";
-
-        PreparedStatement prepStmt;
 
         prepStmt = conn.prepareStatement(sqlUpdate);
         prepStmt.setObject(1, newValue);
@@ -471,23 +465,24 @@ public class DatabaseManagement {
      * @return data    contains user data instance.
      * @throws SQLException Unable to access database.
      */
-    public Object[] returnDataUser(String userID) throws SQLException {
+    public UserData returnUser(String userID) throws SQLException {
 
         // SQL: get userData.
         String sql = "SELECT * FROM user_data WHERE userID = ?";
 
-        Object[] data = new Object[4];
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        UserData user = new UserData(userID);
+
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setString(1, userID);
         rs = prepStmt.executeQuery();
 
-        data[0] = rs.getString("address");
-        data[1] = rs.getString("interests");
-        data[2] = rs.getString("competencies");
-        data[3] = rs.getString("gCalendarLink");
+        user.setAddress(rs.getString("address"));
+        user.setInterests(rs.getString("interests"));
+        user.setCompetencies(rs.getString("competencies"));
+        user.setgCalendarLink(rs.getString("gCalendarLink"));
 
-        return data;
+        return user;
     }
 
     /**
@@ -498,24 +493,86 @@ public class DatabaseManagement {
      * @return data    Object. Contains all meetingData.
      * @throws SQLException Unable to access database.
      */
-    public Object[] returnDataMeeting(int meetingID) throws SQLException {
+    public MeetingData returnMeeting(int meetingID) throws SQLException {
 
         // SQL: get meetingData.
         String sql = "SELECT * FROM meeting_data WHERE meetingID = ?";
 
-        Object[] data = new Object[5];
-
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setInt(1, meetingID);
         rs = prepStmt.executeQuery();
 
-        data[0] = rs.getString("hostID");
-        data[1] = rs.getString("participantID");
-        data[2] = rs.getLong("starttime");
-        data[3] = rs.getLong("endtime");
-        data[4] = rs.getString("message");
+        MeetingData meeting = new MeetingData(rs.getString("hostID"), rs.getString("participantID"), rs.getLong("starttime"), rs.getLong("endtime"), rs.getString("message"));
 
-        return data;
+        meeting.setMeetingID(meetingID);
+
+        return meeting;
+    }
+
+    /**
+     * Gets all meetings of the user
+     *
+     * @param userID user to search meetings for
+     * @return List with all meetings
+     * @throws SQLException Unable to access database.
+     */
+    public List<MeetingData> returnMultipleMeetings(String userID) throws SQLException {
+
+        ArrayList<MeetingData> meetingList = new ArrayList<>();
+
+        long currentEpoch = System.currentTimeMillis();
+
+        // SQL: get all meetings of user
+        String sql = "SELECT * FROM meeting_data WHERE (? IN (hostID, participantID)) AND starttime > ? ORDER BY starttime ASC";
+
+        prepStmt = conn.prepareStatement(sql);
+        prepStmt.setString(1, userID);
+        prepStmt.setLong(2, currentEpoch);
+        rs = prepStmt.executeQuery();
+
+        //Fetches all meeting datas, puts them into MeetingData-Objects and then into a list
+        while (rs.next()) {
+            MeetingData tempData = new MeetingData(rs.getString("hostID"), rs.getString("participantID"), rs.getLong("starttime"), rs.getLong("endtime"), rs.getString("message"));
+            tempData.setMeetingID(rs.getInt("meetingID"));
+
+            meetingList.add(tempData);
+        }
+        return meetingList;
+    }
+
+    /**
+     * Gets all meetings of the user until a certain time
+     * Overloaded with certain time
+     *
+     * @param userID user to search meetings for
+     * @return List with all meetings
+     * @throws SQLException Unable to access database.
+     */
+    public List<MeetingData> returnMultipleMeetings(String userID, long duration) throws SQLException {
+
+        ArrayList<MeetingData> meetingList = new ArrayList<>();
+
+        long currentEpoch = System.currentTimeMillis();
+
+        long durationEpoch = currentEpoch + duration;
+
+        // SQL: get all meetings of user
+        String sql = "SELECT * FROM meeting_data WHERE (? IN (hostID, participantID)) AND (? < starttime AND starttime < ?) ORDER BY starttime ASC";
+
+        prepStmt = conn.prepareStatement(sql);
+        prepStmt.setString(1, userID);
+        prepStmt.setLong(2, currentEpoch);
+        prepStmt.setLong(3, durationEpoch);
+        rs = prepStmt.executeQuery();
+
+        //Fetches all meeting datas, puts them into MeetingData-Objects and then into a list
+        while (rs.next()) {
+            MeetingData tempData = new MeetingData(rs.getString("hostID"), rs.getString("participantID"), rs.getLong("starttime"), rs.getLong("endtime"), rs.getString("message"));
+            tempData.setMeetingID(rs.getInt("meetingID"));
+
+            meetingList.add(tempData);
+        }
+        return meetingList;
     }
 
     /**
@@ -531,7 +588,7 @@ public class DatabaseManagement {
         // SQL Code:Check if there is an entry of userID in the database.
         String sql = "SELECT COUNT (*) FROM user_data WHERE userID = ?";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setString(1, userID);
         rs = prepStmt.executeQuery();
 
@@ -551,12 +608,10 @@ public class DatabaseManagement {
      */
     public boolean authorizationCheck(int meetingID, String userID) throws SQLException {
 
-        /**
-         * SQL: Check authorization of user.
-         */
+        // SQL: Check authorization of user.
         String sql = "SELECT hostID FROM meeting_data WHERE meetingID = ?";
 
-        PreparedStatement prepStmt = conn.prepareStatement(sql);
+        prepStmt = conn.prepareStatement(sql);
         prepStmt.setInt(1, meetingID);
         rs = prepStmt.executeQuery();
 

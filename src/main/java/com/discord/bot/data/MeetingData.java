@@ -51,11 +51,11 @@ public class MeetingData {
         return meetingID;
     }
 
-    public void setUserID(String userID) {
-        this.hostID = userID;
+    public void setHostID(String hostID) {
+        this.hostID = hostID;
     }
 
-    public final String getUserID() {
+    public final String getHostID() {
         return hostID;
     }
 

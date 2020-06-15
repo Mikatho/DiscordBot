@@ -49,7 +49,7 @@ public class CommandListener extends ListenerAdapter {
 
                 /*
                  * Call execute method in CommandManager.
-                 * returnedValue = 0 --> execute was successfull
+                 * returnedValue = 0 --> execute was successful
                  * returnedValue = 1 --> command doesn't exist at all
                  * returnedValue = 2 --> command was written in wrong chat type
                  */
@@ -57,8 +57,10 @@ public class CommandListener extends ListenerAdapter {
 
                 if (commandExists == 1) {
                     channel.sendMessage("Unknown Command. Use `!help` to see an overview of all available commands.").queue();
+                    event.getMessage().addReaction("U+2753").queue();
                 } else if (commandExists == 2) {
                     channel.sendMessage("This command is for private chat only.").queue();
+                    event.getMessage().addReaction("U+1F645").queue();
                 }
             }
         }).start();

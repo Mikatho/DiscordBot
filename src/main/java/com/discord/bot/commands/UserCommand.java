@@ -1,6 +1,7 @@
 package com.discord.bot.commands;
 
 import com.discord.bot.UserManagement;
+import com.discord.bot.data.UserData;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -51,7 +52,7 @@ public class UserCommand implements CommandInterface {
         //Saves the author of the message.
         User user = msg.getAuthor();
         // Contains all user User data.
-        Object[] receivedData;
+        UserData receivedData;
         // Output of the UserData.
         String data;
 
@@ -82,7 +83,7 @@ public class UserCommand implements CommandInterface {
             case "data":
 
                 // Saves the data of the received message about the author.
-                if (userManager.search(msg.getAuthor().getId()).length == 0) {
+                if (userManager.search(msg.getAuthor().getId()) == null) {
                     channel.sendMessage(user.getAsMention() + " Could not search for the user.").queue();
                     return;
                 }
@@ -96,10 +97,10 @@ public class UserCommand implements CommandInterface {
 
                 // Loads the data of the user out of his instance
                 data = "Nickname: " + msg.getAuthor().getName()
-                        + "\nAddress: " + receivedData[0]
-                        + "\nInterests: " + receivedData[1]
-                        + "\nCompetencies: " + receivedData[2]
-                        + "\nGoogle Calendar Link: " + userManager.googleCalendarLink(Objects.toString(receivedData[3]));
+                        + "\nAddress: " + receivedData.getAddress()
+                        + "\nInterests: " + receivedData.getInterests()
+                        + "\nCompetencies: " + receivedData.getCompetencies()
+                        + "\nGoogle Calendar Link: " + userManager.googleCalendarLink(Objects.toString(receivedData.getgCalendarLink()));
                 channel.sendMessage(data).queue();
                 msg.addReaction("U+1F44D").queue();
                 break;
@@ -129,7 +130,7 @@ public class UserCommand implements CommandInterface {
                     return;
                 }
 
-                if (userManager.search(msg.getAuthor().getId()).length == 0) {
+                if (userManager.search(msg.getAuthor().getId()) == null) {
                     channel.sendMessage(user.getAsMention() + " Could not search for the user.").queue();
                     return;
                 }
@@ -145,9 +146,9 @@ public class UserCommand implements CommandInterface {
                 String nickname = msg.getContentDisplay().split(" ")[2];
 
                 data = "Nickname: " + nickname
-                        + "\nAddress: " + receivedData[0]
-                        + "\nInterests: " + receivedData[1]
-                        + "\nCompetencies: " + receivedData[2];
+                        + "\nAddress: " + receivedData.getAddress()
+                        + "\nInterests: " + receivedData.getInterests()
+                        + "\nCompetencies: " + receivedData.getCompetencies();
 
                 channel.sendMessage(data).queue();
                 msg.addReaction("U+1F44D").queue();

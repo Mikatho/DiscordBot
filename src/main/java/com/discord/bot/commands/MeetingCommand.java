@@ -2,6 +2,7 @@ package com.discord.bot.commands;
 
 import com.discord.bot.MeetingManagement;
 import com.discord.bot.data.BotMeetingMessageData;
+import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -14,6 +15,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
+import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * The <code>MeetingCommand</code> Class implements the <code>CommandInterface</code>
@@ -34,15 +37,24 @@ public class MeetingCommand implements CommandInterface {
     !meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]
     !meeting delete [meetingID]
     !meeting update [meetingID] [value to change] [new value]
+    !meeting search [meetingID]
+    !meeting search [length] hours
+    !meeting search [length] days
+    !meeting search all
      */
 
     private static boolean flag = false;
 
     private static final Logger LOGGER = LogManager.getLogger(MeetingCommand.class.getName());
 
+    /*
+     * Establishes the standard of the format of the input-date.
+     */
+    SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
-     * method is executed, because the Discord input [!meeting create | !meeting delete | !meeting update]
+     * method is executed, because the Discord input [!meeting create | !meeting delete | !meeting update | !meeting search]
      * was made.
      *
      * @param channel Discord channel
@@ -55,12 +67,18 @@ public class MeetingCommand implements CommandInterface {
         String[] patterns = {
                 "!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]",
                 "!meeting delete [meetingID]",
-                "!meeting update [meetingID] [value to change] [new value]"};
+                "!meeting update [meetingID] [value to change] [new value]",
+                "!meeting search [meetingID]",
+                "!meeting search [length] hours",
+                "!meeting search [length] days",
+                "!meeting search all"};
 
         // Regex for the UserID
         String userIdRegex = "<@!\\d{18}>";
 
-        String thumbsUP = "U+1F44D";
+        String thumbsUp = "U+1F44D";
+
+        String crossedArms = "U+2753";
 
         User user = msg.getAuthor();
 
@@ -73,11 +91,13 @@ public class MeetingCommand implements CommandInterface {
 
         MeetingManagement meetingManager = MeetingManagement.getINSTANCE();
 
+        MeetingData meeting;
+
+        EmbedBuilder embed;
+
         /*
-         * Establishes the standard of the format of the input-date.
          * Makes sure that the input is an existing date.
          */
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         format.setLenient(false);
 
         // Checks if the author is a registered user and exists in the database.
@@ -93,7 +113,7 @@ public class MeetingCommand implements CommandInterface {
          */
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage(user.getAsMention() + " Use one of the following patterns:\n"
-                    + "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\nNote: Dateformat " + format.toPattern().toUpperCase() + "```").queue();
+                    + "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\n\n" + patterns[3] + "\n" + patterns[4] + "\n" + patterns[5] + "\nNote: Dateformat " + format.toPattern().toUpperCase() + "```").queue();
             msg.addReaction("U+1F4AF").queue();
             return;
         }
@@ -222,7 +242,7 @@ public class MeetingCommand implements CommandInterface {
 
                     channel.sendMessage(answerCommand).queue();
 
-                    msg.addReaction(thumbsUP).queue();
+                    msg.addReaction(thumbsUp).queue();
 
                     user.openPrivateChannel().complete().sendMessage("Trying to arrange a meeting...").queue();
 
@@ -268,7 +288,7 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, user.getAsMention(), createArgs[0], format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), meetingMessage);
+                embed = meetingManager.buildEmbed(returnedMeetingID, user.getAsMention(), createArgs[0], format.format(earliestMeetingTimes[0]), format.format(earliestMeetingTimes[1]), meetingMessage);
 
                 // If the user has assigned himself to meeting he created he wont be mentioned twice.
                 if (user.getName().equals(participantName)) {
@@ -278,7 +298,7 @@ public class MeetingCommand implements CommandInterface {
                 }
                 channel.sendMessage(embed.build()).queue();
 
-                msg.addReaction(thumbsUP).queue();
+                msg.addReaction(thumbsUp).queue();
 
                 // Creating the Google Calender link to the event for both users
                 String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
@@ -324,12 +344,13 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                if (meetingManager.search(meetingID).length == 0) {
+                meeting = meetingManager.search(meetingID);
 
+                if (meeting == null) {
                     channel.sendMessage(user.getAsMention() + " Could not search for the meeting.").queue();
                     return;
                 }
-                participantID = (String) meetingManager.search(meetingID)[1];
+                participantID = meeting.getParticipantID();
 
                 if (meetingManager.userIsRegistered(participantID)) {
 
@@ -337,13 +358,12 @@ public class MeetingCommand implements CommandInterface {
                 }
 
                 if (!meetingManager.delete(meetingID)) {
-
                     channel.sendMessage(user.getAsMention() + " Could not delete the meeting.").queue();
                     return;
                 }
 
                 channel.sendMessage(user.getAsMention() + " Successfully deleted the meeting.").queue();
-                msg.addReaction(thumbsUP).queue();
+                msg.addReaction(thumbsUp).queue();
                 break;
 
 
@@ -352,7 +372,6 @@ public class MeetingCommand implements CommandInterface {
 
                 // If the command is just [!meeting delete] without all required parameters.
                 if (args.length == 2) {
-
                     channel.sendMessage(String.format("%s Use `%s` to update a meeting!", user.getAsMention(), patterns[2])).queue();
                     return;
                 }
@@ -361,7 +380,6 @@ public class MeetingCommand implements CommandInterface {
 
                 // If not all additional parameters were entered the user gets informed.
                 if (updateArgs.length != 3) {
-
                     channel.sendMessage(String.format("%s Please add the values like this:%n`%s`", user.getAsMention(), patterns[2])).queue();
                     return;
                 }
@@ -389,34 +407,16 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                if (!updateArgs[1].matches("participant|starttime|endtime|message")) {
+                if (!updateArgs[1].matches("participant|message")) {
 
                     channel.sendMessage(String.format("%s Unknown value to update: `%s` does not exist.", user.getAsMention(), updateArgs[1])).queue();
-                    msg.addReaction("U+2753").queue();
+                    msg.addReaction(crossedArms).queue();
                     return;
                 }
 
-                if (updateArgs[1].contains("time")) {
-
-                    try {
-                        Date time = format.parse(updateArgs[2]);
-
-                        // Epoch is getting saved in variable (not in milliseconds) for the transmission.
-                        newValue = time.getTime() / 1000;
-                    } catch (ParseException e) {
-                        LOGGER.fatal(String.format("Unable to to parse data.%n%s", e));
-                        channel.sendMessage(String.format("%s Date is not valid according to `%s` pattern.", user.getAsMention(), format.toPattern().toUpperCase())).queue();
-                        return;
-                    }
-
-                    /*
-                     * If the entry is a participant the input will be checked if it is in the correct format. If it is invalid the
-                     * user will be informed.
-                     */
-                } else if (updateArgs[1].equals("participant")) {
+                if (updateArgs[1].equals("participant")) {
 
                     if (!updateArgs[2].matches(userIdRegex)) {
-
                         channel.sendMessage(user.getAsMention() + " User is not valid. Please use ´ @UserName ´!").queue();
                         return;
                     }
@@ -427,20 +427,100 @@ public class MeetingCommand implements CommandInterface {
                 }
 
                 if (!meetingManager.update(meetingID, user.getId(), updateArgs[1], newValue)) {
-
                     channel.sendMessage(user.getAsMention() + " Could not update the Meeting.").queue();
                     return;
                 }
 
                 channel.sendMessage(user.getAsMention() + " Successfully updated the Meeting.").queue();
-                msg.addReaction(thumbsUP).queue();
+                msg.addReaction(thumbsUp).queue();
+                break;
+
+            // If second argument is [search].
+            case "search":
+
+                String[] searchArgs = args[2].split(" ");
+
+                long searchParameter;
+
+                String returnMessage;
+
+                String worriedFace = "U+1F61F";
+
+                // If user is searching for all meetings
+                if (searchArgs[0].equals("all")) {
+
+                    returnMessage = searchMultipleMeetings(meetingManager.searchAllMeetings(user.getId(), 0));
+
+                    // If no meetings were found
+                    if (returnMessage.equals("")) {
+                        channel.sendMessage(user.getAsMention() + " You do not have any meetings.").queue();
+                        msg.addReaction(worriedFace).queue();
+                        return;
+                    }
+
+                    channel.sendMessage("**These are all your meetings:**\n\n" + returnMessage).queue();
+                    msg.addReaction(thumbsUp).queue();
+                } else {
+                    //Parses either meetingID or duration of time for the search into long
+                    try {
+                        searchParameter = Long.parseLong(searchArgs[0]);
+                    } catch (NumberFormatException e) {
+                        LOGGER.fatal(String.format("Unable to parse  data.%n%s", e));
+                        channel.sendMessage(String.format("%s %s is neither a number nor a valid parameter to search for.", user.getAsMention(), searchArgs[0])).queue();
+                        return;
+                    }
+
+                    // If it has a length of 1 , it has to be the meetingID
+                    if (searchArgs.length == 1) {
+
+                        meeting = meetingManager.search((int) searchParameter);
+
+                        // If meeting does not exist
+                        if (meeting == null) {
+                            channel.sendMessage(user.getAsMention() + " This meeting does not exist.").queue();
+                            msg.addReaction(worriedFace).queue();
+                            return;
+                        }
+
+                        embed = meetingManager.buildEmbed(meeting.getMeetingID(), "<@!" + meeting.getHostID() + ">", "<@!" + meeting.getParticipantID() + ">", format.format(meeting.getStarttime()), format.format(meeting.getEndtime()), meeting.getMessage());
+
+                        channel.sendMessage(embed.build()).queue();
+                        msg.addReaction(thumbsUp).queue();
+                    } else if (searchArgs[1].toLowerCase().matches("hours|days")) {
+
+                        // Casts hours into milliseconds
+                        searchParameter = searchParameter * 60 * 60 * 1000;
+
+                        // Casts days into milliseconds
+                        if (searchArgs[1].equalsIgnoreCase("days")) {
+                            searchParameter = searchParameter * 24;
+                        }
+
+                        returnMessage = searchMultipleMeetings(meetingManager.searchAllMeetings(user.getId(), searchParameter));
+
+                        // If user does not have any meetings during this period
+                        if (returnMessage.equals("")) {
+                            channel.sendMessage(user.getAsMention() + " You do not have any meetings during this period.").queue();
+                            msg.addReaction(worriedFace).queue();
+                            return;
+                        }
+
+                        channel.sendMessage(String.format("**These are all your meetings in the next %s %s:**%n%n%s", searchArgs[0], searchArgs[1], returnMessage)).queue();
+                        msg.addReaction(thumbsUp).queue();
+                    } else {
+
+                        // If the parameters of the message were wrong
+                        channel.sendMessage(String.format("%s Unknown value to update: `%s` does not exist.", user.getAsMention(), searchArgs[1])).queue();
+                        msg.addReaction(crossedArms).queue();
+                    }
+                }
                 break;
 
             // If second argument is unknown.
             default:
 
                 channel.sendMessage(String.format("%s Unknown command: `%s` does not exist.", user.getAsMention(), args[1])).queue();
-                msg.addReaction("U+2753").queue();
+                msg.addReaction(crossedArms).queue();
                 break;
         }
     }
@@ -448,5 +528,31 @@ public class MeetingCommand implements CommandInterface {
     public static void setFlag(boolean flag) {
 
         MeetingCommand.flag = flag;
+    }
+
+    // Splits list of meetings into seperate meetings and puts them into string to send to user
+    public String searchMultipleMeetings(List<MeetingData> meetings) {
+
+        StringJoiner joiner = new StringJoiner("\n");
+
+        // Iterates through all meetings
+        for (MeetingData data : meetings) {
+            String message = data.getMessage();
+
+            if (message == null) {
+                message = "N/a";
+            }
+
+            String start = format.format(data.getStarttime());
+            String end = format.format(data.getEndtime());
+
+            // If the date of start and end is the same it cuts the date of the endtime
+            if (start.split(" ")[0].equals(end.split(" ")[0])) {
+                end = end.split(" ")[1];
+            }
+
+            joiner.add(String.format("*MeetingID:*  %s%n```Message: %s%n%s - %s```", data.getMeetingID(), message, start, end));
+        }
+        return joiner.toString();
     }
 }

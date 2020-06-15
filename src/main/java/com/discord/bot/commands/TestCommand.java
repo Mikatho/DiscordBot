@@ -1,10 +1,11 @@
 package com.discord.bot.commands;
 
-import com.discord.bot.BotMain;
+import com.discord.bot.DatabaseManagement;
+import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.entities.*;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * The <code>TestCommand</code> Class implements the <code>CommandInterface</code>
@@ -35,17 +36,6 @@ public class TestCommand implements CommandInterface {
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
-
-        /**
-         * Gets all registered members and safes them in [guild].
-         */
-        Guild guild = BotMain.getJda().getGuildById(123456789);
-
-        /**
-         * Prints out all registered members.
-         */
-        assert guild != null;
-        LOGGER.log(Level.FINE, guild.getMembers().toString());
 
     }
 }

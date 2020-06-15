@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -125,6 +127,12 @@ public class MeetingManagement {
         }
     }
 
+    /**
+     * Checks if a user is registered to database
+     *
+     * @param userID user to check if registered
+     * @return if the user is registered or not
+     */
     public boolean userIsRegistered(String userID) {
 
         try {
@@ -135,6 +143,13 @@ public class MeetingManagement {
         }
     }
 
+    /**
+     * Checks if a user is authorized to update/delete the meeting
+     *
+     * @param meetingID meeting to be checked
+     * @param userID user to be checked
+     * @return if user is authorized
+     */
     public boolean authorizationCheck(int meetingID, String userID) {
 
         try {
@@ -150,10 +165,21 @@ public class MeetingManagement {
         return dbManager.findEarliestPossibleMeetingtimes(userID, starttime, endtime, duration);
     }
 
+    /**
+     * Creates google calendar event
+     *
+     * @param userID userID of event host
+     * @param eventName name of event
+     * @param eventLocation location of even
+     * @param eventDescription description of event
+     * @param starttime starttime of event
+     * @param endtime endtime of event
+     * @return the event
+     */
     public String googleCalendarEvent(String userID, String eventName, String eventLocation, String eventDescription, long starttime, long endtime) {
 
         try {
-            String calendarID = (String) dbManager.returnDataUser(userID)[3];
+            String calendarID = dbManager.returnUser(userID).getgCalendarLink();
             return calendarManager.createNewEvent(calendarID, eventName, eventLocation, eventDescription, starttime, endtime);
         } catch (SQLException | IOException e) {
             LOGGER.fatal(String.format("Unable to return a meeting[meeting_data].%n%s", e));
@@ -161,21 +187,55 @@ public class MeetingManagement {
         }
     }
 
-    public Object[] search(int meetingID) {
+    /**
+     * Search a single meeting
+     *
+     * @param meetingID meeting to be searched
+     * @return the meeting as MeetingData
+     */
+    public MeetingData search(int meetingID) {
 
         try {
-            return dbManager.returnDataMeeting(meetingID);
+            return dbManager.returnMeeting(meetingID);
         } catch (SQLException e) {
-            LOGGER.fatal(String.format("Unable to search a user[user_data].%n%s", e));
-            return new Object[0];
+            LOGGER.fatal(String.format("Unable to search a meeting[meeting_data].%n%s", e));
+            return null;
         }
     }
 
+    /**
+     * Search all meetings of a user
+     *
+     * @param userID user to be searched in
+     * @param duration describes if meetings should only be searched until a certain date
+     * @return list of all meetings
+     */
+    public List<MeetingData> searchAllMeetings(String userID, long duration) {
+
+        try {
+            if (duration != 0) {
+                return dbManager.returnMultipleMeetings(userID, duration);
+            } else {
+                return dbManager.returnMultipleMeetings(userID);
+            }
+        } catch (SQLException e) {
+            LOGGER.fatal(String.format("Unable to search meetings[meeting_data].%n%s", e));
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Deletes google calendar event
+     *
+     * @param userID user of the google calendar to delete the meeting
+     * @param meetingID meeting to be deleted
+     * @return if delete was successful or not
+     */
     public boolean deleteGoogleCalendarEvent(String userID, int meetingID) {
 
         try {
-            String calendarID = (String) dbManager.returnDataUser(userID)[3];
-            long epochStart = (long) dbManager.returnDataMeeting(meetingID)[2];
+            String calendarID = dbManager.returnUser(userID).getgCalendarLink();
+            long epochStart = dbManager.returnMeeting(meetingID).getStarttime();
             return calendarManager.deleteEvent(calendarID, epochStart);
         } catch (IOException | SQLException e) {
             LOGGER.fatal(String.format("Unable to delete a meeting[meeting_data].%n%s", e));
@@ -183,6 +243,17 @@ public class MeetingManagement {
         }
     }
 
+    /**
+     * Build an embed of a meeting to send to the user
+     *
+     * @param meetingID ID of the meeting
+     * @param host host of the meeting
+     * @param participant participant of the meeting
+     * @param starttime starttime of the meeting
+     * @param endtime endtime of the meeting
+     * @param message additional message of the meeting
+     * @return returns the Embed
+     */
     public EmbedBuilder buildEmbed(int meetingID, String host, String participant, String starttime, String endtime, String message) {
 
         return new EmbedBuilder()
