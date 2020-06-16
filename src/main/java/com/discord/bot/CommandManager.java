@@ -54,6 +54,9 @@ public class CommandManager {
         commands.put("log", new LogCommand());
         commands.put("meeting", new MeetingCommand());
         commands.put("user", new UserCommand());
+        // Calendar Commands
+        commands.put("calendar", new CalendarCommand());
+        commands.put("cal", new CalendarCommand());
 
         // Bot-Bot-Commands
         commands.put("_meeting", new BotMeetingCommand());

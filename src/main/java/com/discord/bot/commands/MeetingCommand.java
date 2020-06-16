@@ -38,9 +38,6 @@ public class MeetingCommand implements CommandInterface {
     !meeting delete [meetingID]
     !meeting update [meetingID] [value to change] [new value]
     !meeting search [meetingID]
-    !meeting search [length] hours
-    !meeting search [length] days
-    !meeting search all
      */
 
     private static boolean flag = false;
@@ -77,7 +74,6 @@ public class MeetingCommand implements CommandInterface {
         String userIdRegex = "<@!\\d{16,20}>";
 
         String thumbsUp = "U+1F44D";
-
         String crossedArms = "U+2753";
 
         User user = msg.getAuthor();
@@ -451,89 +447,30 @@ public class MeetingCommand implements CommandInterface {
 
                 String[] searchArgs = args[2].split(" ");
 
-                List<MeetingData> meetingList;
-
                 long searchParameter;
 
-                String worriedFace = "U+1F61F";
-
-                // If user is searching for all meetings
-                if (searchArgs[0].equals("all")) {
-
-                    meetingList = meetingManager.searchAllMeetings(user.getId(), 0);
-
-                    // If no meetings were found
-                    if (meetingList.isEmpty()) {
-                        channel.sendMessage(user.getAsMention() + " You do not have any meetings.").queue();
-                        msg.addReaction(worriedFace).queue();
-                        return;
-                    }
-
-                    channel.sendMessage("**These are all your meetings:**\n\n").queue();
-
-                    for (String message : searchMultipleMeetings(meetingList)) {
-                        channel.sendMessage(message).queue();
-                    }
-                    msg.addReaction(thumbsUp).queue();
-                } else {
-                    //Parses either meetingID or duration of time for the search into long
-                    try {
-                        searchParameter = Long.parseLong(searchArgs[0]);
-                    } catch (NumberFormatException e) {
-                        LOGGER.fatal(String.format("Unable to parse  data.%n%s", e));
-                        channel.sendMessage(String.format("%s %s is neither a number nor a valid parameter to search for.", user.getAsMention(), searchArgs[0])).queue();
-                        return;
-                    }
-
-                    // If it has a length of 1 , it has to be the meetingID
-                    if (searchArgs.length == 1) {
-
-                        meeting = meetingManager.search((int) searchParameter);
-
-                        // If meeting does not exist
-                        if (meeting == null) {
-                            channel.sendMessage(user.getAsMention() + " This meeting does not exist.").queue();
-                            msg.addReaction(worriedFace).queue();
-                            return;
-                        }
-
-                        embed = meetingManager.buildEmbed(meeting.getMeetingID(), "<@!" + meeting.getHostID() + ">", "<@!" + meeting.getParticipantID() + ">", format.format(meeting.getStarttime()), format.format(meeting.getEndtime()), meeting.getMessage());
-
-                        channel.sendMessage(embed.build()).queue();
-                        msg.addReaction(thumbsUp).queue();
-                    } else if (searchArgs[1].toLowerCase().matches("hours|days")) {
-
-                        // Casts hours into milliseconds
-                        searchParameter = searchParameter * 60 * 60 * 1000;
-
-                        // Casts days into milliseconds
-                        if (searchArgs[1].equalsIgnoreCase("days")) {
-                            searchParameter = searchParameter * 24;
-                        }
-
-                        meetingList = meetingManager.searchAllMeetings(user.getId(), searchParameter);
-
-                        // If user does not have any meetings during this period
-                        if (meetingList.isEmpty()) {
-                            channel.sendMessage(user.getAsMention() + " You do not have any meetings during this period.").queue();
-                            msg.addReaction(worriedFace).queue();
-                            return;
-                        }
-
-                        channel.sendMessage(String.format("**These are all your meetings in the next %s %s:**%n%n", searchArgs[0], searchArgs[1])).queue();
-
-                        for (String message : searchMultipleMeetings(meetingList)) {
-                            channel.sendMessage(message).queue();
-                        }
-
-                        msg.addReaction(thumbsUp).queue();
-                    } else {
-
-                        // If the parameters of the message were wrong
-                        channel.sendMessage(String.format("%s Unknown value to update: `%s` does not exist.", user.getAsMention(), searchArgs[1])).queue();
-                        msg.addReaction(crossedArms).queue();
-                    }
+                //Parses either meetingID or duration of time for the search into long
+                try {
+                    searchParameter = Long.parseLong(searchArgs[0]);
+                } catch (NumberFormatException e) {
+                    LOGGER.fatal(String.format("Unable to parse  data.%n%s", e));
+                    channel.sendMessage(String.format("%s %s is neither a number nor a valid parameter to search for.", user.getAsMention(), searchArgs[0])).queue();
+                    return;
                 }
+
+                meeting = meetingManager.search((int) searchParameter);
+
+                // If meeting does not exist
+                if (meeting == null) {
+                    channel.sendMessage(user.getAsMention() + " This meeting does not exist.").queue();
+                    msg.addReaction("U+1F61F").queue();
+                    return;
+                }
+
+                embed = meetingManager.buildEmbed(meeting.getMeetingID(), "<@!" + meeting.getHostID() + ">", "<@!" + meeting.getParticipantID() + ">", format.format(meeting.getStarttime()), format.format(meeting.getEndtime()), meeting.getMessage());
+
+                channel.sendMessage(embed.build()).queue();
+                msg.addReaction(thumbsUp).queue();
                 break;
 
             // If second argument is unknown.
@@ -548,40 +485,5 @@ public class MeetingCommand implements CommandInterface {
     public static void setFlag(boolean flag) {
 
         MeetingCommand.flag = flag;
-    }
-
-    // Splits list of meetings into seperate meetings and puts them into packages of 5 to send to user
-    public List<String> searchMultipleMeetings(List<MeetingData> meetings) {
-
-        StringBuilder builder = new StringBuilder();
-
-        List<String> returnMessages = new ArrayList<>();
-
-        // Iterates through all meetings
-        for (MeetingData data : meetings) {
-            String message = data.getMessage();
-
-            if (message == null) {
-                message = "N/a";
-            }
-
-            String start = format.format(data.getStarttime());
-            String end = format.format(data.getEndtime());
-
-            // If the date of start and end is the same it cuts the date of the endtime
-            if (start.split(" ")[0].equals(end.split(" ")[0])) {
-                end = end.split(" ")[1];
-            }
-
-            builder.append(String.format("*MeetingID:*  %s%n```Message: %s%n%s - %s```%n", data.getMeetingID(), message, start, end));
-
-            // Saves every 5th string in array
-            if ((builder.length() % 5) == 0) {
-                returnMessages.add(builder.toString());
-                builder.setLength(0);
-            }
-        }
-        returnMessages.add(builder.toString());
-        return returnMessages;
     }
 }

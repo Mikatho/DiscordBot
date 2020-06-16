@@ -24,14 +24,15 @@ public class HelpCommand implements CommandInterface {
     String[] meetingPatterns = {"!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]",
             "!meeting delete [meetingID]",
             "!meeting update [meetingID] [value to change] [new value]",
-            "!meeting search [meetingID]",
-            "!meeting search [length] hours",
-            "!meeting search [length] days",
-            "!meeting search all"};
+            "!meeting search [meetingID]"};
     String[] userPatterns = {"!user data", "!user update address [new value]",
             "!user update interests [new value1, new value2, etc.]",
             "!user update competencies [new value1, new value2, etc.]",
             "!user search [userId]"};
+    String[] calendarPatterns = {
+            "!cal(endar) all",
+            "!cal(endar) [length] hours",
+            "!cal(endar) [length] days"};
 
     /**
      * This method is called whenever the <code>CommandManager#execute(String, MessageChannel, Message)</code>
@@ -50,10 +51,11 @@ public class HelpCommand implements CommandInterface {
                 + "\n*Register Commands:*" + "```" + registerPatterns[0] + "\n" + registerPatterns[1] + "```"
                 + "\n**All Chat-Types:**"
                 + "\n*Meeting Commands:*" + "```" + meetingPatterns[0] + "\n" + meetingPatterns[1] + "\n" + meetingPatterns[2] + "\n\n"
-                + meetingPatterns[3] + meetingPatterns[4] + meetingPatterns[5] + "\nNote: Dateformat DD-MM-YYYY HH:MM" + "```"
+                + meetingPatterns[3] + "\nNote: Dateformat DD-MM-YYYY HH:MM" + "```"
                 + "\n*User Commands:*" + "```" + userPatterns[0] + "\n" + userPatterns[1] + "\n" + userPatterns[2] + "\n"
                 + userPatterns[3] + "\n" + userPatterns[4] + "```"
                 + "\n*Log Commands:*" + "```" + logPatterns[0] + "\n" + logPatterns[1] + "```"
+                + "\n*Calendar Commands:*" + "```" + calendarPatterns[0] + "\n" + calendarPatterns[1] + "\n" + calendarPatterns[2] + "```"
         ).queue();
         msg.addReaction("U+1F4AC").queue();
     }
