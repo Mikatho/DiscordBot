@@ -53,9 +53,9 @@ public class HelpCommandTest {
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(vPrivateChannel1).sendMessage(argument.capture());
-        assertThat(argument.getValue()).contains(helpCommand.activityPatterns)
-                .contains(helpCommand.deletePatterns).contains(helpCommand.logPatterns)
-                .contains(helpCommand.meetingPatterns).contains(helpCommand.userPatterns);
+        assertThat(argument.getValue()).contains(helpCommand.logPatterns)
+                .contains(helpCommand.meetingPatterns)
+                .contains(helpCommand.userPatterns);
     }
 
 }
