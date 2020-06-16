@@ -35,3 +35,9 @@ d
 4src/main/java/com/discord/bot/MeetingManagement.java,9\0\9080aa0cb3bc6ca2e4f0c9517ab67d981879e889
 j
 :src/main/java/com/discord/bot/commands/MeetingCommand.java,c\2\c2a7945466c777ed854c676f00090cfadfcc2649
+`
+0src/main/java/com/discord/bot/data/UserData.java,7\4\748fb4133c90e9d37ca25957e890f3e23aed13ef
+m
+=src/main/java/com/discord/bot/data/BotMeetingMessageData.java,3\e\3e50ad74801bd859f612e0f1f886d83e1a908b96
+k
+;src/main/java/com/discord/bot/commands/CalendarCommand.java,4\a\4a41580bad7272f25f3e5444a237168b29815897

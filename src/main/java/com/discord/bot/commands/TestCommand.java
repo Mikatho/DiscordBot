@@ -5,6 +5,7 @@ import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.entities.*;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +37,7 @@ public class TestCommand implements CommandInterface {
      */
     @Override
     public void executeCommand(MessageChannel channel, Message msg) {
+
 
     }
 }

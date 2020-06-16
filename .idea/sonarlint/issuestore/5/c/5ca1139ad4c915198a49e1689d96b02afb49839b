@@ -1,5 +1,5 @@
 
-h
-java:S3776&"RRefactor this method to reduce its Cognitive Complexity from 37 to the 15 allowed.(ø×¾¹
 B
-java:S2445˜"+Synchronizing on a new instance is a no-op.(ùÆß¾
+java:S2445“"+Synchronizing on a new instance is a no-op.(ùÆß¾
+h
+java:S3776'"RRefactor this method to reduce its Cognitive Complexity from 43 to the 15 allowed.(ø×¾¹
