@@ -72,11 +72,13 @@ public class BotMeetingCommand implements CommandInterface {
 
             User user = null;
 
+            boolean flag = false;
+
             // Saves the first user which is ours
             for (int i = 1; i < mentionedUser.size(); i++) {
-                if (meetingManager.userIsRegistered(mentionedUser.get(i).getId())) {
+                if (!flag && meetingManager.userIsRegistered(mentionedUser.get(i).getId())) {
                     user = mentionedUser.get(i);
-                    break;
+                    flag = true;
                 }
             }
 

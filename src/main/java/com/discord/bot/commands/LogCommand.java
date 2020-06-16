@@ -64,7 +64,7 @@ public class LogCommand implements CommandInterface {
         switch (args[1].toLowerCase()) {
             // If the second argument is [show].
             case "show":
-                channel.sendMessage(LoggingManagement.getINSTANCE().logToConsole()).queue();
+                channel.sendMessage("```" + LoggingManagement.getINSTANCE().logToConsole() + "```").queue();
                 msg.addReaction("U+1F9FE").queue();
                 break;
 

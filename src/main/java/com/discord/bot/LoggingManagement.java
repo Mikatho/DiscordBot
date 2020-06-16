@@ -67,7 +67,7 @@ public class LoggingManagement {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         LocalDateTime localTime = LocalDateTime.now();
 
-        commandLog.addLast(formatter.format(localTime) + " " + command);
+        commandLog.addLast(formatter.format(localTime) + "  " + command);
     }
 
     /**

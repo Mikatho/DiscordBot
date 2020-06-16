@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 
 import java.util.*;
 
+
 /**
  * The <code>MeetingCommand</code> Class implements the <code>CommandInterface</code>
  * to get the variables in the @Override <code>#executeCommand(MessageChannel channel, Message msg)</code>
@@ -65,10 +66,7 @@ public class MeetingCommand implements CommandInterface {
                 "!meeting create [@Participant] [starttime] [endtime] [duration in minutes] [optional message]",
                 "!meeting delete [meetingID]",
                 "!meeting update [meetingID] [value to change] [new value]",
-                "!meeting search [meetingID]",
-                "!meeting search [length] hours",
-                "!meeting search [length] days",
-                "!meeting search all"};
+                "!meeting search [meetingID]"};
 
         // Regex for the UserID
         String userIdRegex = "<@!\\d{16,20}>";
@@ -109,7 +107,7 @@ public class MeetingCommand implements CommandInterface {
          */
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage(user.getAsMention() + " Use one of the following patterns:\n"
-                    + "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\n\n" + patterns[3] + "\n" + patterns[4] + "\n" + patterns[5] + "\nNote: Dateformat " + format.toPattern().toUpperCase() + "```").queue();
+                    + "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\n" + patterns[3] + "\nNote: Dateformat " + format.toPattern().toUpperCase() + "```").queue();
             msg.addReaction("U+1F4AF").queue();
             return;
         }
