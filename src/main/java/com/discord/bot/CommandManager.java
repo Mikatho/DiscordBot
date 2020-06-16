@@ -103,7 +103,7 @@ public class CommandManager {
             cmdInter = commands.get(cmd.substring(1).toLowerCase());
         }
 
-        // If command doesn´t exists in associated HashMap.
+        // If command does not exists in associated HashMap.
         if (cmdInter == null) {
             return 1;
         }

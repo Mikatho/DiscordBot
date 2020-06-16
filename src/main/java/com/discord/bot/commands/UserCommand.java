@@ -115,12 +115,12 @@ public class UserCommand implements CommandInterface {
                 }
 
                 // Saves the input [@user] in a string and filters the UserID.
-                if (!args[2].matches("<@!\\d{18}>")) {
+                if (!args[2].matches("<@!\\d{16,20}>")) {
                     channel.sendMessage(user.getAsMention() + " User is not valid. Please use ` @UserName `!").queue();
                     return;
                 }
 
-                String searchID = args[2].substring(3, 21);
+                String searchID = args[2].substring(3, args[2].length()-1);
 
                 // Checks if the input [UserID] is existing in the database.
                 if (!userManager.userIsRegistered(searchID)) {

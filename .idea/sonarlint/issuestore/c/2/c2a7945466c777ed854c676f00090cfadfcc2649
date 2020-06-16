@@ -1,0 +1,7 @@
+
+i
+java:S3776@"SRefactor this method to reduce its Cognitive Complexity from 103 to the 15 allowed.(ø×¾¹
+Z
+java:S2276þ"CReplace the call to "Thread.sleep(...)" with a call to "wait(...)".(öÍËè
+]
+java:S2142ÿ"FEither re-interrupt this method or rethrow the "InterruptedException".(ä ¹€

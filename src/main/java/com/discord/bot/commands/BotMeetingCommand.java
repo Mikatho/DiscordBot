@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -41,20 +42,18 @@ public class BotMeetingCommand implements CommandInterface {
 
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-        Guild guild = BotMain.getJda().getGuildById(694185735628128338L);
+        Guild guild = BotMain.getJda().getGuildById(721814959704637551L);
 
         String[] args = msg.getContentRaw().split(" ", 7);
 
-        final String COMMAND = "!_meeting" ;
+        List<User> mentionedUser = msg.getMentionedUsers();
+
+        final String COMMAND = "!_meeting " ;
 
         long[] earliestMeetingTimes;
 
         String commandAnswer;
 
-        String ourUserID = null;
-        String ourUserTag = null;
-
-        String starttime;
         String startDateISO;
 
         int duration;
@@ -71,35 +70,32 @@ public class BotMeetingCommand implements CommandInterface {
         // If it is the first message of the other bot
         if (args.length == 7) {
 
-            String[] userTags = args[6].split(" ");
+            User user = null;
 
             // Saves the first user which is ours
-            for (String item : userTags) {
-                if (meetingManager.userIsRegistered(item.substring(3, 21))) {
-                    ourUserTag = item;
-                    ourUserID = ourUserTag.substring(3, 21);
+            for (int i = 1; i < mentionedUser.size(); i++) {
+                if (meetingManager.userIsRegistered(mentionedUser.get(i).getId())) {
+                    user = mentionedUser.get(i);
                     break;
                 }
             }
 
             // Skips everything if our user is not mentioned in the meeting request
-            if (ourUserTag == null) {
+            if (user == null) {
                 return;
             }
 
             // Stores meeting data in variables
-            String foreignUserID = args[2].substring(2, 20);
+            String foreignUserID = mentionedUser.get(0).getId();
 
             duration = Integer.parseInt(args[5]) * 60 * 1000;
 
-            starttime = args[3];
+            String endtime = args[3].substring(0, 11) + args[4] + ":00";
 
-            String endtime = starttime.substring(0, 11) + args[4] + ":00";
-
-            noTime = COMMAND + args[1] + " " + ourUserTag + " noTime";
+            noTime = COMMAND + args[1] + " " + user.getAsMention() + " noTime";
 
             try {
-                Date dateStart = isoFormat.parse(starttime);
+                Date dateStart = isoFormat.parse(args[3]);
                 epochStart = dateStart.getTime();
 
                 Date dateEnd = isoFormat.parse(endtime);
@@ -112,7 +108,7 @@ public class BotMeetingCommand implements CommandInterface {
 
             // If our user has no free time during the period
             try {
-                earliestMeetingTimes = meetingManager.earliestPossibleMeeting(ourUserID, epochStart, epochPeriodEnd, duration);
+                earliestMeetingTimes = meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochPeriodEnd, duration);
                 if (earliestMeetingTimes[0] == 0) {
                     channel.sendMessage(noTime).queue();
                     return;
@@ -127,11 +123,11 @@ public class BotMeetingCommand implements CommandInterface {
 
             commandAnswer = COMMAND
                     + args[1] + " "
-                    + ourUserTag + " "
+                    + user.getAsMention() + " "
                     + startDateISO;
 
             // Stores meeting data in HashMap
-            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(COMMAND + args[1], foreignUserID, ourUserID, "<@!" + foreignUserID + ">", duration, startDateISO, epochPeriodEnd, "N/a", false));
+            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(COMMAND + args[1], foreignUserID, user.getId(), "<@!" + foreignUserID + ">", duration, startDateISO, epochPeriodEnd, "N/a", false));
 
             channel.sendMessage(commandAnswer).queue();
         } else {
@@ -157,15 +153,15 @@ public class BotMeetingCommand implements CommandInterface {
             // Checks if we started the meeting
             boolean firstStep = data.getFirstStep();
 
+            String ourUserID;
+
             if (firstStep) {
                 ourUserID = data.getHostID();
             } else {
                 ourUserID = data.getParticipantID();
             }
 
-            ourUserTag = "<@!" + ourUserID + ">";
-
-            noTime = COMMAND + args[1] + " " + ourUserTag + " noTime";
+            noTime = COMMAND + args[1] + " " + args[2] + " noTime";
 
             PrivateChannel ourUserPM;
 
@@ -190,18 +186,21 @@ public class BotMeetingCommand implements CommandInterface {
 
             epochPeriodEnd = data.getEpochPeriodEnd();
 
-            starttime = args[3];
-
             try {
-                Date dateStart = isoFormat.parse(starttime);
+                Date dateStart = isoFormat.parse(args[3]);
                 epochStart = dateStart.getTime();
             } catch (ParseException e) {
                 LOGGER.fatal(String.format("Unable to parse data.%n%s", e));
                 return;
             }
 
+
             // If agreement of meeting times has been reached
             if (msg.getContentRaw().matches(savedMessage + ".*" + startDateISO)) {
+
+                if (firstStep) {
+                    channel.sendMessage(msg.getContentRaw()).queue();
+                }
 
                 meetingArrangement(data, epochStart, ourUserPM, format);
 
@@ -219,6 +218,7 @@ public class BotMeetingCommand implements CommandInterface {
 
                     channel.sendMessage(noTime).queue();
                     ourUserPM.sendMessage("I could not arrange a meeting with the other person.").queue();
+                    msg.addReaction("U+1F625").queue();
                     return;
                 }
             } catch (SQLException e) {
@@ -231,13 +231,13 @@ public class BotMeetingCommand implements CommandInterface {
 
             commandAnswer = COMMAND
                     + args[1] + " "
-                    + ourUserTag + " "
+                    + args[2] + " "
                     + newStartDate;
 
             channel.sendMessage(commandAnswer).queue();
 
             // If agreement of meeting times has been reached
-            if (msg.getContentRaw().matches("!_meeting " + args[1] + ".*" + newStartDate)) {
+            if (msg.getContentRaw().matches(COMMAND + args[1] + ".*" + newStartDate)) {
 
                 meetingArrangement(data, earliestMeetingTimes[0], ourUserPM, format);
 
@@ -248,7 +248,7 @@ public class BotMeetingCommand implements CommandInterface {
             }
 
             // Update of the meeting data in HashMap
-            data.setMessage("!_meeting " + args[1]);
+            data.setMessage(COMMAND + args[1]);
             data.setStartDateISO(newStartDate);
         }
     }
@@ -261,10 +261,8 @@ public class BotMeetingCommand implements CommandInterface {
         String ourUserID;
 
         String hostID = data.getHostID();
-        String hostTag = "<@!" + hostID + ">";
 
         String participantID = data.getParticipantID();
-        String participantTag = "<@!" + participantID + ">";
 
         int duration = data.getDuration();
 
@@ -277,7 +275,7 @@ public class BotMeetingCommand implements CommandInterface {
             return;
         }
 
-        EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, hostTag, participantTag, format.format(epochStart), format.format(epochStart + duration), additionalMessage);
+        EmbedBuilder embed = meetingManager.buildEmbed(returnedMeetingID, "<@!" + hostID + ">", "<@!" + participantID + ">", format.format(epochStart), format.format(epochStart + duration), additionalMessage);
 
         // Sends specific message depending on the host of the meeting
         if (firstStep) {

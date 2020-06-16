@@ -1,9 +1,11 @@
 package com.discord.bot.commands;
 
+import com.discord.bot.BotMain;
 import com.discord.bot.MeetingManagement;
 import com.discord.bot.data.BotMeetingMessageData;
 import com.discord.bot.data.MeetingData;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -74,7 +76,7 @@ public class MeetingCommand implements CommandInterface {
                 "!meeting search all"};
 
         // Regex for the UserID
-        String userIdRegex = "<@!\\d{18}>";
+        String userIdRegex = "<@!\\d{16,20}>";
 
         String thumbsUp = "U+1F44D";
 
@@ -147,7 +149,7 @@ public class MeetingCommand implements CommandInterface {
 
                 // If not all required parameters were entered the user gets a discription of the command pattern.
                 if (createArgs.length != 6 && createArgs.length != 7) {
-                    channel.sendMessage(String.format("%s Please add the values like this:%n`%s`",user.getAsMention(), patterns[0])).queue();
+                    channel.sendMessage(String.format("%s Please add the values like this:%n`%s`", user.getAsMention(), patterns[0])).queue();
                     return;
                 }
 
@@ -157,7 +159,7 @@ public class MeetingCommand implements CommandInterface {
                     return;
                 }
 
-                String participantID = createArgs[0].substring(3, 21);
+                String participantID = createArgs[0].substring(3, createArgs[0].length() - 1);
 
                 String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
 
@@ -228,6 +230,8 @@ public class MeetingCommand implements CommandInterface {
 
                     String dateStartISO = isoFormat.format(dateStart);
 
+                    Guild guild = BotMain.getJda().getGuildById(721814959704637551L);
+
                     // Message that the bot sends to the server
                     String answerCommand = "!_meeting "
                             + uniqueID + " "
@@ -240,7 +244,13 @@ public class MeetingCommand implements CommandInterface {
                     // Stores meeting data in HashMap
                     meetingManager.getBotMessageHolder().put(uniqueID, new BotMeetingMessageData(msg.getContentRaw(), user.getId(), participantID, participantName, duration, dateStartISO, epochEnd, meetingMessage, true));
 
-                    channel.sendMessage(answerCommand).queue();
+                    // Trying to open a private channel with our user
+                    try {
+                        guild.getTextChannelById(721815086767014008L).sendMessage(answerCommand).queue();
+                    } catch (NullPointerException e) {
+                        channel.sendMessage(user.getAsMention() + " Unable to message into the right channel.").queue();
+                        return;
+                    }
 
                     msg.addReaction(thumbsUp).queue();
 
@@ -421,7 +431,7 @@ public class MeetingCommand implements CommandInterface {
                         return;
                     }
 
-                    newValue = updateArgs[2].substring(3, 21);
+                    newValue = updateArgs[2].substring(3, updateArgs[2].length() - 1);
                 } else {
                     newValue = updateArgs[2];
                 }

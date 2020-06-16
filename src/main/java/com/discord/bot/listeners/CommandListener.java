@@ -1,12 +1,16 @@
 package com.discord.bot.listeners;
 
 import com.discord.bot.CommandManager;
+import com.discord.bot.DatabaseManagement;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import java.sql.SQLException;
 
 
 /**
@@ -23,6 +27,8 @@ import javax.annotation.Nonnull;
  * @since 1.0
  */
 public class CommandListener extends ListenerAdapter {
+
+    private static final Logger LOGGER = LogManager.getLogger(CommandListener.class.getName());
 
     /**
      * Detect that a Message is received in either a guild or private Discord channel.
@@ -56,8 +62,14 @@ public class CommandListener extends ListenerAdapter {
                 int commandExists = CommandManager.getInstance().execute(args[0], channel, event.getMessage());
 
                 if (commandExists == 1) {
-                    channel.sendMessage("Unknown Command. Use `!help` to see an overview of all available commands.").queue();
-                    event.getMessage().addReaction("U+2753").queue();
+                    try {
+                        if (DatabaseManagement.getINSTANCE().registeredCheck(event.getAuthor().getId())) {
+                            channel.sendMessage("Unknown Command. Use `!help` to see an overview of all available commands.").queue();
+                            event.getMessage().addReaction("U+2753").queue();
+                        }
+                    } catch (SQLException e) {
+                        LOGGER.fatal(String.format("SQLException.%n%s", e));
+                    }
                 } else if (commandExists == 2) {
                     channel.sendMessage("This command is for private chat only.").queue();
                     event.getMessage().addReaction("U+1F645").queue();
