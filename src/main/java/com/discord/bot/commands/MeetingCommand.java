@@ -16,9 +16,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import java.util.Date;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
 
 /**
  * The <code>MeetingCommand</code> Class implements the <code>CommandInterface</code>
@@ -161,7 +159,7 @@ public class MeetingCommand implements CommandInterface {
 
                 String participantID = createArgs[0].substring(3, createArgs[0].length() - 1);
 
-                String participantName = msg.getContentDisplay().split(" ")[2].substring(1);
+                String participantName = msg.getMentionedUsers().get(0).getName();
 
                 String starttime = createArgs[1] + " " + createArgs[2];
                 String endtime = createArgs[3] + " " + createArgs[4];
@@ -311,15 +309,18 @@ public class MeetingCommand implements CommandInterface {
                 msg.addReaction(thumbsUp).queue();
 
                 // Creating the Google Calender link to the event for both users
-                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
+                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", String.format("MeetingID: %s%n%s", returnedMeetingID, meetingMessage), earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
-                meetingManager.googleCalendarEvent(participantID, String.format("Meeting with %s [%s]", user.getName(), returnedMeetingID), "N/a", meetingMessage, earliestMeetingTimes[0], earliestMeetingTimes[1]);
+                if (!user.getName().equals(participantName)) {
+                    meetingManager.googleCalendarEvent(participantID, "Meeting with " + user.getName(), "N/a", String.format("MeetingID: %s%n%s", returnedMeetingID, meetingMessage), earliestMeetingTimes[0], earliestMeetingTimes[1]);
+
+                }
 
                 // Informs the user if the creation of the link to the event was successful
                 if (hostEventLink == null) {
-                    channel.sendMessage(user.getAsMention() + " Could not add meeting to your Google Calendar.").queue();
+                    user.openPrivateChannel().complete().sendMessage("Could not add meeting to your Google Calendar.").queue();
                 } else {
-                    channel.sendMessage(user.getAsMention() + " Here is the Google Calendar-Link to your event:\n" + hostEventLink).queue();
+                    user.openPrivateChannel().complete().sendMessage(String.format("Here is the Google Calendar-Link to your event with the ID %s:%n%s", returnedMeetingID, hostEventLink)).queue();
                 }
                 break;
 
@@ -427,7 +428,7 @@ public class MeetingCommand implements CommandInterface {
                 if (updateArgs[1].equals("participant")) {
 
                     if (!updateArgs[2].matches(userIdRegex)) {
-                        channel.sendMessage(user.getAsMention() + " User is not valid. Please use ´ @UserName ´!").queue();
+                        channel.sendMessage(user.getAsMention() + " User is not valid. Please use [@UserName] !").queue();
                         return;
                     }
 
@@ -450,25 +451,29 @@ public class MeetingCommand implements CommandInterface {
 
                 String[] searchArgs = args[2].split(" ");
 
-                long searchParameter;
+                List<MeetingData> meetingList;
 
-                String returnMessage;
+                long searchParameter;
 
                 String worriedFace = "U+1F61F";
 
                 // If user is searching for all meetings
                 if (searchArgs[0].equals("all")) {
 
-                    returnMessage = searchMultipleMeetings(meetingManager.searchAllMeetings(user.getId(), 0));
+                    meetingList = meetingManager.searchAllMeetings(user.getId(), 0);
 
                     // If no meetings were found
-                    if (returnMessage.equals("")) {
+                    if (meetingList.isEmpty()) {
                         channel.sendMessage(user.getAsMention() + " You do not have any meetings.").queue();
                         msg.addReaction(worriedFace).queue();
                         return;
                     }
 
-                    channel.sendMessage("**These are all your meetings:**\n\n" + returnMessage).queue();
+                    channel.sendMessage("**These are all your meetings:**\n\n").queue();
+
+                    for (String message : searchMultipleMeetings(meetingList)) {
+                        channel.sendMessage(message).queue();
+                    }
                     msg.addReaction(thumbsUp).queue();
                 } else {
                     //Parses either meetingID or duration of time for the search into long
@@ -506,16 +511,21 @@ public class MeetingCommand implements CommandInterface {
                             searchParameter = searchParameter * 24;
                         }
 
-                        returnMessage = searchMultipleMeetings(meetingManager.searchAllMeetings(user.getId(), searchParameter));
+                        meetingList = meetingManager.searchAllMeetings(user.getId(), searchParameter);
 
                         // If user does not have any meetings during this period
-                        if (returnMessage.equals("")) {
+                        if (meetingList.isEmpty()) {
                             channel.sendMessage(user.getAsMention() + " You do not have any meetings during this period.").queue();
                             msg.addReaction(worriedFace).queue();
                             return;
                         }
 
-                        channel.sendMessage(String.format("**These are all your meetings in the next %s %s:**%n%n%s", searchArgs[0], searchArgs[1], returnMessage)).queue();
+                        channel.sendMessage(String.format("**These are all your meetings in the next %s %s:**%n%n", searchArgs[0], searchArgs[1])).queue();
+
+                        for (String message : searchMultipleMeetings(meetingList)) {
+                            channel.sendMessage(message).queue();
+                        }
+
                         msg.addReaction(thumbsUp).queue();
                     } else {
 
@@ -540,10 +550,12 @@ public class MeetingCommand implements CommandInterface {
         MeetingCommand.flag = flag;
     }
 
-    // Splits list of meetings into seperate meetings and puts them into string to send to user
-    public String searchMultipleMeetings(List<MeetingData> meetings) {
+    // Splits list of meetings into seperate meetings and puts them into packages of 5 to send to user
+    public List<String> searchMultipleMeetings(List<MeetingData> meetings) {
 
-        StringJoiner joiner = new StringJoiner("\n");
+        StringBuilder builder = new StringBuilder();
+
+        List<String> returnMessages = new ArrayList<>();
 
         // Iterates through all meetings
         for (MeetingData data : meetings) {
@@ -561,8 +573,15 @@ public class MeetingCommand implements CommandInterface {
                 end = end.split(" ")[1];
             }
 
-            joiner.add(String.format("*MeetingID:*  %s%n```Message: %s%n%s - %s```", data.getMeetingID(), message, start, end));
+            builder.append(String.format("*MeetingID:*  %s%n```Message: %s%n%s - %s```%n", data.getMeetingID(), message, start, end));
+
+            // Saves every 5th string in array
+            if ((builder.length() % 5) == 0) {
+                returnMessages.add(builder.toString());
+                builder.setLength(0);
+            }
         }
-        return joiner.toString();
+        returnMessages.add(builder.toString());
+        return returnMessages;
     }
 }

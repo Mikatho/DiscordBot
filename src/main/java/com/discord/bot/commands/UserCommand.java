@@ -70,7 +70,7 @@ public class UserCommand implements CommandInterface {
         if (!msg.getContentRaw().contains(" ")) {
             channel.sendMessage(user.getAsMention() + " Use one of the following patterns:\n" +
                     "```" + patterns[0] + "\n" + patterns[1] + "\n" + patterns[2] + "\n" + patterns[3] + "\n" + patterns[4] + "```").queue();
-            msg.addReaction("U+14AF").queue();
+            msg.addReaction("U+1F4AF").queue();
             return;
         }
 

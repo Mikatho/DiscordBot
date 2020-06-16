@@ -48,7 +48,7 @@ public class BotMeetingCommand implements CommandInterface {
 
         List<User> mentionedUser = msg.getMentionedUsers();
 
-        final String COMMAND = "!_meeting " ;
+         String commandStructure = "!_meeting " + args[1] ;
 
         long[] earliestMeetingTimes;
 
@@ -92,7 +92,7 @@ public class BotMeetingCommand implements CommandInterface {
 
             String endtime = args[3].substring(0, 11) + args[4] + ":00";
 
-            noTime = COMMAND + args[1] + " " + user.getAsMention() + " noTime";
+            noTime = commandStructure +  " " + user.getAsMention() + " noTime";
 
             try {
                 Date dateStart = isoFormat.parse(args[3]);
@@ -121,13 +121,12 @@ public class BotMeetingCommand implements CommandInterface {
 
             startDateISO = isoFormat.format(earliestMeetingTimes[0]);
 
-            commandAnswer = COMMAND
-                    + args[1] + " "
+            commandAnswer = commandStructure + " "
                     + user.getAsMention() + " "
                     + startDateISO;
 
             // Stores meeting data in HashMap
-            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(COMMAND + args[1], foreignUserID, user.getId(), "<@!" + foreignUserID + ">", duration, startDateISO, epochPeriodEnd, "N/a", false));
+            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(commandStructure, foreignUserID, user.getId(), "<@!" + foreignUserID + ">", duration, startDateISO, epochPeriodEnd, "N/a", false));
 
             channel.sendMessage(commandAnswer).queue();
         } else {
@@ -161,7 +160,12 @@ public class BotMeetingCommand implements CommandInterface {
                 ourUserID = data.getParticipantID();
             }
 
-            noTime = COMMAND + args[1] + " " + args[2] + " noTime";
+            // Checks if meeting is with our user
+            if (!msg.getMentionedUsers().get(0).getId().equals(data.getParticipantID())) {
+                return;
+            }
+
+            noTime = commandStructure + " " + args[2] + " noTime";
 
             PrivateChannel ourUserPM;
 
@@ -174,7 +178,7 @@ public class BotMeetingCommand implements CommandInterface {
             }
 
             // If user of other bot has no free time
-            if (msg.getContentRaw().equals(COMMAND + args[1] + ".* noTime")) {
+            if (msg.getContentRaw().equals(noTime) && firstStep) {
                 ourUserPM.sendMessage("I could not arrange a meeting with the other person.").queue();
                 msg.addReaction("U+1F625").queue();
                 return;
@@ -196,7 +200,7 @@ public class BotMeetingCommand implements CommandInterface {
 
 
             // If agreement of meeting times has been reached
-            if (msg.getContentRaw().matches(savedMessage + ".*" + startDateISO)) {
+            if (msg.getContentRaw().matches(savedMessage + " " + args[2] + " " + startDateISO)) {
 
                 if (firstStep) {
                     channel.sendMessage(msg.getContentRaw()).queue();
@@ -229,15 +233,14 @@ public class BotMeetingCommand implements CommandInterface {
 
             String newStartDate = isoFormat.format(earliestMeetingTimes[0]);
 
-            commandAnswer = COMMAND
-                    + args[1] + " "
+            commandAnswer = commandStructure + " "
                     + args[2] + " "
                     + newStartDate;
 
             channel.sendMessage(commandAnswer).queue();
 
             // If agreement of meeting times has been reached
-            if (msg.getContentRaw().matches(COMMAND + args[1] + ".*" + newStartDate)) {
+            if (msg.getContentRaw().matches(commandStructure + " " + args[2] + " " + newStartDate)) {
 
                 meetingArrangement(data, earliestMeetingTimes[0], ourUserPM, format);
 
@@ -248,7 +251,7 @@ public class BotMeetingCommand implements CommandInterface {
             }
 
             // Update of the meeting data in HashMap
-            data.setMessage(COMMAND + args[1]);
+            data.setMessage(commandStructure);
             data.setStartDateISO(newStartDate);
         }
     }
@@ -289,10 +292,9 @@ public class BotMeetingCommand implements CommandInterface {
         privateChannel.sendMessage(embed.build()).queue();
 
         // Creating the Google Calender link to the event.
-        String foreignUserTag = data.getForeignUserTag();
-        String hostEventLink = meetingManager.googleCalendarEvent(ourUserID, "Meeting with " + foreignUserTag.substring(1), "N/a", additionalMessage, epochStart, epochStart + duration);
+        String hostEventLink = meetingManager.googleCalendarEvent(ourUserID, "Meeting with " + data.getForeignUserName(), "N/a", additionalMessage, epochStart, epochStart + duration);
 
-        // Informs the user if the creation of the link to the event was a sucess or a failure.
+        // Informs the user if the creation of the link to the event was a success or a failure.
         if (hostEventLink == null) {
             privateChannel.sendMessage("Could not add meeting to your Google Calendar.").queue();
         } else {

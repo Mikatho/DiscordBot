@@ -30,7 +30,7 @@ public class BotMeetingMessageDataTest {
         Assert.assertEquals(botMeetingMessageData1.getMessage(), "message");
         Assert.assertEquals(botMeetingMessageData1.getHostID(),"123");
         Assert.assertEquals(botMeetingMessageData1.getParticipantID(),"456");
-        Assert.assertEquals(botMeetingMessageData1.getForeignUserTag(),"foreignUserTag");
+        Assert.assertEquals(botMeetingMessageData1.getForeignUserName(),"foreignUserTag");
 
         botMeetingMessageData1.setMessage("test");
 
