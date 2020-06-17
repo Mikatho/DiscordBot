@@ -48,31 +48,30 @@ public class CommandListener extends ListenerAdapter {
             if (message.startsWith("!")) {
                 String[] args = message.split(" ");
 
-                // Skips everything else if message comes from the bot itself
-                if (event.getAuthor().getId().equals(channel.getJDA().getSelfUser().getId())) {
-                    return;
-                }
+                //If message author is not the bot itself
+                if (!event.getAuthor().getId().equals(channel.getJDA().getSelfUser().getId())) {
 
-                /*
-                 * Call execute method in CommandManager.
-                 * returnedValue = 0 --> execute was successful
-                 * returnedValue = 1 --> command doesn't exist at all
-                 * returnedValue = 2 --> command was written in wrong chat type
-                 */
-                int commandExists = CommandManager.getInstance().execute(args[0], channel, event.getMessage());
+                    /*
+                     * Call execute method in CommandManager.
+                     * returnedValue = 0 --> execute was successful
+                     * returnedValue = 1 --> command doesn't exist at all
+                     * returnedValue = 2 --> command was written in wrong chat type
+                     */
+                    int commandExists = CommandManager.getInstance().execute(args[0], channel, event.getMessage());
 
-                if (commandExists == 1) {
-                    try {
-                        if (DatabaseManagement.getINSTANCE().registeredCheck(event.getAuthor().getId())) {
-                            channel.sendMessage("Unknown Command. Use `!help` to see an overview of all available commands.").queue();
-                            event.getMessage().addReaction("U+2753").queue();
+                    if (commandExists == 1) {
+                        try {
+                            if (DatabaseManagement.getINSTANCE().registeredCheck(event.getAuthor().getId())) {
+                                channel.sendMessage("Unknown Command. Use `!help` to see an overview of all available commands.").queue();
+                                event.getMessage().addReaction("U+2753").queue();
+                            }
+                        } catch (SQLException e) {
+                            LOGGER.fatal(String.format("SQLException.%n%s", e));
                         }
-                    } catch (SQLException e) {
-                        LOGGER.fatal(String.format("SQLException.%n%s", e));
+                    } else if (commandExists == 2) {
+                        channel.sendMessage("This command is for private chat only.").queue();
+                        event.getMessage().addReaction("U+1F645").queue();
                     }
-                } else if (commandExists == 2) {
-                    channel.sendMessage("This command is for private chat only.").queue();
-                    event.getMessage().addReaction("U+1F645").queue();
                 }
             }
         }).start();

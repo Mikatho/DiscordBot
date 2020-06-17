@@ -31,6 +31,7 @@ import java.util.logging.Level;
  * @since 1.0
  */
 public class BotMain {
+    
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(BotMain.class.getName());
 
     private static final String BOT_TOKEN = "Njk0MTkxMzY3NzUxOTkxMzQ3.XqiLrg.mmC1Fvf6zRWdJN2dfsRMUu7WMhs";

@@ -195,7 +195,9 @@ public class MeetingCommand implements CommandInterface {
                  * is blocked.
                  */
                 try {
-                    if (meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochEnd, duration)[0] == 0) {
+                    earliestMeetingTimes = meetingManager.earliestPossibleMeeting(user.getId(), epochStart, epochEnd, duration);
+
+                    if (earliestMeetingTimes[0] == 0) {
                         channel.sendMessage(user.getAsMention() + " You do not have free time during this period.").queue();
                         msg.addReaction("U+1F553").queue();
                         return;
@@ -271,17 +273,9 @@ public class MeetingCommand implements CommandInterface {
                  * Checks if the participant is free in the requested period. Informs user if the requested
                  * period of the meeting is blocked.
                  */
-                try {
-                    earliestMeetingTimes = meetingManager.earliestPossibleMeeting(participantID, epochStart, epochEnd, duration);
-
-                    if (earliestMeetingTimes[0] == 0) {
-                        channel.sendMessage(user.getAsMention() + " The participant does not have free time during this period.").queue();
-                        msg.addReaction("U+11F625").queue();
-                        return;
-                    }
-                } catch (SQLException e) {
-                    LOGGER.fatal(String.format("Unable to get meetingData.%n%s", e));
-                    channel.sendMessage(user.getAsMention() + " Could not receive meeting data.").queue();
+                if (earliestMeetingTimes[0] == 0) {
+                    channel.sendMessage(user.getAsMention() + " The participant does not have free time during this period.").queue();
+                    msg.addReaction("U+11F625").queue();
                     return;
                 }
 
@@ -302,13 +296,21 @@ public class MeetingCommand implements CommandInterface {
 
                 msg.addReaction(thumbsUp).queue();
 
-                // Creating the Google Calender link to the event for both users
-                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), "Meeting with " + participantName, "N/a", String.format("MeetingID: %s%n%s", returnedMeetingID, meetingMessage), earliestMeetingTimes[0], earliestMeetingTimes[1]);
+                String eventTitle;
 
-                if (!user.getName().equals(participantName)) {
+                /*
+                Sets the meeting title for the Google Calendar event fot the host
+                Creating the Google Calendar event for the participant, if host is not arranging meeting with himself
+                 */
+                if (user.getName().equals(participantName)) {
+                    eventTitle = meetingMessage;
+                } else {
+                    eventTitle = "Meeting with " + participantName;
                     meetingManager.googleCalendarEvent(participantID, "Meeting with " + user.getName(), "N/a", String.format("MeetingID: %s%n%s", returnedMeetingID, meetingMessage), earliestMeetingTimes[0], earliestMeetingTimes[1]);
-
                 }
+
+                // Creating the Google Calender event for the host
+                String hostEventLink = meetingManager.googleCalendarEvent(user.getId(), eventTitle, "N/a", String.format("MeetingID: %s%n%s", returnedMeetingID, meetingMessage), earliestMeetingTimes[0], earliestMeetingTimes[1]);
 
                 // Informs the user if the creation of the link to the event was successful
                 if (hostEventLink == null) {
