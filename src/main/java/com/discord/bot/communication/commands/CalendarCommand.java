@@ -103,7 +103,6 @@ public class CalendarCommand implements CommandInterface {
             for (String message : searchMultipleMeetings(meetingList)) {
                 channel.sendMessage(message).queue();
             }
-            msg.addReaction(thumbsUp).queue();
         } else {
             //If second parameter is unknown
             if (!searchArgs[2].toLowerCase().matches("hours|days")) {
@@ -146,8 +145,8 @@ public class CalendarCommand implements CommandInterface {
                 channel.sendMessage(message).queue();
             }
 
-            msg.addReaction(thumbsUp).queue();
         }
+        msg.addReaction(thumbsUp).queue();
     }
 
     // Splits list of meetings into seperate meetings and puts them into packages of 5 to send to user

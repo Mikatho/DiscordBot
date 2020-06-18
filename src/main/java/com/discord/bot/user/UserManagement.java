@@ -132,7 +132,7 @@ public class UserManagement {
         try {
             return GoogleCalendarManagement.getInstance().createCalendar(nickname);
         } catch (IOException e) {
-            LOGGER.fatal(String.format("Unable to get CoogleCalenderManagement instance.%n%s", e));
+            LOGGER.fatal(String.format("Unable to get GoogleCalenderManagement instance.%n%s", e));
             return null;
         }
     }

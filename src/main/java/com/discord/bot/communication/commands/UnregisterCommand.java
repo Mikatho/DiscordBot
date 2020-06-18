@@ -52,7 +52,7 @@ public class UnregisterCommand implements CommandInterface {
             return;
         }
 
-        // If the unregister was successfull, replies with feedback message.
+        // If the unregister was successful, replies with feedback message.
         channel.sendMessage("The unregister was successful!").queue();
         msg.addReaction("U+1F44B").queue();
     }
