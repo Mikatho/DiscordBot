@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
  * @see CommandManager#execute(String, MessageChannel, Message)
  * @see CommandListener
  * @see com.discord.bot.communication.commands.BotMeetingCommand#executeCommand(MessageChannel, Message)
- * @see com.discord.bot.communication.commands.ClearCommand#executeCommand(MessageChannel, Message)
  * @see com.discord.bot.communication.commands.HelpCommand#executeCommand(MessageChannel, Message)
  * @see com.discord.bot.communication.commands.LogCommand#executeCommand(MessageChannel, Message)
  * @see com.discord.bot.communication.commands.MeetingCommand#executeCommand(MessageChannel, Message)
@@ -24,7 +23,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
  * @see com.discord.bot.communication.commands.UserCommand#executeCommand(MessageChannel, Message)
  * @see com.discord.bot.communication.commands.UserCommand#executeCommand(MessageChannel, Message)
  * @see com.discord.bot.communication.commands.UserCommand#executeCommand(MessageChannel, Message)
- * @see com.discord.bot.communication.commands.TestCommand#executeCommand(MessageChannel, Message)
  * @since 1.0
  */
 public interface CommandInterface {

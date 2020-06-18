@@ -64,9 +64,6 @@ public class CommandManager {
         // Bot-Bot-Commands
         commands.put("_meeting", new BotMeetingCommand());
 
-        //Werden wieder gelöscht
-        commands.put("test", new TestCommand());
-        commands.put("clear", new ClearCommand());
     }
 
     /**

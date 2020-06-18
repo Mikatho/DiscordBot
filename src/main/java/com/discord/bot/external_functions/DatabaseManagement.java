@@ -15,7 +15,7 @@ import java.util.StringJoiner;
 
 /**
  * Contains all methods which access the database.
- * [clear], [connect], [disconnect], [createTable], [insert], [insertForeignKey], [delete user],
+ * [connect], [disconnect], [createTable], [insert], [insertForeignKey], [delete user],
  * [delete meeting], [update user], [update meeting], [returnData], [registeredCheck]
  * Execute all function calls from <code>UserManagement</code> and <code>MeetingManagement</code>
  *
@@ -45,20 +45,6 @@ public class DatabaseManagement {
      */
     public static DatabaseManagement getINSTANCE() {
         return INSTANCE;
-    }
-
-    /**
-     * Delete all entries in database.
-     */
-    public void clear() throws SQLException {
-
-        String foreignMeetingUser = "DELETE FROM meetings_of_user;";
-        String user = "DELETE FROM user_data;";
-        String meeting = "DELETE FROM meeting_data;";
-
-        stmt.execute(foreignMeetingUser);
-        stmt.execute(user);
-        stmt.execute(meeting);
     }
 
     /**
