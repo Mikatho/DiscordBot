@@ -22,15 +22,9 @@ public class DatabaseManagementTest {
         UserData testUserData = new UserData("0112358");
         DatabaseManagement dbManagement = new DatabaseManagement();
         dbManagement.connect();
-        dbManagement.clear();
-
-        Assert.assertFalse(dbManagement.registeredCheck("0112358"));
 
         dbManagement.insertUser(testUserData);
         Assert.assertTrue(dbManagement.registeredCheck("0112358") );
-
-        dbManagement.clear();
-        Assert.assertFalse(dbManagement.registeredCheck("0112358"));
 
         dbManagement.deleteUser("0112358");
         dbManagement.disconnect();
@@ -39,20 +33,7 @@ public class DatabaseManagementTest {
     @Test
     public void connect() throws IOException, SQLException {
         DatabaseManagement dbManagement = new DatabaseManagement();
-/*        File fileTest = new File("databaseTest.db");
-
-        Assert.assertFalse(fileTest.exists());
-*/
         dbManagement.connect();
-    }
-
-    @Test
-    public void disconnect() throws IOException, SQLException {
-
-    }
-
-    @Test
-    public void createTable() {
     }
 
     @Test
@@ -60,72 +41,11 @@ public class DatabaseManagementTest {
         UserData testUserData = new UserData("0112358");
         DatabaseManagement dbManagement = new DatabaseManagement();
         dbManagement.connect();
-        dbManagement.clear();
 
-        Assert.assertFalse(dbManagement.registeredCheck("0112358"));
-
-        dbManagement.insertUser(testUserData);
-        Assert.assertTrue(dbManagement.registeredCheck("0112358") );
+        Assert.assertTrue(dbManagement.registeredCheck("0112358"));
 
         dbManagement.deleteUser("0112358");
         dbManagement.disconnect();
-    }
-
-    @Test
-    public void insertMeeting() {
-    }
-
-    @Test
-    public void insertActivity() {
-    }
-
-    @Test
-    public void findEarliestPossibleMeetingtimes() {
-    }
-
-    @Test
-    public void deleteUser() {
-    }
-
-    @Test
-    public void deleteMeeting() {
-    }
-
-    @Test
-    public void updateUser() {
-    }
-
-    @Test
-    public void updateMeeting() {
-    }
-
-    @Test
-    public void returnDataUser() throws IOException, SQLException {
-
-        UserData testUserData = new UserData("42");
-        testUserData.setInterests("interesting");
-        testUserData.setCompetencies("competence");
-        testUserData.setAddress("avenue");
-
-        DatabaseManagement dbManagement = new DatabaseManagement();
-        dbManagement.connect();
-        dbManagement.clear();
-
- //       dbManagement.insertUser(testUserData);
- //       Object[] receivedData = dbManagement.returnDataUser("42");
-
- //       Assert.assertTrue( dbManagement.registeredCheck("42") );
-//        Assert.assertNotNull(receivedData);
-//        Assert.assertNull( receivedData[0] );
-        //Assert.assertNotEquals(receivedData[1], testUserData.getInterests());
-        //Assert.assertEquals(receivedData[1], testUserData.getInterests());
-
-        dbManagement.deleteUser("42");
-        dbManagement.disconnect();
-    }
-
-    @Test
-    public void returnDataMeeting() {
     }
 
     @Test
@@ -133,11 +53,9 @@ public class DatabaseManagementTest {
         UserData testUserData = new UserData("42");
         DatabaseManagement dbManagement = new DatabaseManagement();
         dbManagement.connect();
-        dbManagement.clear();
-
-        Assert.assertFalse(dbManagement.registeredCheck("42"));
 
         dbManagement.insertUser(testUserData);
+
         Assert.assertTrue(dbManagement.registeredCheck("42"));
         Assert.assertFalse(dbManagement.registeredCheck("43"));
 
@@ -145,7 +63,4 @@ public class DatabaseManagementTest {
         dbManagement.disconnect();
     }
 
-    @Test
-    public void authorizationCheck() {
-    }
 }
