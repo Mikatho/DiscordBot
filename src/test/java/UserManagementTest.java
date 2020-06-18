@@ -1,14 +1,11 @@
-import com.discord.bot.DatabaseManagement;
-import com.discord.bot.UserManagement;
-import com.discord.bot.data.UserData;
-import org.graalvm.compiler.hotspot.replacements.AssertionSnippets;
+import com.discord.bot.external_functions.DatabaseManagement;
+import com.discord.bot.user.UserManagement;
+import com.discord.bot.user.UserData;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
-
-import static org.junit.Assert.*;
 
 public class UserManagementTest {
 

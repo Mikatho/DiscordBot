@@ -1,6 +1,7 @@
 package com.discord.bot;
 
-import com.discord.bot.listeners.CommandListener;
+import com.discord.bot.communication.CommandListener;
+import com.discord.bot.external_functions.DatabaseManagement;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -25,9 +26,9 @@ import java.util.logging.Level;
  * @author L2G4
  * @version %I%, %G%
  * @see com.discord.bot.BotMain
- * @see com.discord.bot.listeners.CommandListener
+ * @see CommandListener
  * @see DatabaseManagement#getINSTANCE()
- * @see com.discord.bot.DatabaseManagement
+ * @see DatabaseManagement
  * @since 1.0
  */
 public class BotMain {

@@ -1,5 +1,6 @@
 package com.discord.bot.data;
 
+import com.discord.bot.meeting.MeetingData;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

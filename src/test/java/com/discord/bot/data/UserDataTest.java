@@ -1,12 +1,10 @@
 package com.discord.bot.data;
 
+import com.discord.bot.user.UserData;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.mockito.Mockito;
-import static org.mockito.Mockito.times;
+
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
