@@ -129,7 +129,7 @@ public class BotMeetingCommand implements CommandInterface {
                     + startDateISO;
 
             // Stores meeting data in HashMap
-            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(commandStructure, foreignUserID, user.getId(), "<@!" + foreignUserID + ">", duration, startDateISO, epochPeriodEnd, "N/a", false));
+            meetingManager.getBotMessageHolder().put(args[1], new BotMeetingMessageData(commandStructure, foreignUserID, user.getId(), mentionedUser.get(0).getName(), duration, startDateISO, epochPeriodEnd, "N/a", false));
 
             channel.sendMessage(commandAnswer).queue();
         } else {

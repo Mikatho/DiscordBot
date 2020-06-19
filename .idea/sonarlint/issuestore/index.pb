@@ -21,3 +21,17 @@ o
 ?src/main/java/com/discord/bot/communication/CommandManager.java,7\f\7f2e21518ba78812dfc1cb8ce52db8cc23afcd3d
 f
 6src/main/java/com/discord/bot/meeting/MeetingData.java,2\9\292d40b526bc36b5640357c29651fec375568403
+{
+Ksrc/main/java/com/discord/bot/communication/commands/UnregisterCommand.java,9\3\93e860cf7c503dfc077569a26657bd0a8a5d796b
+u
+Esrc/main/java/com/discord/bot/communication/commands/UserCommand.java,b\e\bebf3e652da0e4c989d5241a1e825f7edab08424
+t
+Dsrc/main/java/com/discord/bot/communication/commands/LogCommand.java,d\6\d639b303d343f1e0ce042b82327e99bbe29b2e9a
+y
+Isrc/main/java/com/discord/bot/communication/commands/RegisterCommand.java,6\0\60526d574077562cc94f5796c8d89c1147367f1c
+~
+Nsrc/main/java/com/discord/bot/external_functions/GoogleCalendarManagement.java,b\3\b3e47a604668bf37fb4ce8445a56db566442e47b
+{
+Ksrc/main/java/com/discord/bot/communication/commands/BotMeetingCommand.java,4\4\4410440aabb3d55d05180f2dfd538433c356731c
+x
+Hsrc/main/java/com/discord/bot/communication/commands/MeetingCommand.java,e\a\eaa51737d8b2251144e4bc5865f07dbc4a8dc70f
